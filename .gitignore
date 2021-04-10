@@ -1,0 +1,6 @@
+*.sqlite3
+/*test/test
+Makefile.cent
+Makefile.local
+/gotest/foo.db
+src/lnstags
