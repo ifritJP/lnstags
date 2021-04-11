@@ -172,14 +172,16 @@ end
 if not _lune3 then
    _lune3 = _lune
 end
-local base = _lune.loadModule( 'go/github:com.ifritJP.lnssqlite3.src.lns.sqlite3.base' )
 local Option = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Option' )
 local Nodes = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Nodes' )
 local TransUnit = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.TransUnit' )
 local front = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.front' )
+local DBCtrl = _lune.loadModule( 'lns.tags.DBCtrl' )
 
 local function __main( args )
 
+   
+   DBCtrl.test(  )
    
    local option = Option.createDefaultOption( "test/main.lns" )
    front.build( option, function ( ast )
@@ -190,53 +192,6 @@ local function __main( args )
          return Nodes.NodeVisitMode.Child
       end, 0 )
    end )
-   
-   local db = base.Open( "hoge.sqlite3", false, false )
-   if  nil == db then
-      local _db = db
-   
-      print( "open error" )
-      return 1
-   end
-   
-   
-   local stmt = [==[
-      create table foo (id integer not null primary key, name text);
-   delete from foo;
-]==]
-   db:Exec( stmt, nil )
-   
-   db:Begin(  )
-   for index = 0, 10 do
-      local sql = string.format( "insert into foo(id, name) values(%d, 'こんにちわ世界%03d')", index, index)
-      db:Exec( sql, nil )
-   end
-   
-   db:Commit(  )
-   
-   db:MapQuery( "select id, name from foo", function ( row )
-   
-      print( math.floor(row[1]) + 10, row[2] .. "hoge" )
-      return true
-   end )
-   
-   db:MapQuery( "select name from foo where id = 3", function ( row )
-   
-      print( row[1] )
-      return false
-   end )
-   
-   db:Exec( "delete from foo", nil )
-   
-   db:Exec( "insert into foo(id, name) values(1, 'foo'), (2, 'bar'), (3, 'baz')", nil )
-   
-   db:MapQuery( "select id, name from foo", function ( row )
-   
-      print( row[1], row[2] )
-      return true
-   end )
-   
-   db:Close(  )
    
    return 0
 end

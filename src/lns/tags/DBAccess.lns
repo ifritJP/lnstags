@@ -1,0 +1,145 @@
+// -*- coding: utf-8 -*-
+
+import go/github:com.ifritJP.lnssqlite3.src.lns.sqlite3.base;
+import lns.tags.Log;
+
+pub class DBAccess {
+   let mut db:base.DB;
+   let mut readonlyFlag:bool {pub};
+   let mut path:str;
+
+   let mut beginFlag:bool {pub};
+
+   local fn __init( db:base.DB, path:str, readonlyFlag:bool ) {
+      self.db = db;
+      self.path = path;
+      self.beginFlag = false;
+      self.readonlyFlag = readonlyFlag;
+   }
+}
+
+pub fn open( path:str, readonly:bool ) mut : DBAccess!
+{
+   let! mut db, err = base.Open( path, readonly, false ) {
+      print( 1, "DBAccess:open error -- %s" (err) );
+      return nil;
+   };
+   return new DBAccess( db, path, readonly );
+}
+
+pub fn DBAccess.close() mut {
+   self.db.Close();
+}
+
+fn DBAccess.outputLog( message:str ) {
+   // let! mut fileObj = io.open( self.path .. ".log", "a+" ) {
+   //    return;
+   // };
+   // let sec = (unwrap os.time(##))@@int;
+   // fileObj.write( "%dd	%s\n" ( sec % 10000, message ) );
+   // fileObj.close();
+}
+
+pub fn DBAccess.begin() mut
+{
+   Log._log( .Log, "start" );
+   
+   if self.readonlyFlag {
+      Log._log( .Err, "db mode is read only" );
+      os.exit( 1 );
+   }
+
+   self.beginFlag = true;
+
+   // self.db.Exec( "PRAGMA journal_mode = MEMORY", nil );
+   // self.db.Exec( "PRAGMA synchronous = OFF", nil );
+   // self.db.Exec( "BEGIN IMMEDIATE", nil );
+
+   self.db.Begin();
+
+   //self.outputLog( message );
+}
+
+pub fn DBAccess.commit() mut
+{
+   if self.readonlyFlag {
+      return;
+   }
+   if not self.beginFlag {
+      return;
+   }
+   self.beginFlag = false;
+
+   Log._log( .Log, "commit: start" );
+
+   self.db.Commit();
+
+   Log._log( .Log, "commit: end" );
+}
+
+pub fn DBAccess.exec( stmt:str, errHandle:base.errHandleForm! ) mut {
+   self.db.Exec( stmt, errHandle );
+}
+
+pub fn DBAccess.mapJoin(
+   tableName:str, otherTable:str, on:str, condition:str!,
+   limit:int!, attrib:str!, func:base.queryForm ) : bool
+{
+   let mut query = "SELECT %s FROM %s INNER JOIN %s ON %s"
+       (attrib or "*", tableName, otherTable, on );
+   when! condition {
+      query = "%s WHERE %s" ( query, condition );
+   }
+   when! limit {
+      query = "%s LIMIT %d" ( query, limit );
+   }
+   return self.db.MapQuery( query, func );
+}
+
+pub fn DBAccess.mapJoin2(
+   tableName:str, otherTable:str, on:str, otherTable2:str, on2:str,
+   condition:str!, limit:int!, attrib:str!, func:base.queryForm ) : bool
+{
+   let mut query = "SELECT %s FROM %s INNER JOIN %s ON %s INNER JOIN %s ON %s"
+       (attrib or "*", tableName, otherTable, on, otherTable2, on2 );
+   when! condition {
+      query = "%s WHERE %s" ( query, condition );
+   }
+   when! limit {
+      query = "%s LIMIT %d" ( query, limit );
+   }
+   return self.db.MapQuery( query, func );
+}
+
+pub fn DBAccess.mapJoin3(
+   tableName:str, otherTable:str, on:str, otherTable2:str, on2:str,
+   otherTable3:str, on3:str,
+   condition:str!, limit:int!, attrib:str!, func:base.queryForm ) : bool
+{
+   let mut query =
+      "SELECT %s FROM %s INNER JOIN %s ON %s INNER JOIN %s ON %s INNER JOIN %s ON %s"
+      ( attrib or "*", tableName, otherTable, on, otherTable2, on2, otherTable3, on3 );
+   when! condition {
+      query = "%s WHERE %s" ( query, condition );
+   }
+   when! limit {
+      query = "%s LIMIT %d" ( query, limit );
+   }
+   return self.db.MapQuery( query, func );
+}
+
+pub fn DBAccess.mapRowList( tableName:str, condition:str!,
+                            limit:int!, attrib:str!, func:base.queryForm ) : bool
+{
+   let mut query;
+   let ATTRIB = unwrap attrib default "*";
+   when! condition {
+      query = "SELECT %s FROM %s WHERE %s" ( ATTRIB, tableName, condition );
+   } else {
+      query = "SELECT %s FROM %s" ( ATTRIB, tableName );
+   }
+   when! limit {
+      query = "%s LIMIT %d" ( query, limit );
+   }
+   return self.db.MapQuery( query, func );
+}

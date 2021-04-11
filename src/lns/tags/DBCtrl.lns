@@ -1,0 +1,131 @@
+// -*- coding: utf-8 -*-
+import go/github:com.ifritJP.lnssqlite3.src.lns.sqlite3.base;
+import lns.tags.DBAccess;
+
+pub class DBCtrl {
+   let mut access:DBAccess.DBAccess;
+
+   local fn __init( access:DBAccess.DBAccess ) {
+      self.access = access;
+   }
+
+   pub fn begin() mut {
+      self.access.begin();
+   }
+   
+   // pub fn getRow( tableName:str, condition:str, attrib:str ) : stem {
+   //    return self.getRowList( tableName, condition, 1, attrib )[1]
+   // }
+}
+
+
+pub fn open( path:str, readonly:bool ) mut : DBCtrl!
+{
+   let! mut db = DBAccess.open( path, readonly ) {
+      return nil;
+   };
+
+   let mut dbCtrl = new DBCtrl( db );
+   
+   if not readonly {
+      dbCtrl.begin();
+   }
+
+//    local item = obj:getRow( "etc", "keyName = 'version'" )
+//    if not item then
+//       log( 1, "unknown version" )
+//       db:close()
+//       return nil
+//    end
+//    if tonumber( item.val ) ~= DB_VERSION then
+//       log( 1, "not support version.", item.val )
+//       db:close()
+//       return nil
+//    end
+
+//    local projDirInfo = obj:getEtc( "projDir" )
+
+//    if DBCtrl:isKilling( obj ) then
+//       error( "db is killed now" )
+//    end
+
+//    obj.individualTypeFlag = obj:getEtc( "individualTypeFlag" ).val ~= '0'
+//    obj.individualStructFlag = obj:getEtc( "individualStructFlag" ).val ~= '0'
+//    obj.individualMacroFlag = obj:getEtc( "individualMacroFlag" ).val ~= '0'
+
+//    if not projDirInfo or projDirInfo.val == "" then
+//       log( 1, "db is not initialized" )
+//       obj:close()
+//       return nil
+//    end
+
+//    if projDirInfo.val == "./" then
+//       obj.projDir = string.gsub( obj:convFullpath( path ), '/[^/]+$', "" )
+//    else
+//       obj.projDir = projDirInfo.val
+//    end
+
+//    obj.dbPath = obj:convFullpath( path )
+//    log( 3, "open: projDir", obj.projDir, projDirInfo.val )
+
+//    return obj
+   // end
+
+   return dbCtrl;
+}
+
+
+pub fn DBCtrl.test() mut {
+   let stmt = ```
+      create table foo (id integer not null primary key, name text);
+   delete from foo;
+```;
+   self.access.exec( stmt, nil );
+
+   for index = 0, 10 {
+      let sql = "insert into foo(id, name) values(%d, 'テスト%03d')"
+          ( index, index );
+      self.access.exec( sql, nil );
+   }
+   self.access.commit();
+
+   self.access.mapRowList(
+      "foo", nil, nil, "id, name",
+      fn ( row : &List<&stem> ) : bool {
+         print( row[ 1 ]@@int + 10, row[ 2 ]@@str .. "hoge" );
+         return true;
+      } );
+
+   self.access.mapRowList(
+      "foo", "id = 3", nil, "name",
+      fn ( row : &List<&stem> ) : bool {
+         print( row[ 1 ] );
+         return false;
+      } );
+
+   self.access.exec( "delete from foo", nil);
+
+   self.access.exec("insert into foo(id, name) values(1, 'foo'), (2, 'bar'), (3, 'baz')", nil);
+      
+
+   self.access.mapRowList(
+      "foo", nil, nil, "id, name",
+      fn ( row : &List<&stem> ) : bool {
+         print( row[1], row[2]);
+         return true;
+      } );
+   
+   self.access.close();
+}
+
+pub fn test() : bool {
+   let! mut db = open( "hoge.sqlite3", false ) {
+      print( "open error" );
+      return false;
+   };
+
+   db.test();
+   
+
+   return true;
+}
