@@ -9,6 +9,6 @@ class Hoge {
 }
 func();
 let hoge = new Hoge();
-// macro _Macro() {
-// }
-// _Macro();
+macro _Macro() {
+}
+_Macro();
