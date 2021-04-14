@@ -1,25 +1,13 @@
 // -*- coding: utf-8 -*-
 
-import go/github:com.ifritJP.LuneScript.src.lune.base.Option;
-import go/github:com.ifritJP.LuneScript.src.lune.base.Nodes;
-import go/github:com.ifritJP.LuneScript.src.lune.base.TransUnit;
-import go/github:com.ifritJP.LuneScript.src.lune.base.front;
 import lns.tags.DBCtrl;
+import lns.tags.Analyze;
 
 pub fn __main( args:&List<str> ) : int {
    
    DBCtrl.test();
-
-   let mut option = Option.createDefaultOption( "test/main.lns" );
-   front.build( option, fn ( ast: &TransUnit.ASTInfo ) {
-      ast.$node.visit(
-         fn ( node:&Nodes.Node, parent:&Nodes.Node,
-              relation:str, depth:int ): Nodes.NodeVisitMode
-         {
-            print( Nodes.getNodeKindName( node.$kind ) );
-            return .Child;         
-         }, 0 );
-   });
+   Analyze.test();
+   
 
    return 0;
 }

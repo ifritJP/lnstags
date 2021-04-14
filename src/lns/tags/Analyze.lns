@@ -1,0 +1,45 @@
+// -*- coding: utf-8 -*-
+
+import go/github:com.ifritJP.LuneScript.src.lune.base.Option;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Nodes;
+import go/github:com.ifritJP.LuneScript.src.lune.base.TransUnit;
+import go/github:com.ifritJP.LuneScript.src.lune.base.front;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Ast;
+
+class Opt {
+}
+
+class tagFilter extend Nodes.Filter<Opt> {
+}
+
+pub override fn tagFilter.processRoot(
+   node: &Nodes.RootNode, opt:Opt ) mut
+{
+   let nodeManager = node.$nodeManager;
+   foreach workNode in nodeManager.getDeclFuncNodeList() {
+      print( "declFunc:", workNode.$pos.lineNo, self.getFull( workNode.$expType, false ) );
+   }
+   foreach workNode in nodeManager.getDeclMethodNodeList() {
+      print( "declMethod:", workNode.$pos.lineNo, self.getFull( workNode.$expType, false ) );
+   }
+   foreach workNode in nodeManager.getExpRefNodeList() {
+      print( "ref:", workNode.$pos.lineNo, workNode.$symbolInfo.$name );
+   }
+};
+
+
+fn dumpRoot( rootNode:&Nodes.RootNode ) {
+   let mut filter = new tagFilter( true, rootNode.$moduleTypeInfo,
+                               rootNode.$moduleTypeInfo.$scope );
+   rootNode.processFilter( filter, new Opt() );
+}
+
+pub fn test() {
+   let mut option = Option.createDefaultOption( "test/main.lns" );
+   front.build( option, fn ( ast: &TransUnit.ASTInfo ) {
+
+      if! let rootNode = ast.$node@@@Nodes.RootNode {
+         dumpRoot( rootNode );
+      }
+   });
+}

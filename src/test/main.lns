@@ -1,1 +1,14 @@
-print( "hoge" );
+fn func() {
+   print( "hoge" );
+}
+class Hoge {
+   fn func() {
+   }
+   static fn sub() {
+   }
+}
+func();
+let hoge = new Hoge();
+// macro _Macro() {
+// }
+// _Macro();
