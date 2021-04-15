@@ -149,13 +149,13 @@ func (self *DBAccess_DBAccess) MapJoin(tableName string,otherTable string,on str
         Lns_GetEnv().SetStackVal( attrib) ||
         Lns_GetEnv().SetStackVal( "*") ).(string), tableName, otherTable, on})
     if condition != nil{
-        condition_115 := condition.(string)
-        query = Lns_getVM().String_format("%s WHERE %s", []LnsAny{query, condition_115})
+        condition_113 := condition.(string)
+        query = Lns_getVM().String_format("%s WHERE %s", []LnsAny{query, condition_113})
         
     }
     if limit != nil{
-        limit_117 := limit.(LnsInt)
-        query = Lns_getVM().String_format("%s LIMIT %d", []LnsAny{query, limit_117})
+        limit_115 := limit.(LnsInt)
+        query = Lns_getVM().String_format("%s LIMIT %d", []LnsAny{query, limit_115})
         
     }
     return self.db.MapQuery(query, _func)
@@ -168,13 +168,13 @@ func (self *DBAccess_DBAccess) MapJoin2(tableName string,otherTable string,on st
         Lns_GetEnv().SetStackVal( attrib) ||
         Lns_GetEnv().SetStackVal( "*") ).(string), tableName, otherTable, on, otherTable2, on2})
     if condition != nil{
-        condition_133 := condition.(string)
-        query = Lns_getVM().String_format("%s WHERE %s", []LnsAny{query, condition_133})
+        condition_131 := condition.(string)
+        query = Lns_getVM().String_format("%s WHERE %s", []LnsAny{query, condition_131})
         
     }
     if limit != nil{
-        limit_135 := limit.(LnsInt)
-        query = Lns_getVM().String_format("%s LIMIT %d", []LnsAny{query, limit_135})
+        limit_133 := limit.(LnsInt)
+        query = Lns_getVM().String_format("%s LIMIT %d", []LnsAny{query, limit_133})
         
     }
     return self.db.MapQuery(query, _func)
@@ -187,13 +187,13 @@ func (self *DBAccess_DBAccess) MapJoin3(tableName string,otherTable string,on st
         Lns_GetEnv().SetStackVal( attrib) ||
         Lns_GetEnv().SetStackVal( "*") ).(string), tableName, otherTable, on, otherTable2, on2, otherTable3, on3})
     if condition != nil{
-        condition_153 := condition.(string)
-        query = Lns_getVM().String_format("%s WHERE %s", []LnsAny{query, condition_153})
+        condition_151 := condition.(string)
+        query = Lns_getVM().String_format("%s WHERE %s", []LnsAny{query, condition_151})
         
     }
     if limit != nil{
-        limit_155 := limit.(LnsInt)
-        query = Lns_getVM().String_format("%s LIMIT %d", []LnsAny{query, limit_155})
+        limit_153 := limit.(LnsInt)
+        query = Lns_getVM().String_format("%s LIMIT %d", []LnsAny{query, limit_153})
         
     }
     return self.db.MapQuery(query, _func)
@@ -205,16 +205,16 @@ func (self *DBAccess_DBAccess) MapRowList(tableName string,condition LnsAny,limi
     var ATTRIB string
     ATTRIB = Lns_unwrapDefault( attrib, "*").(string)
     if condition != nil{
-        condition_168 := condition.(string)
-        query = Lns_getVM().String_format("SELECT %s FROM %s WHERE %s", []LnsAny{ATTRIB, tableName, condition_168})
+        condition_166 := condition.(string)
+        query = Lns_getVM().String_format("SELECT %s FROM %s WHERE %s", []LnsAny{ATTRIB, tableName, condition_166})
         
     } else {
         query = Lns_getVM().String_format("SELECT %s FROM %s", []LnsAny{ATTRIB, tableName})
         
     }
     if limit != nil{
-        limit_171 := limit.(LnsInt)
-        query = Lns_getVM().String_format("%s LIMIT %d", []LnsAny{query, limit_171})
+        limit_169 := limit.(LnsInt)
+        query = Lns_getVM().String_format("%s LIMIT %d", []LnsAny{query, limit_169})
         
     }
     return self.db.MapQuery(query, _func)
