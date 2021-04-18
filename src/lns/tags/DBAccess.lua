@@ -204,7 +204,7 @@ function DBAccess:mapJoin( tableName, otherTable, on, condition, limit, attrib, 
       query = string.format( "%s LIMIT %d", query, limit)
    end
    
-   return self.db:MapQuery( query, func )
+   return self.db:MapQueryAsMap( query, func )
 end
 
 
@@ -219,7 +219,7 @@ function DBAccess:mapJoin2( tableName, otherTable, on, otherTable2, on2, conditi
       query = string.format( "%s LIMIT %d", query, limit)
    end
    
-   return self.db:MapQuery( query, func )
+   return self.db:MapQueryAsMap( query, func )
 end
 
 
@@ -234,7 +234,7 @@ function DBAccess:mapJoin3( tableName, otherTable, on, otherTable2, on2, otherTa
       query = string.format( "%s LIMIT %d", query, limit)
    end
    
-   return self.db:MapQuery( query, func )
+   return self.db:MapQueryAsMap( query, func )
 end
 
 
@@ -253,7 +253,19 @@ function DBAccess:mapRowList( tableName, condition, limit, attrib, func )
       query = string.format( "%s LIMIT %d", query, limit)
    end
    
-   return self.db:MapQuery( query, func )
+   return self.db:MapQueryAsMap( query, func )
+end
+
+
+function DBAccess:createTables( sqlTxt )
+
+   self:exec( sqlTxt, function ( stmt, msg )
+   
+      if not msg:find( "already exists", 1, true ) then
+         print( msg )
+      end
+      
+   end )
 end
 
 

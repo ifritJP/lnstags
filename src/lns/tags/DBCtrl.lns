@@ -1,25 +1,113 @@
 // -*- coding: utf-8 -*-
 import go/github:com.ifritJP.lnssqlite3.src.lns.sqlite3.base;
 import lns.tags.DBAccess;
+import lns.tags.Log;
+
+enum Consts {
+   rootNsId = 1,
+   userNsId = 2,
+   systemFileId = 1,
+}
+let DB_VERSION = 9.0;
 
 pub class DBCtrl {
    let mut access:DBAccess.DBAccess;
+   local let mut individualTypeFlag:bool {pub};
+   local let mut individualStructFlag:bool {pub};
+   local let mut individualMacroFlag:bool {pub};
+   local let mut projDir:str {pub};
+   local let mut dbPath:str {pub};
+   
 
    local fn __init( access:DBAccess.DBAccess ) {
       self.access = access;
+      self.individualTypeFlag = false;
+      self.individualStructFlag = false;
+      self.individualMacroFlag = false;
+      self.projDir = "./";
+      self.dbPath = "lnstags.sqlite3";
    }
 
    pub fn begin() mut {
       self.access.begin();
    }
+
+   pub fn exec( stmt:str, errHandle:base.errHandleForm! ) mut {
+      self.access.exec( stmt, errHandle );
+   }
+
+   pub fn mapRowList( tableName:str, condition:str!,
+                      limit:int!, attrib:str!, func:base.queryMapForm ) : bool
+   {
+      return self.access.mapRowList( tableName, condition, limit, attrib, func );
+   }
+      
+   fn getRowList( tableName:str, condition:str!,
+                  limit:int!, attrib:str! ) : &List<&Map<str,&stem>>
+   {
+      let mut rows:List<&Map<str,&stem>> = [];
+      self.mapRowList( tableName, condition, limit, attrib,
+		       fn( items: &Map<str,&stem> ) : bool
+                       {
+		          rows.insert( items );
+		          return true;
+                       } );
+      return rows;
+   }
    
-   // pub fn getRow( tableName:str, condition:str, attrib:str ) : stem {
-   //    return self.getRowList( tableName, condition, 1, attrib )[1]
-   // }
+   pub fn getRow( tableName:str, condition:str!, attrib:str! ) : &Map<str,&stem>! {
+      let row = self.getRowList( tableName, condition, 1, attrib );
+      if #row == 0 {
+         return nil;
+      };
+      return row[1];
+   }
+
+   pub fn getEtc( key:str ) : str! {
+      if! let etc = self.getRow( "etc", "keyName = '" .. key .. "'" ## ) {
+         if! let val = etc.val {
+            return val@@str;
+         }
+      }
+      return nil;
+   }
+
+   pub fn setEtc( key:str, val:str ) mut {
+      let keyTxt = "keyName = '%s'" (key);
+      let valTxt = "val = '%s'" (val);
+      if not self.getEtc( key ) then
+         self:insert( "etc", string.format( "'%s', '%s'", key, val ) )
+         else  
+            self:update( "etc", valTxt, keyTxt )
+            end      
+      
+      return self.getRow( "etc", "keyName = '" .. key .. "'" ## );
+   }
+   
+   pub fn equalsEtc( key:str, val:str ) : bool {
+      if! let etc = self.getEtc( key ) {
+         if etc.val == val {
+            return true;
+         }
+      }
+      return false;
+   }
+   
+   pub fn isKilling(): bool {
+      if self.equalsEtc( "killFlag", "1" ) {
+         return true;
+      }
+      return false;
+   }
+   
 }
 
+class ETC extend (Mapping) {
+   let keyName:str {pub};
+   let val:str {pub};
+}
 
-pub fn open( path:str, readonly:bool ) mut : DBCtrl!
+pub fn open( path:str, readonly:bool ) : DBCtrl!
 {
    let! mut db = DBAccess.open( path, readonly ) {
       return nil;
@@ -31,92 +119,94 @@ pub fn open( path:str, readonly:bool ) mut : DBCtrl!
       dbCtrl.begin();
    }
 
-//    local item = obj:getRow( "etc", "keyName = 'version'" )
-//    if not item then
-//       log( 1, "unknown version" )
-//       db:close()
-//       return nil
-//    end
-//    if tonumber( item.val ) ~= DB_VERSION then
-//       log( 1, "not support version.", item.val )
-//       db:close()
-//       return nil
-//    end
+   let! item = ETC._fromStem( dbCtrl.getRow( "etc", "keyName = 'version'" ## ) ) {
+      Log._log( .Err, "unknown version" );
+      db.close();
+      return nil;
+   };
+   if tonumber( item.$val ## ) ~= DB_VERSION {
+      Log._log( .Err, "not support version. -- %s" ( item.$val ) );
+      db.close();
+      return nil;
+   }
 
-//    local projDirInfo = obj:getEtc( "projDir" )
 
-//    if DBCtrl:isKilling( obj ) then
-//       error( "db is killed now" )
-//    end
+   if dbCtrl.isKilling() {
+      error( "db is killed now" );
+   }
 
-//    obj.individualTypeFlag = obj:getEtc( "individualTypeFlag" ).val ~= '0'
-//    obj.individualStructFlag = obj:getEtc( "individualStructFlag" ).val ~= '0'
-//    obj.individualMacroFlag = obj:getEtc( "individualMacroFlag" ).val ~= '0'
-
-//    if not projDirInfo or projDirInfo.val == "" then
-//       log( 1, "db is not initialized" )
-//       obj:close()
-//       return nil
-//    end
-
-//    if projDirInfo.val == "./" then
-//       obj.projDir = string.gsub( obj:convFullpath( path ), '/[^/]+$', "" )
-//    else
-//       obj.projDir = projDirInfo.val
-//    end
-
-//    obj.dbPath = obj:convFullpath( path )
-//    log( 3, "open: projDir", obj.projDir, projDirInfo.val )
-
-//    return obj
-   // end
+   dbCtrl.individualTypeFlag = dbCtrl.equalsEtc( "individualTypeFlag", "1" );
+   dbCtrl.individualStructFlag = dbCtrl.equalsEtc( "individualStructFlag", "1" );
+   dbCtrl.individualMacroFlag = dbCtrl.equalsEtc( "individualMacroFlag", "1" );
 
    return dbCtrl;
 }
 
+local fn DBCtrl.creataTables() mut {
+   self.exec( ```
+BEGIN;
+CREATE TABLE etc ( keyName VARCHAR UNIQUE COLLATE binary PRIMARY KEY, val VARCHAR);
+INSERT INTO etc VALUES( 'version', '%d' );
+INSERT INTO etc VALUES( 'projDir', '' );
+INSERT INTO etc VALUES( 'individualStructFlag', '0' );
+INSERT INTO etc VALUES( 'individualTypeFlag', '0' );
+INSERT INTO etc VALUES( 'individualMacroFlag', '0' );
+INSERT INTO etc VALUES( 'killFlag', '0' );
+CREATE TABLE namespace ( id INTEGER PRIMARY KEY, snameId INTEGER, parentId INTEGER, digest CHAR(32), name VARCHAR UNIQUE COLLATE binary, otherName VARCHAR COLLATE binary, virtual INTEGER);
+INSERT INTO namespace VALUES( NULL, 1, 0, '', '', '', 0 );
 
-pub fn DBCtrl.test() mut {
-   let stmt = ```
-      create table foo (id integer not null primary key, name text);
-   delete from foo;
-```;
-   self.access.exec( stmt, nil );
+CREATE TABLE simpleName ( id INTEGER PRIMARY KEY, name VARCHAR UNIQUE COLLATE binary);
+CREATE TABLE filePath ( id INTEGER PRIMARY KEY, path VARCHAR UNIQUE COLLATE binary, incFlag INTEGER, digest CHAR(32), currentDir VARCHAR COLLATE binary, invalidSkip INTEGER);
+INSERT INTO filePath VALUES( NULL, '', 0, '', '', 1 );
 
-   for index = 0, 10 {
-      let sql = "insert into foo(id, name) values(%d, 'テスト%03d')"
-          ( index, index );
-      self.access.exec( sql, nil );
-   }
-   self.access.commit();
+CREATE TABLE targetInfo ( fileId INTEGER, target VARCHAR COLLATE binary, compOp VARCHAR COLLATE binary, hasPch INTEGER, updateTime INTEGER, PRIMARY KEY ( fileId, target, compOp ) );
+CREATE TABLE symbolDecl ( nsId INTEGER, snameId INTEGER, parentId INTEGER, type INTEGER, fileId INTEGER, line INTEGER, column INTEGER, endLine INTEGER, endColumn INTEGER, charSize INTEGER, comment VARCHAR COLLATE binary, hasBodyFlag INTEGER, PRIMARY KEY( nsId, fileId, line ) );
+INSERT INTO symbolDecl VALUES( 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, '', 0 );
 
-   self.access.mapRowList(
-      "foo", nil, nil, "id, name",
-      fn ( row : &List<&stem> ) : bool {
-         print( row[ 1 ]@@int + 10, row[ 2 ]@@str .. "hoge" );
-         return true;
-      } );
-
-   self.access.mapRowList(
-      "foo", "id = 3", nil, "name",
-      fn ( row : &List<&stem> ) : bool {
-         print( row[ 1 ] );
-         return false;
-      } );
-
-   self.access.exec( "delete from foo", nil);
-
-   self.access.exec("insert into foo(id, name) values(1, 'foo'), (2, 'bar'), (3, 'baz')", nil);
-      
-
-   self.access.mapRowList(
-      "foo", nil, nil, "id, name",
-      fn ( row : &List<&stem> ) : bool {
-         print( row[1], row[2]);
-         return true;
-      } );
-   
-   self.access.close();
+CREATE TABLE symbolRef ( nsId INTEGER, snameId INTEGER, fileId INTEGER, line INTEGER, column INTEGER, endLine INTEGER, endColumn INTEGER, charSize INTEGER, belongNsId INTEGER, PRIMARY KEY( nsId, fileId, line, column ) );
+CREATE TABLE funcCall ( nsId INTEGER, snameId INTEGER, belongNsId INTEGER, fileId INTEGER, line INTEGER, column INTEGER, endLine INTEGER, endColumn INTEGER, charSize INTEGER, PRIMARY KEY( nsId, belongNsId ) );
+CREATE TABLE incRef ( id INTEGER, baseFileId INTEGER, line INTEGER );
+CREATE TABLE incCache ( id INTEGER, baseFileId INTEGER, incFlag INTEGER, PRIMARY KEY( id, baseFileId ) );
+CREATE TABLE incBelong ( id INTEGER, baseFileId INTEGER, nsId INTEGER, PRIMARY KEY ( id, nsId ) );
+CREATE TABLE tokenDigest ( fileId INTEGER, digest CHAR(32), PRIMARY KEY( fileId, digest ) );
+CREATE TABLE preproDigest ( fileId INTEGER, nsId INTEGER, digest CHAR(32), PRIMARY KEY( fileId, nsId, digest ) );
+CREATE INDEX index_ns ON namespace ( id, snameId, parentId, name, otherName );
+CREATE INDEX index_sName ON simpleName ( id, name );
+CREATE INDEX index_filePath ON filePath ( id, path );
+CREATE INDEX index_target ON targetInfo ( fileId );
+CREATE INDEX index_symDecl ON symbolDecl ( nsId, parentId, snameId, fileId );
+CREATE INDEX index_symRef ON symbolRef ( nsId, snameId, fileId, belongNsId );
+CREATE INDEX index_incRef ON incRef ( id, baseFileId );
+CREATE INDEX index_incCache ON incCache ( id, baseFileId, incFlag );
+CREATE INDEX index_incBelong ON incBelong ( id, baseFileId );
+CREATE INDEX index_digest ON tokenDigest ( fileId, digest );
+CREATE INDEX index_prepro ON preproDigest ( fileId, nsId, digest );
+COMMIT;
+``` ( DB_VERSION@@int ) ## );
 }
+
+pub fn create( individualTypeFlag:bool,
+               individualStructFlag:bool, individualMacroFlag:bool ) : DBCtrl!
+{
+   let! mut db = DBAccess.open( "lnstags.sqlite3.", false ) {
+      return nil;
+   };
+
+   let mut dbCtrl = new DBCtrl( db );
+   
+   dbCtrl.begin();
+   dbCtrl.creataTables();
+
+   obj:setEtc( "individualTypeFlag",
+	       individualTypeFlag and "1" or "0" );
+   obj:setEtc( "individualStructFlag",
+	       individualStructFlag and "1" or "0" );
+   obj:setEtc( "individualMacroFlag",
+	       individualMacroFlag and "1" or "0" );
+   
+}
+
+
 
 pub fn test() : bool {
    let! mut db = open( "hoge.sqlite3", false ) {
@@ -124,8 +214,6 @@ pub fn test() : bool {
       return false;
    };
 
-   db.test();
-   
 
    return true;
 }
