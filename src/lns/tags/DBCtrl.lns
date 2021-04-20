@@ -2,48 +2,112 @@
 import go/github:com.ifritJP.lnssqlite3.src.lns.sqlite3.base;
 import lns.tags.DBAccess;
 import lns.tags.Log;
+import lns.tags.Depend;
 
-enum Consts {
-   rootNsId = 1,
-   userNsId = 2,
-   systemFileId = 1,
-}
+let rootNsId = 1;
+let userNsId = 2;
+let systemFileId = 1;
 let DB_VERSION = 9.0;
+
+class IdMgr {
+   let mut idNum:int;
+
+   local fn __init( idNum:int ) {
+      self.idNum = idNum;
+   }
+   
+   local fn getIdNext() mut: int {
+      let idNum = self.idNum;
+      self.idNum = self.idNum + 1;
+      return idNum;
+   }
+}
 
 pub class DBCtrl {
    let mut access:DBAccess.DBAccess;
+   
    local let mut individualTypeFlag:bool {pub};
    local let mut individualStructFlag:bool {pub};
    local let mut individualMacroFlag:bool {pub};
    local let mut projDir:str {pub};
    local let mut dbPath:str {pub};
-   
 
-   local fn __init( access:DBAccess.DBAccess ) {
+   let mut idMgrNamespace:IdMgr;
+   let mut idMgrSimpleName:IdMgr;
+   let mut idMgrFilePath:IdMgr;
+
+   static fn getMaxId( access:DBAccess.DBAccess, tableName:str, defId:int ):int {
+      let mut id:stem! = nil;
+      access.mapRowList(
+         tableName, nil, 1, "MAX(id)",
+         fn ( items:&Map<str,&stem>): bool {
+            id = items.id;
+            return false;
+         },
+         fn (stmt:str, msg:str) {
+         }
+      );
+      when! id {
+         return id@@int;
+      }
+      return defId;      
+   }
+   
+   local fn __init( access:DBAccess.DBAccess, readonly:bool ) {
       self.access = access;
       self.individualTypeFlag = false;
       self.individualStructFlag = false;
       self.individualMacroFlag = false;
-      self.projDir = "./";
+      self.projDir = Depend.getCurDir();
       self.dbPath = "lnstags.sqlite3";
+
+      self.idMgrNamespace = new IdMgr(
+         DBCtrl.getMaxId( access, "namespace", userNsId ) );
+      self.idMgrSimpleName = new IdMgr(
+         DBCtrl.getMaxId( access, "simpleName", userNsId ) );
+      self.idMgrFilePath = new IdMgr(
+         DBCtrl.getMaxId( access, "filePath", userNsId ) );
    }
 
+   pub fn close() mut {
+      self.access.close();
+   }
+   
    pub fn begin() mut {
       self.access.begin();
+   }
+   pub fn commit() mut {
+      self.access.commit();
    }
 
    pub fn exec( stmt:str, errHandle:base.errHandleForm! ) mut {
       self.access.exec( stmt, errHandle );
    }
 
-   pub fn mapRowList( tableName:str, condition:str!,
-                      limit:int!, attrib:str!, func:base.queryMapForm ) : bool
+   pub fn insert( tableName:str, values:str ) mut {
+      self.access.insert( tableName, values );
+   }
+
+   pub fn update( tableName:str, set:str, condition:str! ) mut
    {
-      return self.access.mapRowList( tableName, condition, limit, attrib, func );
+      let mut sql = string.format( "UPDATE %s SET %s", tableName, set );
+      if condition {
+         sql = string.format( "%s WHERE %s", sql, condition );
+      }
+      self.exec( sql ## );
+   }
+
+
+   pub fn mapRowList( tableName:str, condition:str!,
+                      limit:int!, attrib:str!, func:base.queryMapForm,
+                      errHandle: base.errHandleForm! ) : bool
+   {
+      return self.access.mapRowList(
+         tableName, condition, limit, attrib, func, errHandle );
    }
       
-   fn getRowList( tableName:str, condition:str!,
-                  limit:int!, attrib:str! ) : &List<&Map<str,&stem>>
+   fn getRowList( tableName:str, condition:str!, limit:int!, attrib:str!,
+                  errHandle: base.errHandleForm! ) : &List<&Map<str,&stem>>
    {
       let mut rows:List<&Map<str,&stem>> = [];
       self.mapRowList( tableName, condition, limit, attrib,
@@ -51,12 +115,14 @@ pub class DBCtrl {
                        {
 		          rows.insert( items );
 		          return true;
-                       } );
+                       }, errHandle );
       return rows;
    }
    
-   pub fn getRow( tableName:str, condition:str!, attrib:str! ) : &Map<str,&stem>! {
-      let row = self.getRowList( tableName, condition, 1, attrib );
+   pub fn getRow( tableName:str, condition:str!, attrib:str!,
+                  errHandle: base.errHandleForm! ) : &Map<str,&stem>!
+   {
+      let row = self.getRowList( tableName, condition, 1, attrib, errHandle );
       if #row == 0 {
          return nil;
       };
@@ -75,20 +141,16 @@ pub class DBCtrl {
    pub fn setEtc( key:str, val:str ) mut {
       let keyTxt = "keyName = '%s'" (key);
       let valTxt = "val = '%s'" (val);
-      if not self.getEtc( key ) then
-         self:insert( "etc", string.format( "'%s', '%s'", key, val ) )
-         else  
-            self:update( "etc", valTxt, keyTxt )
-            end      
-      
-      return self.getRow( "etc", "keyName = '" .. key .. "'" ## );
+      if not self.getEtc( key ) {
+         self.insert( "etc", "'%s', '%s'" ( key, val ) );
+      } else {
+         self.update( "etc", valTxt, keyTxt );
+      }
    }
    
    pub fn equalsEtc( key:str, val:str ) : bool {
-      if! let etc = self.getEtc( key ) {
-         if etc.val == val {
-            return true;
-         }
+      if self.getEtc( key ) == val {
+         return true;
       }
       return false;
    }
@@ -99,7 +161,6 @@ pub class DBCtrl {
       }
       return false;
    }
-   
 }
 
 class ETC extend (Mapping) {
@@ -109,11 +170,12 @@ class ETC extend (Mapping) {
 
 pub fn open( path:str, readonly:bool ) : DBCtrl!
 {
+   Log._log( .Log, "open" );
    let! mut db = DBAccess.open( path, readonly ) {
       return nil;
    };
 
-   let mut dbCtrl = new DBCtrl( db );
+   let mut dbCtrl = new DBCtrl( db, readonly );
    
    if not readonly {
       dbCtrl.begin();
@@ -159,61 +221,255 @@ CREATE TABLE simpleName ( id INTEGER PRIMARY KEY, name VARCHAR UNIQUE COLLATE bi
 CREATE TABLE filePath ( id INTEGER PRIMARY KEY, path VARCHAR UNIQUE COLLATE binary, incFlag INTEGER, digest CHAR(32), currentDir VARCHAR COLLATE binary, invalidSkip INTEGER);
 INSERT INTO filePath VALUES( NULL, '', 0, '', '', 1 );
 
-CREATE TABLE targetInfo ( fileId INTEGER, target VARCHAR COLLATE binary, compOp VARCHAR COLLATE binary, hasPch INTEGER, updateTime INTEGER, PRIMARY KEY ( fileId, target, compOp ) );
 CREATE TABLE symbolDecl ( nsId INTEGER, snameId INTEGER, parentId INTEGER, type INTEGER, fileId INTEGER, line INTEGER, column INTEGER, endLine INTEGER, endColumn INTEGER, charSize INTEGER, comment VARCHAR COLLATE binary, hasBodyFlag INTEGER, PRIMARY KEY( nsId, fileId, line ) );
 INSERT INTO symbolDecl VALUES( 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, '', 0 );
 
 CREATE TABLE symbolRef ( nsId INTEGER, snameId INTEGER, fileId INTEGER, line INTEGER, column INTEGER, endLine INTEGER, endColumn INTEGER, charSize INTEGER, belongNsId INTEGER, PRIMARY KEY( nsId, fileId, line, column ) );
+CREATE TABLE symbolSet ( nsId INTEGER, snameId INTEGER, fileId INTEGER, line INTEGER, column INTEGER, belongNsId INTEGER, PRIMARY KEY( nsId, fileId, line, column ) );
+
 CREATE TABLE funcCall ( nsId INTEGER, snameId INTEGER, belongNsId INTEGER, fileId INTEGER, line INTEGER, column INTEGER, endLine INTEGER, endColumn INTEGER, charSize INTEGER, PRIMARY KEY( nsId, belongNsId ) );
 CREATE TABLE incRef ( id INTEGER, baseFileId INTEGER, line INTEGER );
 CREATE TABLE incCache ( id INTEGER, baseFileId INTEGER, incFlag INTEGER, PRIMARY KEY( id, baseFileId ) );
 CREATE TABLE incBelong ( id INTEGER, baseFileId INTEGER, nsId INTEGER, PRIMARY KEY ( id, nsId ) );
-CREATE TABLE tokenDigest ( fileId INTEGER, digest CHAR(32), PRIMARY KEY( fileId, digest ) );
-CREATE TABLE preproDigest ( fileId INTEGER, nsId INTEGER, digest CHAR(32), PRIMARY KEY( fileId, nsId, digest ) );
 CREATE INDEX index_ns ON namespace ( id, snameId, parentId, name, otherName );
 CREATE INDEX index_sName ON simpleName ( id, name );
 CREATE INDEX index_filePath ON filePath ( id, path );
-CREATE INDEX index_target ON targetInfo ( fileId );
 CREATE INDEX index_symDecl ON symbolDecl ( nsId, parentId, snameId, fileId );
 CREATE INDEX index_symRef ON symbolRef ( nsId, snameId, fileId, belongNsId );
 CREATE INDEX index_incRef ON incRef ( id, baseFileId );
 CREATE INDEX index_incCache ON incCache ( id, baseFileId, incFlag );
 CREATE INDEX index_incBelong ON incBelong ( id, baseFileId );
-CREATE INDEX index_digest ON tokenDigest ( fileId, digest );
-CREATE INDEX index_prepro ON preproDigest ( fileId, nsId, digest );
 COMMIT;
 ``` ( DB_VERSION@@int ) ## );
 }
 
-pub fn create( individualTypeFlag:bool,
-               individualStructFlag:bool, individualMacroFlag:bool ) : DBCtrl!
-{
-   let! mut db = DBAccess.open( "lnstags.sqlite3.", false ) {
-      return nil;
-   };
+class ItemFilePath extend (Mapping) {
+   let id:int {pub};
+   let path:str {pub};
+   // 不要: インクルードファイルかどうか
+   let incFlag:int;
+   // 不要: このファイルが更新されているかどうかを確認するための digest
+   let digest:str;
+   // 不要: このファイルをビルドする際のディレクトリ
+   let currentDir:str;
+   // 不要
+   let invalidSkip:int;
+}
 
-   let mut dbCtrl = new DBCtrl( db );
-   
-   dbCtrl.begin();
-   dbCtrl.creataTables();
-
-   obj:setEtc( "individualTypeFlag",
-	       individualTypeFlag and "1" or "0" );
-   obj:setEtc( "individualStructFlag",
-	       individualStructFlag and "1" or "0" );
-   obj:setEtc( "individualMacroFlag",
-	       individualMacroFlag and "1" or "0" );
-   
+class ItemNamespace extend (Mapping) {
+   let id:int {pub};
+   // simpleName の id
+   let snameId:int {pub};
+   // 親の namespace の id
+   let parentId:int {pub};
+   // 完全限定名 ( e.g. @hoge.@foo.bar)
+   let name:str {pub};
 }
 
 
+/**
+ファイルパス path を登録する。
+
+登録済みの場合、登録済みの ID を返す。
+
+@param path ファイルパス
+@return 登録 ID
+*/
+pub fn DBCtrl.addFile( mut path:str ) mut : int
+{
+   if path.find( self.projDir, 1, true ) == 1 {
+      path = "|%s" (path.sub( #path + 1 ## ));
+   }
+
+   let mut fileId:int! = nil;
+   self.mapRowList(
+      "filePath", "path = '%s'", 1, nil, fn( items: &Map<str,&stem> ) : bool
+      {
+         if! let filePath = ItemFilePath._fromStem( items ) {
+            fileId = filePath.$id;
+         }
+         return false;
+      }##);
+   when! fileId {
+      return fileId;
+   }
+   let id = self.idMgrFilePath.getIdNext();
+   self.insert( "filePath", "%d,'%s',0,'','|',0" ( id, path ) );
+
+   return id;
+}
+
+/**
+名前空間を登録する
+*/
+pub fn DBCtrl.addNamespace( fullName:str, parentId:int ) mut : int
+{
+   let mut id:int! = nil;
+   self.mapRowList(
+      "namespace", "name = '%s'", 1, nil, fn( items: &Map<str,&stem> ) : bool
+      {
+         if! let obj = ItemNamespace._fromStem( items ) {
+            id = obj.$id;
+         }
+         return false;
+      }##);
+   when! id {
+      return id;
+   }
+   let snid = rootNsId;
+   let newId = self.idMgrNamespace.getIdNext();
+   self.insert( "namespace",
+                "%d, %d, %d, '', '%s', '', 1" (newId, snid, parentId, fullName ) );
+
+   return newId;
+}
+
+pub fn DBCtrl.addSymbolDecl(
+   nsId:int, fileId:int, lineNo:int, column:int ) mut
+{
+   let kind = 0;
+   let snid = rootNsId;
+
+   let! parentId = self.getRow(
+      "namespace", "id = %d" (nsId), "parentId"## )$[ "parentId" ]
+   {
+      return;
+   };
+
+   self.insert( "symbolDecl",
+                "%d, %d, %d, %d, %d, %d, %d, %d, %d, 0, '', 0"
+                ( nsId, snid, parentId@@int, kind, fileId,
+                  lineNo, column, lineNo, column ) );
+}
+
+pub fn DBCtrl.addSymbolRef(
+   nsId:int, fileId:int, lineNo:int, column:int, belongNsId:int ) mut
+{
+   let snid = rootNsId;
+   self.insert( "symbolRef",
+                "%d, %d, %d, %d, %d, %d, %d, 0, %d"
+                ( nsId, snid, fileId, lineNo, column, lineNo, column, belongNsId ) );
+}
+
+pub fn DBCtrl.addSymbolSet(
+   nsId:int, fileId:int, lineNo:int, column:int, belongNsId:int ) mut
+{
+   let snid = rootNsId;
+   self.insert( "symbolSet",
+                "%d, %d, %d, %d, %d, %d"
+                ( nsId, snid, fileId, lineNo, column, belongNsId ) );
+}
+   
+   
+
+pub fn create() : DBCtrl!
+{
+   Log._log( .Log, "create" );
+   let! mut db = DBAccess.open( "lnstags.sqlite3", false ) {
+      return nil;
+   };
+
+   let mut dbCtrl = new DBCtrl( db, false );
+
+   dbCtrl.creataTables();
+   
+   dbCtrl.begin();
+   
+   dbCtrl.setEtc( "individualTypeFlag", "1" );
+   dbCtrl.setEtc( "individualStructFlag", "1" );
+   dbCtrl.setEtc( "individualMacroFlag", "1" );
+
+   return dbCtrl;
+}
+
+pub fn initDB() {
+   let! mut db = create() {
+      print( "create error" );
+      return;
+   };
+   db.commit();
+   db.close();
+}
+
+pub fn DBCtrl.dumpAll() {
+   print( "filePath" );
+   self.mapRowList(
+      "filePath", nil, nil, nil,
+      fn (items:&Map<str,&stem>): bool
+      {
+         print( items.id, items.path );
+         return true;
+      }##);
+
+   print( "namespace" );
+   self.mapRowList(
+      "namespace", nil, nil, nil,
+      fn (items:&Map<str,&stem>): bool
+      {
+         print( items.id, items.name );
+         return true;
+      }##);
+
+   print( "symbolDecl" );
+   self.mapRowList(
+      "symbolDecl", nil, nil, nil,
+      fn (items:&Map<str,&stem>): bool
+      {
+         print( items.nsId, items.line, items.column );
+         return true;
+      }##);
+
+   print( "symbolRef" );
+   self.mapRowList(
+      "symbolRef", nil, nil, nil,
+      fn (items:&Map<str,&stem>): bool
+      {
+         print( items.nsId, items.line, items.column );
+         return true;
+      }##);
+
+   print( "symbolSet" );
+   self.mapRowList(
+      "symbolSet", nil, nil, nil,
+      fn (items:&Map<str,&stem>): bool
+      {
+         print( items.nsId, items.line, items.column );
+         return true;
+      }##);
+}
 
 pub fn test() : bool {
-   let! mut db = open( "hoge.sqlite3", false ) {
+   {
+      initDB();
+   }
+   
+   let! mut db = open( "lnstags.sqlite3", false ) {
       print( "open error" );
       return false;
    };
 
+   let mut fileId = rootNsId;
+   foreach path in [ "aa.lns", "bb.lns", "cc.lns" ] {
+      fileId = db.addFile( path );
+   }
 
+
+   let mut parentId = rootNsId;
+   foreach name, index in [ "@hoge", "@hoge.@foo", "@hoge.@foo.bar" ] {
+      let newid = db.addNamespace( name, parentId );
+      db.addSymbolDecl( newid, fileId, 100 + index, index * 10 );
+      db.addSymbolRef(
+         newid, fileId, 200 + index, index * 20, parentId );
+      db.addSymbolSet(
+         newid, fileId, 300 + index, index * 30, parentId );
+
+      parentId = newid;
+   }
+
+   db.commit();
+
+   db.dumpAll();
+
+   
    return true;
 }

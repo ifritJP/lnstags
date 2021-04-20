@@ -4,7 +4,7 @@ import . "github.com/ifritJP/LuneScript/src/lune/base/runtime_go"
 import base "github.com/ifritJP/lnssqlite3/src/lns/sqlite3"
 var init_DBAccess bool
 var DBAccess__mod__ string
-// 21: decl @lns.@tags.@DBAccess.open
+// 26: decl @lns.@tags.@DBAccess.open
 func DBAccess_open(path string,readonly bool) LnsAny {
     var db base.Base_DB
     var err string
@@ -22,37 +22,41 @@ func DBAccess_open(path string,readonly bool) LnsAny {
     return NewDBAccess_DBAccess(db, path, readonly)
 }
 
-func DBAccess_begin___anonymous_1036_() string {
+func DBAccess_begin___anonymous_1039_() string {
     return "start"
 }
-func DBAccess_begin___anonymous_1039_() string {
+func DBAccess_begin___anonymous_1042_() string {
     return "db mode is read only"
 }
-func DBAccess_commit___anonymous_1045_() string {
+func DBAccess_commit___anonymous_1048_() string {
     return "commit: start"
 }
-func DBAccess_commit___anonymous_1048_() string {
+func DBAccess_commit___anonymous_1051_() string {
     return "commit: end"
 }
-func DBAccess_createTables___anonymous_1069_(stmt string,msg string) {
+func DBAccess_createTables___anonymous_1072_(stmt string,msg string) {
     if Lns_op_not(Lns_car(Lns_getVM().String_find(msg,"already exists", 1, true))){
         Lns_print([]LnsAny{msg})
     }
 }
+
 // declaration Class -- DBAccess
 type DBAccess_DBAccessMtd interface {
     Begin()
     Close()
     Commit()
     CreateTables(arg1 string)
+    ErrorExit(arg1 string)
     Exec(arg1 string, arg2 LnsAny)
     Get_beginFlag() bool
     Get_readonlyFlag() bool
-    MapJoin(arg1 string, arg2 string, arg3 string, arg4 LnsAny, arg5 LnsAny, arg6 LnsAny, arg7 base.Base_queryMapForm) bool
-    MapJoin2(arg1 string, arg2 string, arg3 string, arg4 string, arg5 string, arg6 LnsAny, arg7 LnsAny, arg8 LnsAny, arg9 base.Base_queryMapForm) bool
-    MapJoin3(arg1 string, arg2 string, arg3 string, arg4 string, arg5 string, arg6 string, arg7 string, arg8 LnsAny, arg9 LnsAny, arg10 LnsAny, arg11 base.Base_queryMapForm) bool
-    MapRowList(arg1 string, arg2 LnsAny, arg3 LnsAny, arg4 LnsAny, arg5 base.Base_queryMapForm) bool
+    Insert(arg1 string, arg2 string)
+    MapJoin(arg1 string, arg2 string, arg3 string, arg4 LnsAny, arg5 LnsAny, arg6 LnsAny, arg7 base.Base_queryMapForm, arg8 LnsAny) bool
+    MapJoin2(arg1 string, arg2 string, arg3 string, arg4 string, arg5 string, arg6 LnsAny, arg7 LnsAny, arg8 LnsAny, arg9 base.Base_queryMapForm, arg10 LnsAny) bool
+    MapJoin3(arg1 string, arg2 string, arg3 string, arg4 string, arg5 string, arg6 string, arg7 string, arg8 LnsAny, arg9 LnsAny, arg10 LnsAny, arg11 base.Base_queryMapForm, arg12 LnsAny) bool
+    MapRowList(arg1 string, arg2 LnsAny, arg3 LnsAny, arg4 LnsAny, arg5 base.Base_queryMapForm, arg6 LnsAny) bool
     outputLog(arg1 string)
+    Update(arg1 string, arg2 string, arg3 LnsAny)
 }
 type DBAccess_DBAccess struct {
     db base.Base_DB
@@ -101,22 +105,28 @@ func (self *DBAccess_DBAccess) InitDBAccess_DBAccess(db base.Base_DB,path string
     
 }
 
-// 30: decl @lns.@tags.@DBAccess.DBAccess.close
+// 20: decl @lns.@tags.@DBAccess.DBAccess.errorExit
+func (self *DBAccess_DBAccess) ErrorExit(mess string) {
+    Lns_io_stderr.Write(mess + "\n")
+    Lns_getVM().OS_exit(1)
+}
+
+// 35: decl @lns.@tags.@DBAccess.DBAccess.close
 func (self *DBAccess_DBAccess) Close() {
     self.db.Close()
 }
 
-// 34: decl @lns.@tags.@DBAccess.DBAccess.outputLog
+// 39: decl @lns.@tags.@DBAccess.DBAccess.outputLog
 func (self *DBAccess_DBAccess) outputLog(message string) {
 }
 
-// 43: decl @lns.@tags.@DBAccess.DBAccess.begin
+// 48: decl @lns.@tags.@DBAccess.DBAccess.begin
 func (self *DBAccess_DBAccess) Begin() {
     __func__ := "@lns.@tags.@DBAccess.DBAccess.begin"
-    Log_log(Log_Level__Log, __func__, 45, Log_CreateMessage(DBAccess_begin___anonymous_1036_))
+    Log_log(Log_Level__Log, __func__, 50, Log_CreateMessage(DBAccess_begin___anonymous_1039_))
     
     if self.readonlyFlag{
-        Log_log(Log_Level__Err, __func__, 48, Log_CreateMessage(DBAccess_begin___anonymous_1039_))
+        Log_log(Log_Level__Err, __func__, 53, Log_CreateMessage(DBAccess_begin___anonymous_1042_))
         
         Lns_getVM().OS_exit(1)
     }
@@ -125,7 +135,7 @@ func (self *DBAccess_DBAccess) Begin() {
     self.db.Begin()
 }
 
-// 63: decl @lns.@tags.@DBAccess.DBAccess.commit
+// 68: decl @lns.@tags.@DBAccess.DBAccess.commit
 func (self *DBAccess_DBAccess) Commit() {
     __func__ := "@lns.@tags.@DBAccess.DBAccess.commit"
     if self.readonlyFlag{
@@ -136,99 +146,121 @@ func (self *DBAccess_DBAccess) Commit() {
     }
     self.beginFlag = false
     
-    Log_log(Log_Level__Log, __func__, 73, Log_CreateMessage(DBAccess_commit___anonymous_1045_))
+    Log_log(Log_Level__Log, __func__, 78, Log_CreateMessage(DBAccess_commit___anonymous_1048_))
     
     self.db.Commit()
-    Log_log(Log_Level__Log, __func__, 77, Log_CreateMessage(DBAccess_commit___anonymous_1048_))
+    Log_log(Log_Level__Log, __func__, 82, Log_CreateMessage(DBAccess_commit___anonymous_1051_))
     
 }
 
-// 80: decl @lns.@tags.@DBAccess.DBAccess.exec
+// 85: decl @lns.@tags.@DBAccess.DBAccess.exec
 func (self *DBAccess_DBAccess) Exec(stmt string,errHandle LnsAny) {
     self.db.Exec(stmt, errHandle)
 }
 
-// 84: decl @lns.@tags.@DBAccess.DBAccess.mapJoin
-func (self *DBAccess_DBAccess) MapJoin(tableName string,otherTable string,on string,condition LnsAny,limit LnsAny,attrib LnsAny,_func base.Base_queryMapForm) bool {
+// 89: decl @lns.@tags.@DBAccess.DBAccess.mapJoin
+func (self *DBAccess_DBAccess) MapJoin(tableName string,otherTable string,on string,condition LnsAny,limit LnsAny,attrib LnsAny,_func base.Base_queryMapForm,errHandle LnsAny) bool {
     var query string
     query = Lns_getVM().String_format("SELECT %s FROM %s INNER JOIN %s ON %s", []LnsAny{Lns_GetEnv().PopVal( Lns_GetEnv().IncStack() ||
         Lns_GetEnv().SetStackVal( attrib) ||
         Lns_GetEnv().SetStackVal( "*") ).(string), tableName, otherTable, on})
     if condition != nil{
-        condition_116 := condition.(string)
-        query = Lns_getVM().String_format("%s WHERE %s", []LnsAny{query, condition_116})
+        condition_122 := condition.(string)
+        query = Lns_getVM().String_format("%s WHERE %s", []LnsAny{query, condition_122})
         
     }
     if limit != nil{
-        limit_118 := limit.(LnsInt)
-        query = Lns_getVM().String_format("%s LIMIT %d", []LnsAny{query, limit_118})
+        limit_124 := limit.(LnsInt)
+        query = Lns_getVM().String_format("%s LIMIT %d", []LnsAny{query, limit_124})
         
     }
-    return self.db.MapQueryAsMap(query, _func)
+    return self.db.MapQueryAsMap(query, _func, errHandle)
 }
 
-// 99: decl @lns.@tags.@DBAccess.DBAccess.mapJoin2
-func (self *DBAccess_DBAccess) MapJoin2(tableName string,otherTable string,on string,otherTable2 string,on2 string,condition LnsAny,limit LnsAny,attrib LnsAny,_func base.Base_queryMapForm) bool {
+// 105: decl @lns.@tags.@DBAccess.DBAccess.mapJoin2
+func (self *DBAccess_DBAccess) MapJoin2(tableName string,otherTable string,on string,otherTable2 string,on2 string,condition LnsAny,limit LnsAny,attrib LnsAny,_func base.Base_queryMapForm,errHandle LnsAny) bool {
     var query string
     query = Lns_getVM().String_format("SELECT %s FROM %s INNER JOIN %s ON %s INNER JOIN %s ON %s", []LnsAny{Lns_GetEnv().PopVal( Lns_GetEnv().IncStack() ||
         Lns_GetEnv().SetStackVal( attrib) ||
         Lns_GetEnv().SetStackVal( "*") ).(string), tableName, otherTable, on, otherTable2, on2})
     if condition != nil{
-        condition_134 := condition.(string)
-        query = Lns_getVM().String_format("%s WHERE %s", []LnsAny{query, condition_134})
+        condition_141 := condition.(string)
+        query = Lns_getVM().String_format("%s WHERE %s", []LnsAny{query, condition_141})
         
     }
     if limit != nil{
-        limit_136 := limit.(LnsInt)
-        query = Lns_getVM().String_format("%s LIMIT %d", []LnsAny{query, limit_136})
+        limit_143 := limit.(LnsInt)
+        query = Lns_getVM().String_format("%s LIMIT %d", []LnsAny{query, limit_143})
         
     }
-    return self.db.MapQueryAsMap(query, _func)
+    return self.db.MapQueryAsMap(query, _func, errHandle)
 }
 
-// 114: decl @lns.@tags.@DBAccess.DBAccess.mapJoin3
-func (self *DBAccess_DBAccess) MapJoin3(tableName string,otherTable string,on string,otherTable2 string,on2 string,otherTable3 string,on3 string,condition LnsAny,limit LnsAny,attrib LnsAny,_func base.Base_queryMapForm) bool {
+// 121: decl @lns.@tags.@DBAccess.DBAccess.mapJoin3
+func (self *DBAccess_DBAccess) MapJoin3(tableName string,otherTable string,on string,otherTable2 string,on2 string,otherTable3 string,on3 string,condition LnsAny,limit LnsAny,attrib LnsAny,_func base.Base_queryMapForm,errHandle LnsAny) bool {
     var query string
     query = Lns_getVM().String_format("SELECT %s FROM %s INNER JOIN %s ON %s INNER JOIN %s ON %s INNER JOIN %s ON %s", []LnsAny{Lns_GetEnv().PopVal( Lns_GetEnv().IncStack() ||
         Lns_GetEnv().SetStackVal( attrib) ||
         Lns_GetEnv().SetStackVal( "*") ).(string), tableName, otherTable, on, otherTable2, on2, otherTable3, on3})
     if condition != nil{
-        condition_154 := condition.(string)
-        query = Lns_getVM().String_format("%s WHERE %s", []LnsAny{query, condition_154})
+        condition_162 := condition.(string)
+        query = Lns_getVM().String_format("%s WHERE %s", []LnsAny{query, condition_162})
         
     }
     if limit != nil{
-        limit_156 := limit.(LnsInt)
-        query = Lns_getVM().String_format("%s LIMIT %d", []LnsAny{query, limit_156})
+        limit_164 := limit.(LnsInt)
+        query = Lns_getVM().String_format("%s LIMIT %d", []LnsAny{query, limit_164})
         
     }
-    return self.db.MapQueryAsMap(query, _func)
+    return self.db.MapQueryAsMap(query, _func, errHandle)
 }
 
-// 131: decl @lns.@tags.@DBAccess.DBAccess.mapRowList
-func (self *DBAccess_DBAccess) MapRowList(tableName string,condition LnsAny,limit LnsAny,attrib LnsAny,_func base.Base_queryMapForm) bool {
+// 139: decl @lns.@tags.@DBAccess.DBAccess.mapRowList
+func (self *DBAccess_DBAccess) MapRowList(tableName string,condition LnsAny,limit LnsAny,attrib LnsAny,_func base.Base_queryMapForm,errHandle LnsAny) bool {
     var query string
     var ATTRIB string
     ATTRIB = Lns_unwrapDefault( attrib, "*").(string)
     if condition != nil{
-        condition_169 := condition.(string)
-        query = Lns_getVM().String_format("SELECT %s FROM %s WHERE %s", []LnsAny{ATTRIB, tableName, condition_169})
+        condition_178 := condition.(string)
+        query = Lns_getVM().String_format("SELECT %s FROM %s WHERE %s", []LnsAny{ATTRIB, tableName, condition_178})
         
     } else {
         query = Lns_getVM().String_format("SELECT %s FROM %s", []LnsAny{ATTRIB, tableName})
         
     }
     if limit != nil{
-        limit_172 := limit.(LnsInt)
-        query = Lns_getVM().String_format("%s LIMIT %d", []LnsAny{query, limit_172})
+        limit_181 := limit.(LnsInt)
+        query = Lns_getVM().String_format("%s LIMIT %d", []LnsAny{query, limit_181})
         
     }
-    return self.db.MapQueryAsMap(query, _func)
+    return self.db.MapQueryAsMap(query, _func, errHandle)
 }
 
-// 147: decl @lns.@tags.@DBAccess.DBAccess.createTables
+// 156: decl @lns.@tags.@DBAccess.DBAccess.createTables
 func (self *DBAccess_DBAccess) CreateTables(sqlTxt string) {
-    self.FP.Exec(sqlTxt, base.Base_errHandleForm(DBAccess_createTables___anonymous_1069_))
+    self.FP.Exec(sqlTxt, base.Base_errHandleForm(DBAccess_createTables___anonymous_1072_))
+}
+
+// 166: decl @lns.@tags.@DBAccess.DBAccess.insert
+func (self *DBAccess_DBAccess) Insert(tableName string,values string) {
+    self.FP.Exec(Lns_getVM().String_format("INSERT INTO %s VALUES ( %s );", []LnsAny{tableName, values}), base.Base_errHandleForm(func(stmt string,message string) {
+        if Lns_isCondTrue( Lns_GetEnv().PopVal( Lns_GetEnv().IncStack() ||
+            Lns_GetEnv().SetStackVal( Lns_op_not(Lns_car(Lns_getVM().String_find(message,"UNIQUE constraint failed", 1, true)))) &&
+            Lns_GetEnv().SetStackVal( Lns_op_not(Lns_car(Lns_getVM().String_find(message," not unique", 1, true)))) ).(bool)){
+            self.FP.ErrorExit(Lns_getVM().String_format("%s\n%s", []LnsAny{message, stmt}))
+        }
+    }))
+}
+
+// 180: decl @lns.@tags.@DBAccess.DBAccess.update
+func (self *DBAccess_DBAccess) Update(tableName string,set string,condition LnsAny) {
+    var sql string
+    sql = Lns_getVM().String_format("UPDATE %s SET %s", []LnsAny{tableName, set})
+    if Lns_isCondTrue( condition){
+        sql = Lns_getVM().String_format("%s WHERE %s", []LnsAny{sql, condition})
+        
+    }
+    self.FP.Exec(sql, nil)
 }
 
 

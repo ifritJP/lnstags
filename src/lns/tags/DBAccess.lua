@@ -95,6 +95,11 @@ function DBAccess:__init(db, path, readonlyFlag)
    self.beginFlag = false
    self.readonlyFlag = readonlyFlag
 end
+function DBAccess:errorExit( mess )
+
+   io.stderr:write( mess .. "\n" )
+   os.exit( 1 )
+end
 function DBAccess.setmeta( obj )
   setmetatable( obj, { __index = DBAccess  } )
 end
@@ -136,14 +141,14 @@ end
 function DBAccess:begin(  )
    local __func__ = '@lns.@tags.@DBAccess.DBAccess.begin'
 
-   Log.log( Log.Level.Log, __func__, 45, function (  )
+   Log.log( Log.Level.Log, __func__, 50, function (  )
    
       return "start"
    end )
    
    
    if self.readonlyFlag then
-      Log.log( Log.Level.Err, __func__, 48, function (  )
+      Log.log( Log.Level.Err, __func__, 53, function (  )
       
          return "db mode is read only"
       end )
@@ -171,7 +176,7 @@ function DBAccess:commit(  )
    
    self.beginFlag = false
    
-   Log.log( Log.Level.Log, __func__, 73, function (  )
+   Log.log( Log.Level.Log, __func__, 78, function (  )
    
       return "commit: start"
    end )
@@ -179,7 +184,7 @@ function DBAccess:commit(  )
    
    self.db:Commit(  )
    
-   Log.log( Log.Level.Log, __func__, 77, function (  )
+   Log.log( Log.Level.Log, __func__, 82, function (  )
    
       return "commit: end"
    end )
@@ -193,7 +198,7 @@ function DBAccess:exec( stmt, errHandle )
 end
 
 
-function DBAccess:mapJoin( tableName, otherTable, on, condition, limit, attrib, func )
+function DBAccess:mapJoin( tableName, otherTable, on, condition, limit, attrib, func, errHandle )
 
    local query = string.format( "SELECT %s FROM %s INNER JOIN %s ON %s", attrib or "*", tableName, otherTable, on)
    if condition ~= nil then
@@ -204,11 +209,11 @@ function DBAccess:mapJoin( tableName, otherTable, on, condition, limit, attrib, 
       query = string.format( "%s LIMIT %d", query, limit)
    end
    
-   return self.db:MapQueryAsMap( query, func )
+   return self.db:MapQueryAsMap( query, func, errHandle )
 end
 
 
-function DBAccess:mapJoin2( tableName, otherTable, on, otherTable2, on2, condition, limit, attrib, func )
+function DBAccess:mapJoin2( tableName, otherTable, on, otherTable2, on2, condition, limit, attrib, func, errHandle )
 
    local query = string.format( "SELECT %s FROM %s INNER JOIN %s ON %s INNER JOIN %s ON %s", attrib or "*", tableName, otherTable, on, otherTable2, on2)
    if condition ~= nil then
@@ -219,11 +224,11 @@ function DBAccess:mapJoin2( tableName, otherTable, on, otherTable2, on2, conditi
       query = string.format( "%s LIMIT %d", query, limit)
    end
    
-   return self.db:MapQueryAsMap( query, func )
+   return self.db:MapQueryAsMap( query, func, errHandle )
 end
 
 
-function DBAccess:mapJoin3( tableName, otherTable, on, otherTable2, on2, otherTable3, on3, condition, limit, attrib, func )
+function DBAccess:mapJoin3( tableName, otherTable, on, otherTable2, on2, otherTable3, on3, condition, limit, attrib, func, errHandle )
 
    local query = string.format( "SELECT %s FROM %s INNER JOIN %s ON %s INNER JOIN %s ON %s INNER JOIN %s ON %s", attrib or "*", tableName, otherTable, on, otherTable2, on2, otherTable3, on3)
    if condition ~= nil then
@@ -234,11 +239,11 @@ function DBAccess:mapJoin3( tableName, otherTable, on, otherTable2, on2, otherTa
       query = string.format( "%s LIMIT %d", query, limit)
    end
    
-   return self.db:MapQueryAsMap( query, func )
+   return self.db:MapQueryAsMap( query, func, errHandle )
 end
 
 
-function DBAccess:mapRowList( tableName, condition, limit, attrib, func )
+function DBAccess:mapRowList( tableName, condition, limit, attrib, func, errHandle )
 
    local query
    
@@ -253,7 +258,7 @@ function DBAccess:mapRowList( tableName, condition, limit, attrib, func )
       query = string.format( "%s LIMIT %d", query, limit)
    end
    
-   return self.db:MapQueryAsMap( query, func )
+   return self.db:MapQueryAsMap( query, func, errHandle )
 end
 
 
@@ -266,6 +271,29 @@ function DBAccess:createTables( sqlTxt )
       end
       
    end )
+end
+
+
+function DBAccess:insert( tableName, values )
+
+   self:exec( string.format( "INSERT INTO %s VALUES ( %s );", tableName, values), function ( stmt, message )
+   
+      if not message:find( "UNIQUE constraint failed", 1, true ) and not message:find( " not unique", 1, true ) then
+         self:errorExit( string.format( "%s\n%s", message, stmt) )
+      end
+      
+   end )
+end
+
+
+function DBAccess:update( tableName, set, condition )
+
+   local sql = string.format( "UPDATE %s SET %s", tableName, set )
+   if condition then
+      sql = string.format( "%s WHERE %s", sql, condition )
+   end
+   
+   self:exec( sql )
 end
 
 

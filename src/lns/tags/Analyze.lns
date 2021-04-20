@@ -1,6 +1,8 @@
 // -*- coding: utf-8 -*-
 
-import go/github:com.ifritJP.LuneScript.src.lune.base.Option;
+import lns.tags.DBCtrl;
+import lns.tags.Option;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Option as LnsOpt;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Nodes;
 import go/github:com.ifritJP.LuneScript.src.lune.base.TransUnit;
 import go/github:com.ifritJP.LuneScript.src.lune.base.front;
@@ -10,6 +12,7 @@ class Opt {
 }
 
 class tagFilter extend Nodes.Filter<Opt> {
+   let option:&Option.Option;
 }
 
 pub override fn tagFilter.processRoot(
@@ -28,18 +31,29 @@ pub override fn tagFilter.processRoot(
 };
 
 
-fn dumpRoot( rootNode:&Nodes.RootNode ) {
+fn dumpRoot( rootNode:&Nodes.RootNode, option:&Option.Option ) {
    let mut filter = new tagFilter( true, rootNode.$moduleTypeInfo,
-                               rootNode.$moduleTypeInfo.$scope );
+                                   rootNode.$moduleTypeInfo.$scope, option );
    rootNode.processFilter( filter, new Opt() );
 }
 
+pub fn start( db:DBCtrl.DBCtrl, option:&Option.Option ) {
+   foreach path in option.$pathList {
+      let mut lnsOpt = LnsOpt.createDefaultOption( path );
+      front.build( lnsOpt, fn ( ast: &TransUnit.ASTInfo ) {
+         if! let rootNode = ast.$node@@@Nodes.RootNode {
+            dumpRoot( rootNode, option );
+         }
+      });
+   }
+}
+
 pub fn test() {
-   let mut option = Option.createDefaultOption( "test/main.lns" );
-   front.build( option, fn ( ast: &TransUnit.ASTInfo ) {
+   let mut lnsOpt = LnsOpt.createDefaultOption( "test/main.lns" );
+   front.build( lnsOpt, fn ( ast: &TransUnit.ASTInfo ) {
 
       if! let rootNode = ast.$node@@@Nodes.RootNode {
-         dumpRoot( rootNode );
+         dumpRoot( rootNode, Option.analyzeArgs( [ "build" ] ) );
       }
    });
 }

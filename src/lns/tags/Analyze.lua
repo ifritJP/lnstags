@@ -172,7 +172,9 @@ end
 if not _lune3 then
    _lune3 = _lune
 end
-local Option = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Option' )
+local DBCtrl = _lune.loadModule( 'lns.tags.DBCtrl' )
+local Option = _lune.loadModule( 'lns.tags.Option' )
+local LnsOpt = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Option' )
 local Nodes = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Nodes' )
 local TransUnit = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.TransUnit' )
 local front = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.front' )
@@ -200,17 +202,18 @@ setmetatable( tagFilter, { __index = Nodes.Filter } )
 function tagFilter.setmeta( obj )
   setmetatable( obj, { __index = tagFilter  } )
 end
-function tagFilter.new( __superarg1, __superarg2, __superarg3 )
+function tagFilter.new( __superarg1, __superarg2, __superarg3,option )
    local obj = {}
    tagFilter.setmeta( obj )
    if obj.__init then
-      obj:__init( __superarg1, __superarg2, __superarg3 )
+      obj:__init( __superarg1, __superarg2, __superarg3,option )
    end
    return obj
 end
-function tagFilter:__init( __superarg1, __superarg2, __superarg3 )
+function tagFilter:__init( __superarg1, __superarg2, __superarg3,option )
 
    Nodes.Filter.__init( self, __superarg1, __superarg2, __superarg3 )
+   self.option = option
 end
 
 
@@ -233,22 +236,41 @@ end
 
 
 
-local function dumpRoot( rootNode )
+local function dumpRoot( rootNode, option )
 
-   local filter = tagFilter.new(true, rootNode:get_moduleTypeInfo(), rootNode:get_moduleTypeInfo():get_scope())
+   local filter = tagFilter.new(true, rootNode:get_moduleTypeInfo(), rootNode:get_moduleTypeInfo():get_scope(), option)
    rootNode:processFilter( filter, Opt.new() )
 end
 
+local function start( db, option )
+
+   for __index, path in pairs( option:get_pathList() ) do
+      local lnsOpt = LnsOpt.createDefaultOption( path )
+      front.build( lnsOpt, function ( ast )
+      
+         do
+            local rootNode = _lune.__Cast( ast:get_node(), 3, Nodes.RootNode )
+            if rootNode ~= nil then
+               dumpRoot( rootNode, option )
+            end
+         end
+         
+      end )
+   end
+   
+end
+_moduleObj.start = start
+
 local function test(  )
 
-   local option = Option.createDefaultOption( "test/main.lns" )
-   front.build( option, function ( ast )
+   local lnsOpt = LnsOpt.createDefaultOption( "test/main.lns" )
+   front.build( lnsOpt, function ( ast )
    
       
       do
          local rootNode = _lune.__Cast( ast:get_node(), 3, Nodes.RootNode )
          if rootNode ~= nil then
-            dumpRoot( rootNode )
+            dumpRoot( rootNode, Option.analyzeArgs( {"build"} ) )
          end
       end
       

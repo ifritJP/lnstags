@@ -16,6 +16,11 @@ pub class DBAccess {
       self.beginFlag = false;
       self.readonlyFlag = readonlyFlag;
    }
+
+   pub fn errorExit( mess:str ) : __ {
+      io.stderr.write( mess .. "\n" );
+      os.exit( 1 );
+   }
 }
 
 pub fn open( path:str, readonly:bool ) mut : DBAccess!
@@ -83,7 +88,8 @@ pub fn DBAccess.exec( stmt:str, errHandle:base.errHandleForm! ) mut {
 
 pub fn DBAccess.mapJoin(
    tableName:str, otherTable:str, on:str, condition:str!,
-   limit:int!, attrib:str!, func:base.queryMapForm ) : bool
+   limit:int!, attrib:str!, func:base.queryMapForm,
+   errHandle:base.errHandleForm! ) : bool
 {
    let mut query = "SELECT %s FROM %s INNER JOIN %s ON %s"
        (attrib or "*", tableName, otherTable, on );
@@ -93,12 +99,13 @@ pub fn DBAccess.mapJoin(
    when! limit {
       query = "%s LIMIT %d" ( query, limit );
    }
-   return self.db.MapQueryAsMap( query, func );
+   return self.db.MapQueryAsMap( query, func, errHandle );
 }
 
 pub fn DBAccess.mapJoin2(
    tableName:str, otherTable:str, on:str, otherTable2:str, on2:str,
-   condition:str!, limit:int!, attrib:str!, func:base.queryMapForm ) : bool
+   condition:str!, limit:int!, attrib:str!, func:base.queryMapForm,
+   errHandle:base.errHandleForm! ) : bool
 {
    let mut query = "SELECT %s FROM %s INNER JOIN %s ON %s INNER JOIN %s ON %s"
        (attrib or "*", tableName, otherTable, on, otherTable2, on2 );
@@ -108,13 +115,14 @@ pub fn DBAccess.mapJoin2(
    when! limit {
       query = "%s LIMIT %d" ( query, limit );
    }
-   return self.db.MapQueryAsMap( query, func );
+   return self.db.MapQueryAsMap( query, func, errHandle );
 }
 
 pub fn DBAccess.mapJoin3(
    tableName:str, otherTable:str, on:str, otherTable2:str, on2:str,
    otherTable3:str, on3:str,
-   condition:str!, limit:int!, attrib:str!, func:base.queryMapForm ) : bool
+   condition:str!, limit:int!, attrib:str!, func:base.queryMapForm,
+   errHandle:base.errHandleForm! ) : bool
 {
    let mut query =
       "SELECT %s FROM %s INNER JOIN %s ON %s INNER JOIN %s ON %s INNER JOIN %s ON %s"
@@ -125,11 +133,12 @@ pub fn DBAccess.mapJoin3(
    when! limit {
       query = "%s LIMIT %d" ( query, limit );
    }
-   return self.db.MapQueryAsMap( query, func );
+   return self.db.MapQueryAsMap( query, func, errHandle );
 }
 
-pub fn DBAccess.mapRowList( tableName:str, condition:str!,
-                            limit:int!, attrib:str!, func:base.queryMapForm ) : bool
+pub fn DBAccess.mapRowList(
+   tableName:str, condition:str!,
+   limit:int!, attrib:str!, func:base.queryMapForm, errHandle:base.errHandleForm! ) : bool
 {
    let mut query;
    let ATTRIB = unwrap attrib default "*";
@@ -141,7 +150,7 @@ pub fn DBAccess.mapRowList( tableName:str, condition:str!,
    when! limit {
       query = "%s LIMIT %d" ( query, limit );
    }
-   return self.db.MapQueryAsMap( query, func );
+   return self.db.MapQueryAsMap( query, func, errHandle );
 }
 
 pub fn DBAccess.createTables( sqlTxt:str ) mut {
@@ -158,14 +167,21 @@ pub fn DBAccess.insert( tableName:str, values:str ) mut
 {
    self.exec(
       "INSERT INTO %s VALUES ( %s );" (tableName, values ),
-      fn ( db, stmt, message )
-	 if not message:find( "UNIQUE constraint failed" ) and
-	    not message:find( " not unique" )
-	 then
-	    self:errorExit( 5, message )
-	 else
-	    self.uniqueCount = self.uniqueCount + 1
-	 end
-      end
-   )
-end
+      fn ( stmt:str, message:str ) {
+	 if not message.find( "UNIQUE constraint failed", 1, true ) and
+	    not message.find( " not unique", 1, true )
+         {
+	    self.errorExit( "%s\n%s" (message, stmt ) );
+         }
+      }
+   );
+}
+
+pub fn DBAccess.update( tableName:str, set:str, condition:str! ) mut
+{
+   let mut sql = string.format( "UPDATE %s SET %s", tableName, set );
+   if condition {
+      sql = string.format( "%s WHERE %s", sql, condition );
+   }
+   self.exec( sql ## );
+}

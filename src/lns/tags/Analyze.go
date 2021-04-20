@@ -1,34 +1,53 @@
 // This code is transcompiled by LuneScript.
 package tags
 import . "github.com/ifritJP/LuneScript/src/lune/base/runtime_go"
-import Option "github.com/ifritJP/LuneScript/src/lune/base"
+import LnsOpt "github.com/ifritJP/LuneScript/src/lune/base"
 import Nodes "github.com/ifritJP/LuneScript/src/lune/base"
 import TransUnit "github.com/ifritJP/LuneScript/src/lune/base"
 import front "github.com/ifritJP/LuneScript/src/lune/base"
 import Ast "github.com/ifritJP/LuneScript/src/lune/base"
 var init_Analyze bool
 var Analyze__mod__ string
-// 31: decl @lns.@tags.@Analyze.dumpRoot
-func Analyze_dumpRoot_1033_(rootNode *Nodes.Nodes_RootNode) {
+// 34: decl @lns.@tags.@Analyze.dumpRoot
+func Analyze_dumpRoot_1033_(rootNode *Nodes.Nodes_RootNode,option *Option_Option) {
     var filter *Analyze_tagFilter
-    filter = NewAnalyze_tagFilter(true, rootNode.FP.Get_moduleTypeInfo(), rootNode.FP.Get_moduleTypeInfo().FP.Get_scope())
+    filter = NewAnalyze_tagFilter(true, rootNode.FP.Get_moduleTypeInfo(), rootNode.FP.Get_moduleTypeInfo().FP.Get_scope(), option)
     rootNode.FP.ProcessFilter(&filter.Nodes_Filter, Analyze_Opt2Stem(NewAnalyze_Opt()))
 }
 
-func test___anonymous_1039_(ast *TransUnit.TransUnit_ASTInfo) {
+
+// 40: decl @lns.@tags.@Analyze.start
+func Analyze_start(db *DBCtrl_DBCtrl,option *Option_Option) {
+    for _, _path := range( option.FP.Get_pathList().Items ) {
+        path := _path.(string)
+        var lnsOpt *LnsOpt.Option_Option
+        lnsOpt = LnsOpt.Option_createDefaultOption(path)
+        front.Front_build(lnsOpt, front.Front_AstCallback(func(ast *TransUnit.TransUnit_ASTInfo) {
+            {
+                _rootNode := Nodes.Nodes_RootNodeDownCastF(ast.FP.Get_node().FP)
+                if _rootNode != nil {
+                    rootNode := _rootNode.(*Nodes.Nodes_RootNode)
+                    Analyze_dumpRoot_1033_(rootNode, option)
+                }
+            }
+        }))
+    }
+}
+
+func test___anonymous_1046_(ast *TransUnit.TransUnit_ASTInfo) {
     {
         _rootNode := Nodes.Nodes_RootNodeDownCastF(ast.FP.Get_node().FP)
         if _rootNode != nil {
             rootNode := _rootNode.(*Nodes.Nodes_RootNode)
-            Analyze_dumpRoot_1033_(rootNode)
+            Analyze_dumpRoot_1033_(rootNode, Option_analyzeArgs(NewLnsList([]LnsAny{"build"})))
         }
     }
 }
-// 37: decl @lns.@tags.@Analyze.test
+// 51: decl @lns.@tags.@Analyze.test
 func Analyze_test() {
-    var option *Option.Option_Option
-    option = Option.Option_createDefaultOption("test/main.lns")
-    front.Front_build(option, front.Front_AstCallback(test___anonymous_1039_))
+    var lnsOpt *LnsOpt.Option_Option
+    lnsOpt = LnsOpt.Option_createDefaultOption("test/main.lns")
+    front.Front_build(lnsOpt, front.Front_AstCallback(test___anonymous_1046_))
 }
 
 // declaration Class -- Opt
@@ -166,6 +185,7 @@ type Analyze_tagFilterMtd interface {
 }
 type Analyze_tagFilter struct {
     Nodes.Nodes_Filter
+    option *Option_Option
     FP Analyze_tagFilterMtd
 }
 func Analyze_tagFilter2Stem( obj LnsAny ) LnsAny {
@@ -188,17 +208,18 @@ func Analyze_tagFilterDownCastF( multi ...LnsAny ) LnsAny {
 func (obj *Analyze_tagFilter) ToAnalyze_tagFilter() *Analyze_tagFilter {
     return obj
 }
-func NewAnalyze_tagFilter(arg1 bool, arg2 LnsAny, arg3 LnsAny) *Analyze_tagFilter {
+func NewAnalyze_tagFilter(arg1 bool, arg2 LnsAny, arg3 LnsAny, arg4 *Option_Option) *Analyze_tagFilter {
     obj := &Analyze_tagFilter{}
     obj.FP = obj
     obj.Nodes_Filter.FP = obj
-    obj.InitAnalyze_tagFilter(arg1, arg2, arg3)
+    obj.InitAnalyze_tagFilter(arg1, arg2, arg3, arg4)
     return obj
 }
-func (self *Analyze_tagFilter) InitAnalyze_tagFilter(arg1 bool, arg2 LnsAny, arg3 LnsAny) {
+func (self *Analyze_tagFilter) InitAnalyze_tagFilter(arg1 bool, arg2 LnsAny, arg3 LnsAny, arg4 *Option_Option) {
     self.Nodes_Filter.InitNodes_Filter( arg1,arg2,arg3)
+    self.option = arg4
 }
-// 15: decl @lns.@tags.@Analyze.tagFilter.processRoot
+// 18: decl @lns.@tags.@Analyze.tagFilter.processRoot
 func (self *Analyze_tagFilter) ProcessRoot(node *Nodes.Nodes_RootNode,_opt LnsAny) {
     var nodeManager *Nodes.Nodes_NodeManager
     nodeManager = node.FP.Get_nodeManager()
@@ -222,7 +243,9 @@ func Lns_Analyze_init() {
     init_Analyze = true
     Analyze__mod__ = "@lns.@tags.@Analyze"
     Lns_InitMod()
-    Option.Lns_Option_init()
+    Lns_DBCtrl_init()
+    Lns_Option_init()
+    LnsOpt.Lns_Option_init()
     Nodes.Lns_Nodes_init()
     TransUnit.Lns_TransUnit_init()
     front.Lns_front_init()

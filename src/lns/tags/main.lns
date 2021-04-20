@@ -2,11 +2,30 @@
 
 import lns.tags.DBCtrl;
 import lns.tags.Analyze;
+import lns.tags.Option;
 
 pub fn __main( args:&List<str> ) : int {
-   
-   DBCtrl.test();
-   Analyze.test();
+
+
+   let option = Option.analyzeArgs( args );
+
+   _switch option.$mode {
+      case .Init {
+         DBCtrl.initDB();
+      }
+      case .Build {
+         let! mut db = DBCtrl.open( "lnstags.sqlite3", false ) {
+            print( "error" );
+            return -1;
+         };
+         Analyze.start( db, option );
+         db.dumpAll();
+      }
+      case .Test {
+         DBCtrl.test();
+         Analyze.test();
+      }
+   }
    
 
    return 0;

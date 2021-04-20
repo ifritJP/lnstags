@@ -17,12 +17,34 @@ if not _lune3 then
 end
 local DBCtrl = _lune.loadModule( 'lns.tags.DBCtrl' )
 local Analyze = _lune.loadModule( 'lns.tags.Analyze' )
+local Option = _lune.loadModule( 'lns.tags.Option' )
 
 local function __main( args )
 
    
-   DBCtrl.test(  )
-   Analyze.test(  )
+   local option = Option.analyzeArgs( args )
+   
+   do
+      local _switchExp = option:get_mode()
+      if _switchExp == Option.Mode.Init then
+         DBCtrl.initDB(  )
+      elseif _switchExp == Option.Mode.Build then
+         local db = DBCtrl.open( "lnstags.sqlite3", false )
+         if  nil == db then
+            local _db = db
+         
+            print( "error" )
+            return -1
+         end
+         
+         Analyze.start( db, option )
+         db:dumpAll(  )
+      elseif _switchExp == Option.Mode.Test then
+         DBCtrl.test(  )
+         Analyze.test(  )
+      end
+   end
+   
    
    return 0
 end

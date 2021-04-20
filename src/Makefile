@@ -1,7 +1,9 @@
 LNSC=lnsc
 
 SRCS=
+SRCS += lns/tags/Depend.lns
 SRCS += lns/tags/Log.lns
+SRCS += lns/tags/Option.lns
 SRCS += lns/tags/DBAccess.lns
 SRCS += lns/tags/DBCtrl.lns
 SRCS += lns/tags/Analyze.lns
@@ -21,8 +23,9 @@ lnstags: $(SRCS)
 	$(MAKE) exec
 
 exec: build
-	rm -f hoge.sqlite3
-	./lnstags
+	rm -f lnstags.sqlite3
+	./lnstags init
+	./lnstags build test/main.lns
 
 clean:
-	rm -f hoge.sqlite3 lnstags
+	rm -f lnstags.sqlite3 lnstags
