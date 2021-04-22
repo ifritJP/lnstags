@@ -1,14 +1,10 @@
-fn func() {
-   print( "hoge" );
-}
-class Hoge {
-   fn func() {
-   }
-   static fn sub() {
-   }
-}
-func();
-let hoge = new Hoge();
+import test.Sub;
+Sub.func();
+let hoge = new Sub.Hoge();
+hoge.func( .Val1 );
+Sub.Hoge.sub( .Val2 );
+
 macro _Macro() {
+   Sub.func();
 }
 _Macro();

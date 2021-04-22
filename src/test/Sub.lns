@@ -1,0 +1,31 @@
+pub fn func() {
+   print( "hoge" );
+}
+pub enum Foo {
+   Val1,
+   Val2,
+}
+pub alge Bar {
+   Val1,
+   Val2,
+}
+pub proto class Hoge;
+pub class Hoge {
+   pub fn func(val:Foo);
+   pub static fn sub(val:Bar) {
+      match val {
+         case .Val1 {
+         }
+         case .Val2 {
+         }
+      }
+   }
+}
+pub fn Hoge.func(val:Foo) {
+   _switch val {
+      case .Val1 {
+      }
+      case .Val2 {
+      }
+   }
+}

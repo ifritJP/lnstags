@@ -195,6 +195,8 @@ local Log = _lune.loadModule( 'lns.tags.Log' )
 local Depend = _lune.loadModule( 'lns.tags.Depend' )
 
 local rootNsId = 1
+_moduleObj.rootNsId = rootNsId
+
 local userNsId = 2
 local systemFileId = 1
 local DB_VERSION = 9.0
@@ -690,7 +692,7 @@ function DBCtrl:addNamespace( fullName, parentId )
       return id
    end
    
-   local snid = rootNsId
+   local snid = _moduleObj.rootNsId
    local newId = self.idMgrNamespace:getIdNext(  )
    self:insert( "namespace", string.format( "%d, %d, %d, '', '%s', '', 1", newId, snid, parentId, fullName) )
    
@@ -701,7 +703,7 @@ end
 function DBCtrl:addSymbolDecl( nsId, fileId, lineNo, column )
 
    local kind = 0
-   local snid = rootNsId
+   local snid = _moduleObj.rootNsId
    
    local parentId = _lune.nilacc( self:getRow( "namespace", string.format( "id = %d", nsId), "parentId" ), nil, 'item', "parentId")
    if  nil == parentId then
@@ -715,16 +717,18 @@ function DBCtrl:addSymbolDecl( nsId, fileId, lineNo, column )
 end
 
 
-function DBCtrl:addSymbolRef( nsId, fileId, lineNo, column, belongNsId )
+function DBCtrl:addSymbolRef( nsId, fileId, lineNo, column )
 
-   local snid = rootNsId
+   local snid = _moduleObj.rootNsId
+   local belongNsId = _moduleObj.rootNsId
    self:insert( "symbolRef", string.format( "%d, %d, %d, %d, %d, %d, %d, 0, %d", nsId, snid, fileId, lineNo, column, lineNo, column, belongNsId) )
 end
 
 
-function DBCtrl:addSymbolSet( nsId, fileId, lineNo, column, belongNsId )
+function DBCtrl:addSymbolSet( nsId, fileId, lineNo, column )
 
-   local snid = rootNsId
+   local snid = _moduleObj.rootNsId
+   local belongNsId = _moduleObj.rootNsId
    self:insert( "symbolSet", string.format( "%d, %d, %d, %d, %d, %d", nsId, snid, fileId, lineNo, column, belongNsId) )
 end
 
@@ -732,7 +736,7 @@ end
 local function create(  )
    local __func__ = '@lns.@tags.@DBCtrl.create'
 
-   Log.log( Log.Level.Log, __func__, 367, function (  )
+   Log.log( Log.Level.Log, __func__, 369, function (  )
    
       return "create"
    end )
@@ -793,21 +797,21 @@ function DBCtrl:dumpAll(  )
    print( "symbolDecl" )
    self:mapRowList( "symbolDecl", nil, nil, nil, function ( items )
    
-      print( items['nsId'], items['line'], items['column'] )
+      print( items['nsId'], items['fileId'], items['line'], items['column'] )
       return true
    end )
    
    print( "symbolRef" )
    self:mapRowList( "symbolRef", nil, nil, nil, function ( items )
    
-      print( items['nsId'], items['line'], items['column'] )
+      print( items['nsId'], items['fileId'], items['line'], items['column'] )
       return true
    end )
    
    print( "symbolSet" )
    self:mapRowList( "symbolSet", nil, nil, nil, function ( items )
    
-      print( items['nsId'], items['line'], items['column'] )
+      print( items['nsId'], items['fileId'], items['line'], items['column'] )
       return true
    end )
 end
@@ -829,18 +833,18 @@ local function test(  )
    end
    
    
-   local fileId = rootNsId
+   local fileId = _moduleObj.rootNsId
    for __index, path in pairs( {"aa.lns", "bb.lns", "cc.lns"} ) do
       fileId = db:addFile( path )
    end
    
    
-   local parentId = rootNsId
+   local parentId = _moduleObj.rootNsId
    for index, name in pairs( {"@hoge", "@hoge.@foo", "@hoge.@foo.bar"} ) do
       local newid = db:addNamespace( name, parentId )
       db:addSymbolDecl( newid, fileId, 100 + index, index * 10 )
-      db:addSymbolRef( newid, fileId, 200 + index, index * 20, parentId )
-      db:addSymbolSet( newid, fileId, 300 + index, index * 30, parentId )
+      db:addSymbolRef( newid, fileId, 200 + index, index * 20 )
+      db:addSymbolSet( newid, fileId, 300 + index, index * 30 )
       
       parentId = newid
    end

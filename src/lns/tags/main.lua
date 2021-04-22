@@ -41,7 +41,6 @@ local function __main( args )
          db:dumpAll(  )
       elseif _switchExp == Option.Mode.Test then
          DBCtrl.test(  )
-         Analyze.test(  )
       end
    end
    

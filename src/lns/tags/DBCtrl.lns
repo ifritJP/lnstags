@@ -4,7 +4,7 @@ import lns.tags.DBAccess;
 import lns.tags.Log;
 import lns.tags.Depend;
 
-let rootNsId = 1;
+pub let rootNsId = 1;
 let userNsId = 2;
 let systemFileId = 1;
 let DB_VERSION = 9.0;
@@ -343,18 +343,20 @@ pub fn DBCtrl.addSymbolDecl(
 }
 
 pub fn DBCtrl.addSymbolRef(
-   nsId:int, fileId:int, lineNo:int, column:int, belongNsId:int ) mut
+   nsId:int, fileId:int, lineNo:int, column:int ) mut
 {
    let snid = rootNsId;
+   let belongNsId = rootNsId;
    self.insert( "symbolRef",
                 "%d, %d, %d, %d, %d, %d, %d, 0, %d"
                 ( nsId, snid, fileId, lineNo, column, lineNo, column, belongNsId ) );
 }
 
 pub fn DBCtrl.addSymbolSet(
-   nsId:int, fileId:int, lineNo:int, column:int, belongNsId:int ) mut
+   nsId:int, fileId:int, lineNo:int, column:int ) mut
 {
    let snid = rootNsId;
+   let belongNsId = rootNsId;
    self.insert( "symbolSet",
                 "%d, %d, %d, %d, %d, %d"
                 ( nsId, snid, fileId, lineNo, column, belongNsId ) );
@@ -415,7 +417,7 @@ pub fn DBCtrl.dumpAll() {
       "symbolDecl", nil, nil, nil,
       fn (items:&Map<str,&stem>): bool
       {
-         print( items.nsId, items.line, items.column );
+         print( items.nsId, items.fileId, items.line, items.column );
          return true;
       }##);
 
@@ -424,7 +426,7 @@ pub fn DBCtrl.dumpAll() {
       "symbolRef", nil, nil, nil,
       fn (items:&Map<str,&stem>): bool
       {
-         print( items.nsId, items.line, items.column );
+         print( items.nsId, items.fileId, items.line, items.column );
          return true;
       }##);
 
@@ -433,7 +435,7 @@ pub fn DBCtrl.dumpAll() {
       "symbolSet", nil, nil, nil,
       fn (items:&Map<str,&stem>): bool
       {
-         print( items.nsId, items.line, items.column );
+         print( items.nsId, items.fileId, items.line, items.column );
          return true;
       }##);
 }
@@ -459,9 +461,9 @@ pub fn test() : bool {
       let newid = db.addNamespace( name, parentId );
       db.addSymbolDecl( newid, fileId, 100 + index, index * 10 );
       db.addSymbolRef(
-         newid, fileId, 200 + index, index * 20, parentId );
+         newid, fileId, 200 + index, index * 20 );
       db.addSymbolSet(
-         newid, fileId, 300 + index, index * 30, parentId );
+         newid, fileId, 300 + index, index * 30 );
 
       parentId = newid;
    }

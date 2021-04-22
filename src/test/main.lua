@@ -5,35 +5,15 @@ local _lune = require( "lune.base.runtime3" )
 if not _lune3 then
    _lune3 = _lune
 end
-local function func(  )
+local Sub = _lune.loadModule( 'test.Sub' )
+Sub.func(  )
+local hoge = Sub.Hoge.new()
+hoge:func( Sub.Foo.Val1 )
+Sub.Hoge.sub( _lune.newAlge( Sub.Bar.Val2) )
 
-   print( "hoge" )
-end
-local Hoge = {}
-function Hoge:func(  )
 
-end
-function Hoge.sub(  )
 
-end
-function Hoge.setmeta( obj )
-  setmetatable( obj, { __index = Hoge  } )
-end
-function Hoge.new(  )
-   local obj = {}
-   Hoge.setmeta( obj )
-   if obj.__init then
-      obj:__init(  )
-   end
-   return obj
-end
-function Hoge:__init(  )
-
-end
-
-func(  )
-local hoge = Hoge.new()
-
+Sub.func(  )
 
 
 return _moduleObj

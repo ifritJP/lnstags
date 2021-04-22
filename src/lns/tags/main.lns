@@ -23,7 +23,6 @@ pub fn __main( args:&List<str> ) : int {
       }
       case .Test {
          DBCtrl.test();
-         Analyze.test();
       }
    }
    
