@@ -677,7 +677,7 @@ end
 function DBCtrl:addNamespace( fullName, parentId )
 
    local id = nil
-   self:mapRowList( "namespace", "name = '%s'", 1, nil, function ( items )
+   self:mapRowList( "namespace", string.format( "name = '%s'", fullName), 1, nil, function ( items )
    
       do
          local obj = ItemNamespace._fromStem( items )
@@ -689,14 +689,14 @@ function DBCtrl:addNamespace( fullName, parentId )
       return false
    end )
    if id ~= nil then
-      return id
+      return id, false
    end
    
    local snid = _moduleObj.rootNsId
    local newId = self.idMgrNamespace:getIdNext(  )
    self:insert( "namespace", string.format( "%d, %d, %d, '', '%s', '', 1", newId, snid, parentId, fullName) )
    
-   return newId
+   return newId, true
 end
 
 
@@ -736,7 +736,7 @@ end
 local function create(  )
    local __func__ = '@lns.@tags.@DBCtrl.create'
 
-   Log.log( Log.Level.Log, __func__, 369, function (  )
+   Log.log( Log.Level.Log, __func__, 373, function (  )
    
       return "create"
    end )
@@ -847,6 +847,13 @@ local function test(  )
       db:addSymbolSet( newid, fileId, 300 + index, index * 30 )
       
       parentId = newid
+   end
+   
+   
+   do
+      local _
+      local _405, added = db:addNamespace( "@hoge", _moduleObj.rootNsId )
+      print( "added", added )
    end
    
    

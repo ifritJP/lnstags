@@ -8,9 +8,9 @@ func Main___main(args *LnsList) LnsInt {
     Lns_main_init()
     var option *Option_Option
     option = Option_analyzeArgs(args)
-    if _switch88 := option.FP.Get_mode(); _switch88 == Option_Mode__Init {
+    if _switch99 := option.FP.Get_mode(); _switch99 == Option_Mode__Init {
         DBCtrl_initDB()
-    } else if _switch88 == Option_Mode__Build {
+    } else if _switch99 == Option_Mode__Build {
         var db *DBCtrl_DBCtrl
         
         {
@@ -22,9 +22,11 @@ func Main___main(args *LnsList) LnsInt {
                 db = _db.(*DBCtrl_DBCtrl)
             }
         }
+        db.FP.Commit()
         Analyze_start(db, option)
         db.FP.DumpAll()
-    } else if _switch88 == Option_Mode__Test {
+        db.FP.Close()
+    } else if _switch99 == Option_Mode__Test {
         DBCtrl_test()
     }
     return 0

@@ -2,6 +2,7 @@ import test.Sub;
 Sub.func();
 let hoge = new Sub.Hoge();
 hoge.func( .Val1 );
+hoge.func( Sub.Foo.Val1 );
 Sub.Hoge.sub( .Val2 );
 
 macro _Macro() {

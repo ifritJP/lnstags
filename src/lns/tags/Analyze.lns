@@ -9,6 +9,8 @@ import go/github:com.ifritJP.LuneScript.src.lune.base.TransUnit;
 import go/github:com.ifritJP.LuneScript.src.lune.base.front;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Ast;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Types;
+import go/github:com.ifritJP.LuneScript.src.lune.base.LuaVer;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Log as LnsLog;
 
 class Opt {
 }
@@ -33,51 +35,84 @@ class tagFilter extend Nodes.Filter<Opt> {
    
 }
 
-fn tagFilter.registerType( mut typeInfo:&Ast.TypeInfo ) mut : int {
+fn tagFilter.registerType( mut typeInfo:&Ast.TypeInfo ) mut : int, bool {
    typeInfo = typeInfo.$nonnilableType.$srcTypeInfo.$genSrcTypeInfo;
    if! self.type2nsid[ typeInfo ] {
-      return _exp;
+      return _exp, false;
    }
    let parentNsId = self.registerType( typeInfo.$parentInfo );
-   let nsId = self.db.addNamespace( self.getFull( typeInfo, false ), parentNsId );
+   let name = self.getFull( typeInfo, false );
+   let nsId, added = self.db.addNamespace( name, parentNsId );
+   Log._log( .Debug, "%s %s %d" (name, added, nsId ) );
    self.type2nsid[ typeInfo ] = nsId;
-   return nsId;
+   return nsId, added;
 }
 
-fn tagFilter.registerSymbol( symbolInfo:&Ast.SymbolInfo ) mut : int
-{
-   if! self.sym2nsid[ symbolInfo ] {
-      return _exp;
-   }
-   let parentNsId = self.registerType( symbolInfo.$namespaceTypeInfo );
+fn tagFilter.getFullNameSym( symbolInfo:&Ast.SymbolInfo ) : str {
    let name = "%s.%s"
        ( self.getFull( symbolInfo.$namespaceTypeInfo, false ), symbolInfo.$name );
-   let nsId = self.db.addNamespace( name, parentNsId );
-   self.sym2nsid[ symbolInfo ] = nsId;
-   return nsId;
+   return name;
 }
 
-fn tagFilter.registerDecl( nodeManager:&Nodes.NodeManager, fileId:int ) mut {
+fn tagFilter.registerSymbol( mut symbolInfo:&Ast.SymbolInfo ) mut : int, bool
+{
+   symbolInfo = symbolInfo.getOrg();
+   if! self.sym2nsid[ symbolInfo ] {
+      return _exp, false;
+   }
+   let parentNsId = self.registerType( symbolInfo.$namespaceTypeInfo );
+   let name = self.getFullNameSym( symbolInfo );
+   let nsId, added = self.db.addNamespace( name, parentNsId );
+   Log._log( .Debug, "%s %s %d" (name, added, nsId ) );
+   self.sym2nsid[ symbolInfo ] = nsId;
+   return nsId, added;
+}
+
+fn tagFilter.registerDecl(
+   nodeManager:&Nodes.NodeManager, fileId:int, processInfo: Ast.ProcessInfo ) mut
+{
+   macro _registDeclTypeOp( typeInfo:__exp, pos:__exp ) {
+      {}
+      {
+         let nsId = self.registerType( ,,typeInfo );
+         self.db.addSymbolDecl(
+            nsId, fileId, ,,pos.lineNo, ,,pos.column );
+      }
+   }
    macro _registDeclType( workNode:__exp ) {
-      let nsId = self.registerType( ,,workNode.$expType );
-      self.db.addSymbolDecl(
-         nsId, fileId, ,,workNode.$pos.lineNo, ,,workNode.$pos.column );
+      _registDeclTypeOp( ,,workNode.$expType, ,,workNode.$pos );
+
    }
    macro _registDeclSym( symbolInfo:__exp ) {
       let symNsId = self.registerSymbol( ,,symbolInfo );
       let pos = unwrap ,,symbolInfo.$pos;
       self.db.addSymbolDecl( symNsId, fileId, pos.lineNo, pos.column );
+      Log._log( .Debug, ,,symbolInfo.$name );
+   }
+
+   fn registerAutoMethod( parentInfo:&Ast.TypeInfo, pos:&Types.Position ) {
+      foreach symbolInfo in unwrap parentInfo.$scope$.$symbol2SymbolInfoMap {
+         let typeInfo = symbolInfo.$typeInfo;
+         if typeInfo.$autoFlag {
+            _registDeclTypeOp( typeInfo, pos );
+         }
+      }
    }
    
    // ======== 型の定義系 ======
+   foreach workNode in nodeManager.getDeclFormNodeList() {
+      _registDeclType( workNode );
+   }
+
    foreach workNode in nodeManager.getProtoClassNodeList() {
       _registDeclType( workNode );
    }
    
    foreach workNode in nodeManager.getDeclClassNodeList() {
       _registDeclType( workNode );
+      registerAutoMethod( workNode.$expType, workNode.$pos );
    }
-   
+
    foreach workNode in nodeManager.getDeclFuncNodeList() {
       _registDeclType( workNode );
    }
@@ -89,6 +124,7 @@ fn tagFilter.registerDecl( nodeManager:&Nodes.NodeManager, fileId:int ) mut {
    }
    foreach workNode in nodeManager.getDeclEnumNodeList() {
       _registDeclType( workNode );
+      registerAutoMethod( workNode.$expType, workNode.$pos );
       foreach name in workNode.$valueNameList {
          if! workNode.$scope.getSymbolInfoChild( name.txt ) {
             _registDeclSym( _exp );
@@ -117,35 +153,56 @@ fn tagFilter.registerDecl( nodeManager:&Nodes.NodeManager, fileId:int ) mut {
    }
    foreach workNode in nodeManager.getDeclMemberNodeList() {
       _registDeclSym( workNode.$symbolInfo );
+      if workNode.$getterMode ~= .None {
+         let name = "get_%s" (workNode.$name.txt);
+         _registDeclTypeOp(
+            unwrap workNode.$classType.$scope$.getTypeInfoChild$( name ), workNode.$pos );
+      }
+      if workNode.$setterMode ~= .None {
+         let name = "set_%s" (workNode.$name.txt);
+         _registDeclTypeOp(
+            unwrap workNode.$classType.$scope$.getTypeInfoChild$( name ), workNode.$pos );
+      }
    }
 }
 
 fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager, fileId:int ) mut {
 
-   fn addSymbol( symbolInfo:&Ast.SymbolInfo, pos:&Types.Position ) {
-      if! let nsId = self.sym2nsid[ symbolInfo ] {
-         self.db.addSymbolRef(
-            nsId, fileId, pos.lineNo, pos.column );
-      } else {
-         Log._log( .Err, "no register -- %s" ( symbolInfo.$name ) );
+   fn addSymbolRef( symbolInfo:&Ast.SymbolInfo, pos:&Types.Position ) {
+      switch symbolInfo.$name {
+         case "__func__", "__mod__", "__line__" {
+            return;
+         }
       }
+      let nsId, added = self.registerSymbol( symbolInfo );
+      if added and not Ast.isBuiltin( symbolInfo.$namespaceTypeInfo.$typeId ) {
+         Log._log( .Err, "no register sym -- %d:%d:%s"
+                   ( pos.lineNo, pos.column, self.getFullNameSym( symbolInfo ) ) );
+      }
+      self.db.addSymbolRef(
+         nsId, fileId, pos.lineNo, pos.column );
    }
    
    fn registerRefSym( symbolInfo:&Ast.SymbolInfo, pos:&Types.Position ) {
       switch symbolInfo.$namespaceTypeInfo.$kind {
          case .Enum, .Alge {
-            addSymbol( symbolInfo, pos );
+            addSymbolRef( symbolInfo, pos );
          }
          default {
             _switch symbolInfo.$kind {
                case .Fun, .Mac, .Mbr, .Mtd, .Typ {
-                  let nsId = self.registerType( symbolInfo.$typeInfo );
+                  let nsId, added = self.registerType( symbolInfo.$typeInfo );
+                  if added and not Ast.isBuiltin( symbolInfo.$typeInfo.$typeId ) {
+                     Log._log( .Err, "no register type -- %d:%d:%s"
+                               ( pos.lineNo, pos.column,
+                                 self.getFull( symbolInfo.$typeInfo, false ) ) );
+                  }
                   self.db.addSymbolRef(
                      nsId, fileId, pos.lineNo, pos.column );
                }
                case .Var {
                   if Ast.isPubToExternal( symbolInfo.$accessMode ) {
-                     addSymbol( symbolInfo, pos );
+                     addSymbolRef( symbolInfo, pos );
                   }
                }
                case .Arg {
@@ -182,14 +239,14 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager, fileId:int ) mut {
 }
 
 pub override fn tagFilter.processRoot(
-   node: &Nodes.RootNode, opt:Opt ) mut
+   node: Nodes.RootNode, opt:Opt ) mut
 {
    let fileId = self.db.addFile( self.streamName );
 
    self.type2nsid[ Ast.headTypeInfo ] = DBCtrl.rootNsId;
    self.registerType( node.$moduleTypeInfo );
 
-   self.registerDecl( node.$nodeManager, fileId );
+   self.registerDecl( node.$nodeManager, fileId, node.$processInfo );
    self.registerRefs( node.$nodeManager, fileId );
 };
 
@@ -197,14 +254,25 @@ pub override fn tagFilter.processRoot(
 fn dumpRoot( rootNode:&Nodes.RootNode, db:DBCtrl.DBCtrl,
              option:&Option.Option, streamName:str )
 {
+   Log._log( .Log, streamName );
    let mut filter = new tagFilter( rootNode, option, db, streamName );
+   db.begin();
    rootNode.processFilter( filter, new Opt() );
+   db.commit();
 }
 
 pub fn start( db:DBCtrl.DBCtrl, option:&Option.Option ) {
+   // lns のログレベル設定
+   LnsLog.setLevel( .Log );
    foreach path in option.$pathList {
       let mut lnsOpt = LnsOpt.createDefaultOption( path );
-      front.build( lnsOpt, fn ( ast: &TransUnit.ASTInfo ) {
+      // ver 51, 52 では構文エラーになるケースがあるので、
+      // ここでは 53 として処理する。
+      // 本来はオプション指定した方が良いかも。
+      lnsOpt.targetLuaVer = LuaVer.ver53;
+      // .meta があったときでも ast 解析するように .Force 設定
+      lnsOpt.transCtrlInfo.uptodateMode = .Force;
+      front.build( lnsOpt, fn ( ast: TransUnit.ASTInfo ) {
          if! let rootNode = ast.$node@@@Nodes.RootNode {
             dumpRoot( rootNode, db, option, ast.$streamName );
          }

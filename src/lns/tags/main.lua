@@ -37,8 +37,11 @@ local function __main( args )
             return -1
          end
          
+         db:commit(  )
+         
          Analyze.start( db, option )
          db:dumpAll(  )
+         db:close(  )
       elseif _switchExp == Option.Mode.Test then
          DBCtrl.test(  )
       end

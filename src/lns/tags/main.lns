@@ -18,8 +18,11 @@ pub fn __main( args:&List<str> ) : int {
             print( "error" );
             return -1;
          };
+         db.commit();
+         
          Analyze.start( db, option );
          db.dumpAll();
+         db.close();
       }
       case .Test {
          DBCtrl.test();

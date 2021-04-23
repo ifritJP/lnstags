@@ -27,5 +27,10 @@ exec: build
 	./lnstags init
 	./lnstags build test/main.lns
 
+check: build
+	rm -f lnstags.sqlite3
+	./lnstags test
+
+
 clean:
 	rm -f lnstags.sqlite3 lnstags

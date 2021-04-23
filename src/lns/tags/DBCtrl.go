@@ -12,13 +12,17 @@ var DBCtrl_DB_VERSION LnsReal
 func DBCtrl_convExp1277(arg1 []LnsAny) LnsAny {
     return Lns_getFromMulti( arg1, 0 )
 }
-// for 311
-func DBCtrl_convExp1390(arg1 []LnsAny) LnsAny {
+// for 315
+func DBCtrl_convExp1398(arg1 []LnsAny) LnsAny {
     return Lns_getFromMulti( arg1, 0 )
 }
 // for 184
 func DBCtrl_convExp974(arg1 []LnsAny) LnsAny {
     return Lns_getFromMulti( arg1, 0 )
+}
+// for 465
+func DBCtrl_convExp2211(arg1 []LnsAny) LnsInt {
+    return Lns_getFromMulti( arg1, 0 ).(LnsInt)
 }
 
 func DBCtrl_getMaxId___anonymous_1053_(stmt string,msg string) {
@@ -89,10 +93,10 @@ func DBCtrl_open(path string,readonly bool) LnsAny {
 func create___anonymous_1262_() string {
     return "create"
 }
-// 367: decl @lns.@tags.@DBCtrl.create
+// 371: decl @lns.@tags.@DBCtrl.create
 func DBCtrl_create() LnsAny {
     __func__ := "@lns.@tags.@DBCtrl.create"
-    Log_log(Log_Level__Log, __func__, 369, Log_CreateMessage(create___anonymous_1262_))
+    Log_log(Log_Level__Log, __func__, 373, Log_CreateMessage(create___anonymous_1262_))
     
     var db *DBAccess_DBAccess
     
@@ -114,7 +118,7 @@ func DBCtrl_create() LnsAny {
     return dbCtrl
 }
 
-// 387: decl @lns.@tags.@DBCtrl.initDB
+// 391: decl @lns.@tags.@DBCtrl.initDB
 func DBCtrl_initDB() {
     var db *DBCtrl_DBCtrl
     
@@ -151,7 +155,7 @@ func DBCtrl_dumpAll___anonymous_1303_(items *LnsMap) bool {
     Lns_print([]LnsAny{items.Items["nsId"], items.Items["fileId"], items.Items["line"], items.Items["column"]})
     return true
 }
-// 443: decl @lns.@tags.@DBCtrl.test
+// 447: decl @lns.@tags.@DBCtrl.test
 func DBCtrl_test() bool {
     {
         DBCtrl_initDB()
@@ -180,12 +184,17 @@ func DBCtrl_test() bool {
         index := _index + 1
         name := _name.(string)
         var newid LnsInt
-        newid = db.FP.AddNamespace(name, parentId)
+        newid = DBCtrl_convExp2211(Lns_2DDD(db.FP.AddNamespace(name, parentId)))
         db.FP.AddSymbolDecl(newid, fileId, 100 + index, index * 10)
         db.FP.AddSymbolRef(newid, fileId, 200 + index, index * 20)
         db.FP.AddSymbolSet(newid, fileId, 300 + index, index * 30)
         parentId = newid
         
+    }
+    {
+        var added bool
+        _,added = db.FP.AddNamespace("@hoge", DBCtrl_rootNsId)
+        Lns_print([]LnsAny{"added", added})
     }
     db.FP.Commit()
     db.FP.DumpAll()
@@ -245,7 +254,7 @@ func (self *DBCtrl_IdMgr) getIdNext() LnsInt {
 // declaration Class -- DBCtrl
 type DBCtrl_DBCtrlMtd interface {
     AddFile(arg1 string) LnsInt
-    AddNamespace(arg1 string, arg2 LnsInt) LnsInt
+    AddNamespace(arg1 string, arg2 LnsInt)(LnsInt, bool)
     AddSymbolDecl(arg1 LnsInt, arg2 LnsInt, arg3 LnsInt, arg4 LnsInt)
     AddSymbolRef(arg1 LnsInt, arg2 LnsInt, arg3 LnsInt, arg4 LnsInt)
     AddSymbolSet(arg1 LnsInt, arg2 LnsInt, arg3 LnsInt, arg4 LnsInt)
@@ -494,13 +503,13 @@ func (self *DBCtrl_DBCtrl) AddFile(path string) LnsInt {
     return id
 }
 
-// 305: decl @lns.@tags.@DBCtrl.DBCtrl.addNamespace
-func (self *DBCtrl_DBCtrl) AddNamespace(fullName string,parentId LnsInt) LnsInt {
+// 309: decl @lns.@tags.@DBCtrl.DBCtrl.addNamespace
+func (self *DBCtrl_DBCtrl) AddNamespace(fullName string,parentId LnsInt)(LnsInt, bool) {
     var id LnsAny
     id = nil
-    self.FP.MapRowList("namespace", "name = '%s'", 1, nil, base.Base_queryMapForm(func(items *LnsMap) bool {
+    self.FP.MapRowList("namespace", Lns_getVM().String_format("name = '%s'", []LnsAny{fullName}), 1, nil, base.Base_queryMapForm(func(items *LnsMap) bool {
         {
-            _obj := DBCtrl_convExp1390(Lns_2DDD(DBCtrl_ItemNamespace__fromStem_1225_(items,nil)))
+            _obj := DBCtrl_convExp1398(Lns_2DDD(DBCtrl_ItemNamespace__fromStem_1225_(items,nil)))
             if _obj != nil {
                 obj := _obj.(*DBCtrl_ItemNamespace)
                 id = obj.FP.Get_id()
@@ -511,17 +520,17 @@ func (self *DBCtrl_DBCtrl) AddNamespace(fullName string,parentId LnsInt) LnsInt 
     }), nil)
     if id != nil{
         id_318 := id.(LnsInt)
-        return id_318
+        return id_318, false
     }
     var snid LnsInt
     snid = DBCtrl_rootNsId
     var newId LnsInt
     newId = self.idMgrNamespace.FP.getIdNext()
     self.FP.Insert("namespace", Lns_getVM().String_format("%d, %d, %d, '', '%s', '', 1", []LnsAny{newId, snid, parentId, fullName}))
-    return newId
+    return newId, true
 }
 
-// 327: decl @lns.@tags.@DBCtrl.DBCtrl.addSymbolDecl
+// 331: decl @lns.@tags.@DBCtrl.DBCtrl.addSymbolDecl
 func (self *DBCtrl_DBCtrl) AddSymbolDecl(nsId LnsInt,fileId LnsInt,lineNo LnsInt,column LnsInt) {
     var kind LnsInt
     kind = 0
@@ -542,7 +551,7 @@ func (self *DBCtrl_DBCtrl) AddSymbolDecl(nsId LnsInt,fileId LnsInt,lineNo LnsInt
     self.FP.Insert("symbolDecl", Lns_getVM().String_format("%d, %d, %d, %d, %d, %d, %d, %d, %d, 0, '', 0", []LnsAny{nsId, snid, Lns_forceCastInt(parentId), kind, fileId, lineNo, column, lineNo, column}))
 }
 
-// 345: decl @lns.@tags.@DBCtrl.DBCtrl.addSymbolRef
+// 349: decl @lns.@tags.@DBCtrl.DBCtrl.addSymbolRef
 func (self *DBCtrl_DBCtrl) AddSymbolRef(nsId LnsInt,fileId LnsInt,lineNo LnsInt,column LnsInt) {
     var snid LnsInt
     snid = DBCtrl_rootNsId
@@ -551,7 +560,7 @@ func (self *DBCtrl_DBCtrl) AddSymbolRef(nsId LnsInt,fileId LnsInt,lineNo LnsInt,
     self.FP.Insert("symbolRef", Lns_getVM().String_format("%d, %d, %d, %d, %d, %d, %d, 0, %d", []LnsAny{nsId, snid, fileId, lineNo, column, lineNo, column, belongNsId}))
 }
 
-// 355: decl @lns.@tags.@DBCtrl.DBCtrl.addSymbolSet
+// 359: decl @lns.@tags.@DBCtrl.DBCtrl.addSymbolSet
 func (self *DBCtrl_DBCtrl) AddSymbolSet(nsId LnsInt,fileId LnsInt,lineNo LnsInt,column LnsInt) {
     var snid LnsInt
     snid = DBCtrl_rootNsId
@@ -560,7 +569,7 @@ func (self *DBCtrl_DBCtrl) AddSymbolSet(nsId LnsInt,fileId LnsInt,lineNo LnsInt,
     self.FP.Insert("symbolSet", Lns_getVM().String_format("%d, %d, %d, %d, %d, %d", []LnsAny{nsId, snid, fileId, lineNo, column, belongNsId}))
 }
 
-// 396: decl @lns.@tags.@DBCtrl.DBCtrl.dumpAll
+// 400: decl @lns.@tags.@DBCtrl.DBCtrl.dumpAll
 func (self *DBCtrl_DBCtrl) DumpAll() {
     Lns_print([]LnsAny{"filePath"})
     self.FP.MapRowList("filePath", nil, nil, nil, base.Base_queryMapForm(DBCtrl_dumpAll___anonymous_1275_), nil)

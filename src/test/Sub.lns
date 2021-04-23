@@ -9,8 +9,12 @@ pub alge Bar {
    Val1,
    Val2,
 }
-pub proto class Hoge;
-pub class Hoge {
+pub proto class Hoge extend (Mapping);
+pub class Hoge extend (Mapping) {
+   let mut val:int{pub,pub};
+   pub fn __init() {
+      self.val = 0;
+   }
    pub fn func(val:Foo);
    pub static fn sub(val:Bar) {
       match val {

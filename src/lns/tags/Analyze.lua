@@ -236,6 +236,8 @@ local TransUnit = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.b
 local front = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.front' )
 local Ast = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Ast' )
 local Types = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Types' )
+local LuaVer = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.LuaVer' )
+local LnsLog = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Log' )
 
 local Opt = {}
 function Opt.setmeta( obj )
@@ -277,86 +279,172 @@ end
 
 
 function tagFilter:registerType( typeInfo )
+   local __func__ = '@lns.@tags.@Analyze.tagFilter.registerType'
 
    typeInfo = typeInfo:get_nonnilableType():get_srcTypeInfo():get_genSrcTypeInfo()
    do
       local _exp = self.type2nsid[typeInfo]
       if _exp ~= nil then
-         return _exp
+         return _exp, false
       end
    end
    
    local parentNsId = self:registerType( typeInfo:get_parentInfo() )
-   local nsId = self.db:addNamespace( self:getFull( typeInfo, false ), parentNsId )
+   local name = self:getFull( typeInfo, false )
+   local nsId, added = self.db:addNamespace( name, parentNsId )
+   Log.log( Log.Level.Debug, __func__, 46, function (  )
+   
+      return string.format( "%s %s %d", name, added, nsId)
+   end )
+   
    self.type2nsid[typeInfo] = nsId
-   return nsId
+   return nsId, added
+end
+
+
+function tagFilter:getFullNameSym( symbolInfo )
+
+   local name = string.format( "%s.%s", self:getFull( symbolInfo:get_namespaceTypeInfo(), false ), symbolInfo:get_name())
+   return name
 end
 
 
 function tagFilter:registerSymbol( symbolInfo )
+   local __func__ = '@lns.@tags.@Analyze.tagFilter.registerSymbol'
 
+   symbolInfo = symbolInfo:getOrg(  )
    do
       local _exp = self.sym2nsid[symbolInfo]
       if _exp ~= nil then
-         return _exp
+         return _exp, false
       end
    end
    
    local parentNsId = self:registerType( symbolInfo:get_namespaceTypeInfo() )
-   local name = string.format( "%s.%s", self:getFull( symbolInfo:get_namespaceTypeInfo(), false ), symbolInfo:get_name())
-   local nsId = self.db:addNamespace( name, parentNsId )
+   local name = self:getFullNameSym( symbolInfo )
+   local nsId, added = self.db:addNamespace( name, parentNsId )
+   Log.log( Log.Level.Debug, __func__, 66, function (  )
+   
+      return string.format( "%s %s %d", name, added, nsId)
+   end )
+   
    self.sym2nsid[symbolInfo] = nsId
-   return nsId
+   return nsId, added
 end
 
 
-function tagFilter:registerDecl( nodeManager, fileId )
+function tagFilter:registerDecl( nodeManager, fileId, processInfo )
+   local __func__ = '@lns.@tags.@Analyze.tagFilter.registerDecl'
 
    
+   
+   
+   
+   local function registerAutoMethod( parentInfo, pos )
+   
+      for __index, symbolInfo in pairs( _lune.unwrap( _lune.nilacc( parentInfo:get_scope(), 'get_symbol2SymbolInfoMap', 'callmtd' )) ) do
+         local typeInfo = symbolInfo:get_typeInfo()
+         if typeInfo:get_autoFlag() then
+            
+            do
+               local nsId = self:registerType( typeInfo )
+               self.db:addSymbolDecl( nsId, fileId, pos.lineNo, pos.column )
+            end
+            
+            
+         end
+         
+      end
+      
+   end
+   
+   for __index, workNode in pairs( nodeManager:getDeclFormNodeList(  ) ) do
+      
+      
+      do
+         local nsId = self:registerType( workNode:get_expType() )
+         self.db:addSymbolDecl( nsId, fileId, workNode:get_pos().lineNo, workNode:get_pos().column )
+      end
+      
+      
+      
+   end
    
    
    for __index, workNode in pairs( nodeManager:getProtoClassNodeList(  ) ) do
       
-      local nsId = self:registerType( workNode:get_expType() )
-      self.db:addSymbolDecl( nsId, fileId, workNode:get_pos().lineNo, workNode:get_pos().column )
+      
+      do
+         local nsId = self:registerType( workNode:get_expType() )
+         self.db:addSymbolDecl( nsId, fileId, workNode:get_pos().lineNo, workNode:get_pos().column )
+      end
+      
+      
       
    end
    
    
    for __index, workNode in pairs( nodeManager:getDeclClassNodeList(  ) ) do
       
-      local nsId = self:registerType( workNode:get_expType() )
-      self.db:addSymbolDecl( nsId, fileId, workNode:get_pos().lineNo, workNode:get_pos().column )
       
+      do
+         local nsId = self:registerType( workNode:get_expType() )
+         self.db:addSymbolDecl( nsId, fileId, workNode:get_pos().lineNo, workNode:get_pos().column )
+      end
+      
+      
+      
+      registerAutoMethod( workNode:get_expType(), workNode:get_pos() )
    end
    
    
    for __index, workNode in pairs( nodeManager:getDeclFuncNodeList(  ) ) do
       
-      local nsId = self:registerType( workNode:get_expType() )
-      self.db:addSymbolDecl( nsId, fileId, workNode:get_pos().lineNo, workNode:get_pos().column )
+      
+      do
+         local nsId = self:registerType( workNode:get_expType() )
+         self.db:addSymbolDecl( nsId, fileId, workNode:get_pos().lineNo, workNode:get_pos().column )
+      end
+      
+      
       
    end
    
    for __index, workNode in pairs( nodeManager:getProtoMethodNodeList(  ) ) do
       
-      local nsId = self:registerType( workNode:get_expType() )
-      self.db:addSymbolDecl( nsId, fileId, workNode:get_pos().lineNo, workNode:get_pos().column )
+      
+      do
+         local nsId = self:registerType( workNode:get_expType() )
+         self.db:addSymbolDecl( nsId, fileId, workNode:get_pos().lineNo, workNode:get_pos().column )
+      end
+      
+      
       
    end
    
    for __index, workNode in pairs( nodeManager:getDeclMethodNodeList(  ) ) do
       
-      local nsId = self:registerType( workNode:get_expType() )
-      self.db:addSymbolDecl( nsId, fileId, workNode:get_pos().lineNo, workNode:get_pos().column )
+      
+      do
+         local nsId = self:registerType( workNode:get_expType() )
+         self.db:addSymbolDecl( nsId, fileId, workNode:get_pos().lineNo, workNode:get_pos().column )
+      end
+      
+      
       
    end
    
    for __index, workNode in pairs( nodeManager:getDeclEnumNodeList(  ) ) do
       
-      local nsId = self:registerType( workNode:get_expType() )
-      self.db:addSymbolDecl( nsId, fileId, workNode:get_pos().lineNo, workNode:get_pos().column )
       
+      do
+         local nsId = self:registerType( workNode:get_expType() )
+         self.db:addSymbolDecl( nsId, fileId, workNode:get_pos().lineNo, workNode:get_pos().column )
+      end
+      
+      
+      
+      registerAutoMethod( workNode:get_expType(), workNode:get_pos() )
       for __index, name in pairs( workNode:get_valueNameList() ) do
          do
             local _exp = workNode:get_scope():getSymbolInfoChild( name.txt )
@@ -365,6 +453,11 @@ function tagFilter:registerDecl( nodeManager, fileId )
                local symNsId = self:registerSymbol( _exp )
                local pos = _lune.unwrap( _exp:get_pos())
                self.db:addSymbolDecl( symNsId, fileId, pos.lineNo, pos.column )
+               Log.log( Log.Level.Debug, __func__, 90, function (  )
+               
+                  return _exp:get_name()
+               end )
+               
                
             end
          end
@@ -375,8 +468,13 @@ function tagFilter:registerDecl( nodeManager, fileId )
    
    for __index, workNode in pairs( nodeManager:getDeclAlgeNodeList(  ) ) do
       
-      local nsId = self:registerType( workNode:get_expType() )
-      self.db:addSymbolDecl( nsId, fileId, workNode:get_pos().lineNo, workNode:get_pos().column )
+      
+      do
+         local nsId = self:registerType( workNode:get_expType() )
+         self.db:addSymbolDecl( nsId, fileId, workNode:get_pos().lineNo, workNode:get_pos().column )
+      end
+      
+      
       
       do
          local __sorted = {}
@@ -386,7 +484,7 @@ function tagFilter:registerDecl( nodeManager, fileId )
          end
          table.sort( __sorted )
          for __index, name in ipairs( __sorted ) do
-            local _5791 = __map[ name ]
+            local _5848 = __map[ name ]
             do
                do
                   local _exp = _lune.nilacc( workNode:get_algeType():get_scope(), 'getSymbolInfoChild', 'callmtd' , name )
@@ -395,6 +493,11 @@ function tagFilter:registerDecl( nodeManager, fileId )
                      local symNsId = self:registerSymbol( _exp )
                      local pos = _lune.unwrap( _exp:get_pos())
                      self.db:addSymbolDecl( symNsId, fileId, pos.lineNo, pos.column )
+                     Log.log( Log.Level.Debug, __func__, 90, function (  )
+                     
+                        return _exp:get_name()
+                     end )
+                     
                      
                   end
                end
@@ -407,8 +510,13 @@ function tagFilter:registerDecl( nodeManager, fileId )
    
    for __index, workNode in pairs( nodeManager:getDeclMacroNodeList(  ) ) do
       
-      local nsId = self:registerType( workNode:get_expType() )
-      self.db:addSymbolDecl( nsId, fileId, workNode:get_pos().lineNo, workNode:get_pos().column )
+      
+      do
+         local nsId = self:registerType( workNode:get_expType() )
+         self.db:addSymbolDecl( nsId, fileId, workNode:get_pos().lineNo, workNode:get_pos().column )
+      end
+      
+      
       
    end
    
@@ -420,6 +528,11 @@ function tagFilter:registerDecl( nodeManager, fileId )
             local symNsId = self:registerSymbol( symbolInfo )
             local pos = _lune.unwrap( symbolInfo:get_pos())
             self.db:addSymbolDecl( symNsId, fileId, pos.lineNo, pos.column )
+            Log.log( Log.Level.Debug, __func__, 90, function (  )
+            
+               return symbolInfo:get_name()
+            end )
+            
             
          end
          
@@ -432,6 +545,33 @@ function tagFilter:registerDecl( nodeManager, fileId )
       local symNsId = self:registerSymbol( workNode:get_symbolInfo() )
       local pos = _lune.unwrap( workNode:get_symbolInfo():get_pos())
       self.db:addSymbolDecl( symNsId, fileId, pos.lineNo, pos.column )
+      Log.log( Log.Level.Debug, __func__, 90, function (  )
+      
+         return workNode:get_symbolInfo():get_name()
+      end )
+      
+      
+      if workNode:get_getterMode() ~= Ast.AccessMode.None then
+         local name = string.format( "get_%s", workNode:get_name().txt)
+         
+         do
+            local nsId = self:registerType( _lune.unwrap( _lune.nilacc( workNode:get_classType():get_scope(), 'getTypeInfoChild', 'callmtd' , name )) )
+            self.db:addSymbolDecl( nsId, fileId, workNode:get_pos().lineNo, workNode:get_pos().column )
+         end
+         
+         
+      end
+      
+      if workNode:get_setterMode() ~= Ast.AccessMode.None then
+         local name = string.format( "set_%s", workNode:get_name().txt)
+         
+         do
+            local nsId = self:registerType( _lune.unwrap( _lune.nilacc( workNode:get_classType():get_scope(), 'getTypeInfoChild', 'callmtd' , name )) )
+            self.db:addSymbolDecl( nsId, fileId, workNode:get_pos().lineNo, workNode:get_pos().column )
+         end
+         
+         
+      end
       
    end
    
@@ -441,40 +581,53 @@ end
 function tagFilter:registerRefs( nodeManager, fileId )
 
    
-   local function addSymbol( symbolInfo, pos )
-      local __func__ = '@lns.@tags.@Analyze.tagFilter.registerRefs.addSymbol'
+   local function addSymbolRef( symbolInfo, pos )
+      local __func__ = '@lns.@tags.@Analyze.tagFilter.registerRefs.addSymbolRef'
    
       do
-         local nsId = self.sym2nsid[symbolInfo]
-         if nsId ~= nil then
-            self.db:addSymbolRef( nsId, fileId, pos.lineNo, pos.column )
-         else
-            Log.log( Log.Level.Err, __func__, 130, function (  )
-            
-               return string.format( "no register -- %s", symbolInfo:get_name())
-            end )
-            
+         local _switchExp = symbolInfo:get_name()
+         if _switchExp == "__func__" or _switchExp == "__mod__" or _switchExp == "__line__" then
+            return 
          end
       end
       
+      local nsId, added = self:registerSymbol( symbolInfo )
+      if added and not Ast.isBuiltin( symbolInfo:get_namespaceTypeInfo():get_typeId() ) then
+         Log.log( Log.Level.Err, __func__, 179, function (  )
+         
+            return string.format( "no register sym -- %d:%d:%s", pos.lineNo, pos.column, self:getFullNameSym( symbolInfo ))
+         end )
+         
+      end
+      
+      self.db:addSymbolRef( nsId, fileId, pos.lineNo, pos.column )
    end
    
    local function registerRefSym( symbolInfo, pos )
+      local __func__ = '@lns.@tags.@Analyze.tagFilter.registerRefs.registerRefSym'
    
       do
          local _switchExp = symbolInfo:get_namespaceTypeInfo():get_kind()
          if _switchExp == Ast.TypeInfoKind.Enum or _switchExp == Ast.TypeInfoKind.Alge then
-            addSymbol( symbolInfo, pos )
+            addSymbolRef( symbolInfo, pos )
          else 
             
                do
                   local _switchExp = symbolInfo:get_kind()
                   if _switchExp == Ast.SymbolKind.Fun or _switchExp == Ast.SymbolKind.Mac or _switchExp == Ast.SymbolKind.Mbr or _switchExp == Ast.SymbolKind.Mtd or _switchExp == Ast.SymbolKind.Typ then
-                     local nsId = self:registerType( symbolInfo:get_typeInfo() )
+                     local nsId, added = self:registerType( symbolInfo:get_typeInfo() )
+                     if added and not Ast.isBuiltin( symbolInfo:get_typeInfo():get_typeId() ) then
+                        Log.log( Log.Level.Err, __func__, 196, function (  )
+                        
+                           return string.format( "no register type -- %d:%d:%s", pos.lineNo, pos.column, self:getFull( symbolInfo:get_typeInfo(), false ))
+                        end )
+                        
+                     end
+                     
                      self.db:addSymbolRef( nsId, fileId, pos.lineNo, pos.column )
                   elseif _switchExp == Ast.SymbolKind.Var then
                      if Ast.isPubToExternal( symbolInfo:get_accessMode() ) then
-                        addSymbol( symbolInfo, pos )
+                        addSymbolRef( symbolInfo, pos )
                      end
                      
                   elseif _switchExp == Ast.SymbolKind.Arg then
@@ -535,22 +688,33 @@ function tagFilter:processRoot( node, opt )
    self.type2nsid[Ast.headTypeInfo] = DBCtrl.rootNsId
    self:registerType( node:get_moduleTypeInfo() )
    
-   self:registerDecl( node:get_nodeManager(), fileId )
+   self:registerDecl( node:get_nodeManager(), fileId, node:get_processInfo() )
    self:registerRefs( node:get_nodeManager(), fileId )
 end
 
 
 
 local function dumpRoot( rootNode, db, option, streamName )
+   local __func__ = '@lns.@tags.@Analyze.dumpRoot'
 
+   Log.log( Log.Level.Log, __func__, 257, function (  )
+   
+      return streamName
+   end )
+   
    local filter = tagFilter.new(rootNode, option, db, streamName)
+   db:begin(  )
    rootNode:processFilter( filter, Opt.new() )
+   db:commit(  )
 end
 
 local function start( db, option )
 
+   LnsLog.setLevel( LnsLog.Level.Log )
    for __index, path in pairs( option:get_pathList() ) do
       local lnsOpt = LnsOpt.createDefaultOption( path )
+      lnsOpt.targetLuaVer = LuaVer.ver53
+      lnsOpt.transCtrlInfo.uptodateMode = Types.CheckingUptodateMode.Force
       front.build( lnsOpt, function ( ast )
       
          do

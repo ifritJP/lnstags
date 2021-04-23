@@ -300,13 +300,17 @@ pub fn DBCtrl.addFile( mut path:str ) mut : int
 }
 
 /**
-名前空間を登録する
+名前空間を登録する。
+
+@return int 登録後の ID
+@return bool 新規登録した場合 true。 登録済みだった場合 false。
+
 */
-pub fn DBCtrl.addNamespace( fullName:str, parentId:int ) mut : int
+pub fn DBCtrl.addNamespace( fullName:str, parentId:int ) mut : int, bool
 {
    let mut id:int! = nil;
    self.mapRowList(
-      "namespace", "name = '%s'", 1, nil, fn( items: &Map<str,&stem> ) : bool
+      "namespace", "name = '%s'" (fullName), 1, nil, fn( items: &Map<str,&stem> ) : bool
       {
          if! let obj = ItemNamespace._fromStem( items ) {
             id = obj.$id;
@@ -314,14 +318,14 @@ pub fn DBCtrl.addNamespace( fullName:str, parentId:int ) mut : int
          return false;
       }##);
    when! id {
-      return id;
+      return id, false;
    }
    let snid = rootNsId;
    let newId = self.idMgrNamespace.getIdNext();
    self.insert( "namespace",
                 "%d, %d, %d, '', '%s', '', 1" (newId, snid, parentId, fullName ) );
 
-   return newId;
+   return newId, true;
 }
 
 pub fn DBCtrl.addSymbolDecl(
@@ -466,6 +470,12 @@ pub fn test() : bool {
          newid, fileId, 300 + index, index * 30 );
 
       parentId = newid;
+   }
+
+
+   {
+      let _, added = db.addNamespace( "@hoge", rootNsId );
+      print( "added", added );
    }
 
    db.commit();
