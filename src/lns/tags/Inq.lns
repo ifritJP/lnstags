@@ -1,0 +1,26 @@
+import lns.tags.DBCtrl;
+import lns.tags.Util;
+
+pub fn InqDef( db:DBCtrl.DBCtrl, pattern:str ) {
+   let mut factory = new Util.SourceCodeLineAccessorFactory();
+   db.mapSymbolDecl(
+      pattern, fn (item:&DBCtrl.ItemSymbolDecl):bool {
+         let path = unwrap db.getFilePath( item.$fileId );
+         Util.outputLocate(
+            io.stdout, pattern, path,
+            factory.create( path## ), item.$line );
+         return true;
+      });
+}
+
+pub fn InqRef( db:DBCtrl.DBCtrl, pattern:str ) {
+   let mut factory = new Util.SourceCodeLineAccessorFactory();
+   db.mapSymbolRef(
+      pattern, fn (item:&DBCtrl.ItemSymbolRef):bool {
+         let path = unwrap db.getFilePath( item.$fileId );
+         Util.outputLocate(
+            io.stdout, pattern, path,
+            factory.create( path## ), item.$line );
+         return true;
+      });
+}

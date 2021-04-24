@@ -30,7 +30,6 @@ pub class DBCtrl {
    local let mut individualStructFlag:bool {pub};
    local let mut individualMacroFlag:bool {pub};
    local let mut projDir:str {pub};
-   local let mut dbPath:str {pub};
 
    let mut idMgrNamespace:IdMgr;
    let mut idMgrSimpleName:IdMgr;
@@ -39,7 +38,7 @@ pub class DBCtrl {
    static fn getMaxId( access:DBAccess.DBAccess, tableName:str, defId:int ):int {
       let mut id:stem! = nil;
       access.mapRowList(
-         tableName, nil, 1, "MAX(id)",
+         tableName, nil, 1, "MAX(id)", nil,
          fn ( items:&Map<str,&stem>): bool {
             id = items.id;
             return false;
@@ -59,7 +58,6 @@ pub class DBCtrl {
       self.individualStructFlag = false;
       self.individualMacroFlag = false;
       self.projDir = Depend.getCurDir();
-      self.dbPath = "lnstags.sqlite3";
 
       self.idMgrNamespace = new IdMgr(
          DBCtrl.getMaxId( access, "namespace", userNsId ) );
@@ -103,9 +101,17 @@ pub class DBCtrl {
                       errHandle: base.errHandleForm! ) : bool
    {
       return self.access.mapRowList(
-         tableName, condition, limit, attrib, func, errHandle );
+         tableName, condition, limit, attrib, nil, func, errHandle );
    }
-      
+
+   pub fn mapRowListSort( tableName:str, condition:str!, limit:int!, attrib:str!,
+                          order:str!, func:base.queryMapForm,
+                          errHandle: base.errHandleForm! ) : bool
+   {
+      return self.access.mapRowList(
+         tableName, condition, limit, attrib, order, func, errHandle );
+   }
+   
    fn getRowList( tableName:str, condition:str!, limit:int!, attrib:str!,
                   errHandle: base.errHandleForm! ) : &List<&Map<str,&stem>>
    {
@@ -221,6 +227,7 @@ CREATE TABLE simpleName ( id INTEGER PRIMARY KEY, name VARCHAR UNIQUE COLLATE bi
 CREATE TABLE filePath ( id INTEGER PRIMARY KEY, path VARCHAR UNIQUE COLLATE binary, incFlag INTEGER, digest CHAR(32), currentDir VARCHAR COLLATE binary, invalidSkip INTEGER);
 INSERT INTO filePath VALUES( NULL, '', 0, '', '', 1 );
 
+CREATE TABLE override (nsId INTEGER, superNsId INTEGER, PRIMARY KEY (nsId, superNsId));
 CREATE TABLE symbolDecl ( nsId INTEGER, snameId INTEGER, parentId INTEGER, type INTEGER, fileId INTEGER, line INTEGER, column INTEGER, endLine INTEGER, endColumn INTEGER, charSize INTEGER, comment VARCHAR COLLATE binary, hasBodyFlag INTEGER, PRIMARY KEY( nsId, fileId, line ) );
 INSERT INTO symbolDecl VALUES( 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, '', 0 );
 
@@ -234,6 +241,7 @@ CREATE TABLE incBelong ( id INTEGER, baseFileId INTEGER, nsId INTEGER, PRIMARY K
 CREATE INDEX index_ns ON namespace ( id, snameId, parentId, name, otherName );
 CREATE INDEX index_sName ON simpleName ( id, name );
 CREATE INDEX index_filePath ON filePath ( id, path );
+CREATE INDEX index_override ON override (nsId, superNsId);
 CREATE INDEX index_symDecl ON symbolDecl ( nsId, parentId, snameId, fileId );
 CREATE INDEX index_symRef ON symbolRef ( nsId, snameId, fileId, belongNsId );
 CREATE INDEX index_incRef ON incRef ( id, baseFileId );
@@ -264,6 +272,25 @@ class ItemNamespace extend (Mapping) {
    let parentId:int {pub};
    // 完全限定名 ( e.g. @hoge.@foo.bar)
    let name:str {pub};
+}
+
+pub class ItemSymbolDecl extend (Mapping) {
+   let nsId:int {pub};
+   let fileId:int {pub};
+   let line:int {pub};
+   let column:int {pub};
+}
+
+pub class ItemSymbolRef extend (Mapping) {
+   let nsId:int {pub};
+   let fileId:int {pub};
+   let line:int {pub};
+   let column:int {pub};
+}
+
+pub class ItemOverride extend (Mapping) {
+   let nsId:int {pub};
+   let superNsId:int {pub};
 }
 
 
@@ -299,6 +326,34 @@ pub fn DBCtrl.addFile( mut path:str ) mut : int
    return id;
 }
 
+fn DBCtrl.getName( nsId:int ) : str! {
+   let mut name:str! = nil;
+   self.mapRowList(
+      "namespace", "id = %d" (nsId), 1, nil, fn( items: &Map<str,&stem> ) : bool
+      {
+         if! let obj = ItemNamespace._fromStem( items ) {
+            name = obj.$name;
+         }
+         return false;
+      }##);
+   return name;
+}
+
+
+fn DBCtrl.getNsId( name:str ) : int! {
+   let mut nsId:int! = nil;
+   self.mapRowList(
+      "namespace", "name = '%s'" (name), 1, nil, fn( items: &Map<str,&stem> ) : bool
+      {
+         if! let obj = ItemNamespace._fromStem( items ) {
+            nsId = obj.$id;
+         }
+         return false;
+      }##);
+   return nsId;
+}
+
+
 /**
 名前空間を登録する。
 
@@ -326,6 +381,24 @@ pub fn DBCtrl.addNamespace( fullName:str, parentId:int ) mut : int, bool
                 "%d, %d, %d, '', '%s', '', 1" (newId, snid, parentId, fullName ) );
 
    return newId, true;
+}
+
+pub fn DBCtrl.getFilePath( fileId:int ) : str! {
+   let mut path:str! = nil;
+   self.mapRowList(
+      "filePath", "id = %d" (fileId), 1, nil, fn( items: &Map<str,&stem> ) : bool
+      {
+         if! let obj = ItemFilePath._fromStem( items ) {
+            path = obj.$path;
+         }
+         return false;
+      }##);
+   return path;
+}
+
+pub fn DBCtrl.addOverride( nsId:int, superNsId:int ) mut
+{
+   self.insert( "override", "%d, %d" (nsId, superNsId ) );
 }
 
 pub fn DBCtrl.addSymbolDecl(
@@ -368,10 +441,10 @@ pub fn DBCtrl.addSymbolSet(
    
    
 
-pub fn create() : DBCtrl!
+fn create( dbPath:str ) : DBCtrl!
 {
    Log._log( .Log, "create" );
-   let! mut db = DBAccess.open( "lnstags.sqlite3", false ) {
+   let! mut db = DBAccess.open( dbPath, false ) {
       return nil;
    };
 
@@ -388,14 +461,75 @@ pub fn create() : DBCtrl!
    return dbCtrl;
 }
 
-pub fn initDB() {
-   let! mut db = create() {
+pub fn initDB( dbPath:str ) {
+   os.remove( dbPath );
+   let! mut db = create( dbPath ) {
       print( "create error" );
       return;
    };
    db.commit();
    db.close();
 }
+
+pub form callbackSymbolDecl( item:&ItemSymbolDecl ):bool;
+pub fn DBCtrl.mapSymbolDecl( name:str, callback:callbackSymbolDecl ) {
+   let! nsId = self.getNsId( name ) {
+      return;
+   };
+
+   // sub クラスの override定義も含める
+   let mut overrideStr = "%d" (nsId);
+   self.mapRowList(
+      "override", "superNsId = %d" (nsId), nil, nil,
+      fn (items:&Map<str,&stem>): bool
+      {
+         if! let item = ItemOverride._fromStem( items ) {
+            overrideStr = "%s, %d" (overrideStr, item.$nsId );
+         }
+         return true;
+      }##);
+   
+   self.mapRowListSort(
+      "symbolDecl", "nsId IN (%s)" (overrideStr), nil, nil, "fileId, line",
+      fn (items:&Map<str,&stem>): bool
+      {
+         if! let item = ItemSymbolDecl._fromStem( items ) {
+            return callback( item );
+         }
+         return true;
+      }##);
+}
+
+
+pub form callbackSymbolRef( item:&ItemSymbolRef ):bool;
+pub fn DBCtrl.mapSymbolRef( name:str, callback:callbackSymbolRef ) {
+   let! nsId = self.getNsId( name ) {
+      return;
+   };
+
+   // super クラスからの参照も含める
+   let mut overrideStr = "%d" (nsId);
+   self.mapRowList(
+      "override", "nsId = %d" (nsId), nil, nil,
+      fn (items:&Map<str,&stem>): bool
+      {
+         if! let item = ItemOverride._fromStem( items ) {
+            overrideStr = "%s, %d" (overrideStr, item.$superNsId );
+         }
+         return true;
+      }##);
+   
+   self.mapRowListSort(
+      "symbolRef", "nsId IN (%s)" (overrideStr), nil, nil, "fileId, line",
+      fn (items:&Map<str,&stem>): bool
+      {
+         if! let item = ItemSymbolRef._fromStem( items ) {
+            return callback( item );
+         }
+         return true;
+      }##);
+}
+
 
 pub fn DBCtrl.dumpAll() {
    print( "filePath" );
@@ -413,6 +547,15 @@ pub fn DBCtrl.dumpAll() {
       fn (items:&Map<str,&stem>): bool
       {
          print( items.id, items.name );
+         return true;
+      }##);
+
+   print( "override" );
+   self.mapRowList(
+      "override", nil, nil, nil,
+      fn (items:&Map<str,&stem>): bool
+      {
+         print( items.nsId, items.superNsId );
          return true;
       }##);
 
@@ -445,11 +588,12 @@ pub fn DBCtrl.dumpAll() {
 }
 
 pub fn test() : bool {
+   let dbPath = "lnstags.sqlite3";
    {
-      initDB();
+      initDB( dbPath );
    }
    
-   let! mut db = open( "lnstags.sqlite3", false ) {
+   let! mut db = open( dbPath, false ) {
       print( "open error" );
       return false;
    };

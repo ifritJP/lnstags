@@ -71,17 +71,13 @@ fn tagFilter.registerSymbol( mut symbolInfo:&Ast.SymbolInfo ) mut : int, bool
 fn tagFilter.registerDecl(
    nodeManager:&Nodes.NodeManager, fileId:int, processInfo: Ast.ProcessInfo ) mut
 {
-   macro _registDeclTypeOp( typeInfo:__exp, pos:__exp ) {
-      {}
-      {
-         let nsId = self.registerType( ,,typeInfo );
-         self.db.addSymbolDecl(
-            nsId, fileId, ,,pos.lineNo, ,,pos.column );
-      }
+   fn registDeclTypeOp( typeInfo:&Ast.TypeInfo, pos:&Types.Position ) : int {
+      let nsId = self.registerType( typeInfo );
+      self.db.addSymbolDecl( nsId, fileId, pos.lineNo, pos.column );
+      return nsId;
    }
-   macro _registDeclType( workNode:__exp ) {
-      _registDeclTypeOp( ,,workNode.$expType, ,,workNode.$pos );
-
+   fn registDeclType( workNode:&Nodes.Node ) : int {
+      return registDeclTypeOp( workNode.$expType, workNode.$pos );
    }
    macro _registDeclSym( symbolInfo:__exp ) {
       let symNsId = self.registerSymbol( ,,symbolInfo );
@@ -94,36 +90,50 @@ fn tagFilter.registerDecl(
       foreach symbolInfo in unwrap parentInfo.$scope$.$symbol2SymbolInfoMap {
          let typeInfo = symbolInfo.$typeInfo;
          if typeInfo.$autoFlag {
-            _registDeclTypeOp( typeInfo, pos );
+            registDeclTypeOp( typeInfo, pos );
          }
       }
    }
    
    // ======== 型の定義系 ======
    foreach workNode in nodeManager.getDeclFormNodeList() {
-      _registDeclType( workNode );
+      registDeclType( workNode );
    }
 
    foreach workNode in nodeManager.getProtoClassNodeList() {
-      _registDeclType( workNode );
+      registDeclType( workNode );
    }
    
    foreach workNode in nodeManager.getDeclClassNodeList() {
-      _registDeclType( workNode );
+      registDeclType( workNode );
       registerAutoMethod( workNode.$expType, workNode.$pos );
    }
 
    foreach workNode in nodeManager.getDeclFuncNodeList() {
-      _registDeclType( workNode );
+      registDeclType( workNode );
    }
    foreach workNode in nodeManager.getProtoMethodNodeList() {
-      _registDeclType( workNode );
+      registDeclType( workNode );
    }
    foreach workNode in nodeManager.getDeclMethodNodeList() {
-      _registDeclType( workNode );
+      let nsId = registDeclType( workNode );
+      let methodType = workNode.$expType;
+      if not methodType.$staticFlag {
+         if! let scope = methodType.$parentInfo.$scope {
+            scope.filterTypeInfoFieldAndIF(
+               false, scope, .Normal,
+               fn ( symbolInfo:&Ast.SymbolInfo ) : bool {
+                  if symbolInfo.$name == methodType.$rawTxt {
+                     let superNsId = self.registerType( symbolInfo.$typeInfo );
+                     self.db.addOverride( nsId, superNsId );
+                  }
+                  return true;
+               } );
+         }
+      }
    }
    foreach workNode in nodeManager.getDeclEnumNodeList() {
-      _registDeclType( workNode );
+      registDeclType( workNode );
       registerAutoMethod( workNode.$expType, workNode.$pos );
       foreach name in workNode.$valueNameList {
          if! workNode.$scope.getSymbolInfoChild( name.txt ) {
@@ -132,7 +142,7 @@ fn tagFilter.registerDecl(
       }
    }
    foreach workNode in nodeManager.getDeclAlgeNodeList() {
-      _registDeclType( workNode );
+      registDeclType( workNode );
       forsort _, name in workNode.$algeType.$valInfoMap {
          if! workNode.$algeType.$scope$.getSymbolInfoChild$( name ) {
             _registDeclSym( _exp );
@@ -140,7 +150,7 @@ fn tagFilter.registerDecl(
       }
    }
    foreach workNode in nodeManager.getDeclMacroNodeList() {
-      _registDeclType( workNode );
+      registDeclType( workNode );
    }
 
    // ======== シンボルの定義系 ======
@@ -155,12 +165,12 @@ fn tagFilter.registerDecl(
       _registDeclSym( workNode.$symbolInfo );
       if workNode.$getterMode ~= .None {
          let name = "get_%s" (workNode.$name.txt);
-         _registDeclTypeOp(
+         registDeclTypeOp(
             unwrap workNode.$classType.$scope$.getTypeInfoChild$( name ), workNode.$pos );
       }
       if workNode.$setterMode ~= .None {
          let name = "set_%s" (workNode.$name.txt);
-         _registDeclTypeOp(
+         registDeclTypeOp(
             unwrap workNode.$classType.$scope$.getTypeInfoChild$( name ), workNode.$pos );
       }
    }
@@ -182,6 +192,17 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager, fileId:int ) mut {
       self.db.addSymbolRef(
          nsId, fileId, pos.lineNo, pos.column );
    }
+
+   fn registerRefType( typeInfo:&Ast.TypeInfo, pos:&Types.Position ) {
+      let nsId, added = self.registerType( typeInfo );
+      if added and not Ast.isBuiltin( typeInfo.$typeId ) {
+         Log._log( .Err, "no register type -- %d:%d:%s"
+                   ( pos.lineNo, pos.column, self.getFull( typeInfo, false ) ) );
+      }
+      self.db.addSymbolRef(
+         nsId, fileId, pos.lineNo, pos.column );
+   }
+
    
    fn registerRefSym( symbolInfo:&Ast.SymbolInfo, pos:&Types.Position ) {
       switch symbolInfo.$namespaceTypeInfo.$kind {
@@ -191,14 +212,7 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager, fileId:int ) mut {
          default {
             _switch symbolInfo.$kind {
                case .Fun, .Mac, .Mbr, .Mtd, .Typ {
-                  let nsId, added = self.registerType( symbolInfo.$typeInfo );
-                  if added and not Ast.isBuiltin( symbolInfo.$typeInfo.$typeId ) {
-                     Log._log( .Err, "no register type -- %d:%d:%s"
-                               ( pos.lineNo, pos.column,
-                                 self.getFull( symbolInfo.$typeInfo, false ) ) );
-                  }
-                  self.db.addSymbolRef(
-                     nsId, fileId, pos.lineNo, pos.column );
+                  registerRefType( symbolInfo.$typeInfo, pos );
                }
                case .Var {
                   if Ast.isPubToExternal( symbolInfo.$accessMode ) {
@@ -213,7 +227,19 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager, fileId:int ) mut {
       }
    }
    
-   // ======== 参照系 ======== 
+   // ======== 参照系 ========
+   foreach workNode in nodeManager.getExpNewNodeList() {
+      registerRefType( workNode.$ctorTypeInfo, workNode.$pos );
+   }
+   
+   foreach workNode in nodeManager.getExpCallSuperCtorNodeList() {
+      registerRefType( workNode.$methodType, workNode.$pos );
+   }
+
+   foreach workNode in nodeManager.getExpCallSuperNodeList() {
+      registerRefType( workNode.$methodType, workNode.$pos );
+   }
+
    foreach workNode in nodeManager.getExpRefNodeList() {
       registerRefSym( workNode.$symbolInfo, workNode.$pos );
    }

@@ -1,0 +1,19 @@
+# -*- coding:utf-8 -*-
+#+AUTHOR: ifritJP
+#+STARTUP: nofold
+#+OPTIONS: ^:{}
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="org-mode-document.css" />
+
+#+TITLE: TODO
+
+- [ ] 宣言登録抜け
+  - [x] ビルトイン
+  - [x] form 宣言
+  - [x] module 宣言
+  - [x] Mapping, accessor の自動生成
+  - [x] =__func__=, =__mod__= 系
+- [x] new 演算子の登録
+- [x] super() コール
+- [x] override 関数コール
+- [ ] belongns 対応
+- [ ] emacs mode

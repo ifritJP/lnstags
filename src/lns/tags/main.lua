@@ -18,6 +18,11 @@ end
 local DBCtrl = _lune.loadModule( 'lns.tags.DBCtrl' )
 local Analyze = _lune.loadModule( 'lns.tags.Analyze' )
 local Option = _lune.loadModule( 'lns.tags.Option' )
+local Util = _lune.loadModule( 'lns.tags.Util' )
+local Inq = _lune.loadModule( 'lns.tags.Inq' )
+local Log = _lune.loadModule( 'lns.tags.Log' )
+
+local dbPath = "lnstags.sqlite3"
 
 local function __main( args )
 
@@ -27,9 +32,9 @@ local function __main( args )
    do
       local _switchExp = option:get_mode()
       if _switchExp == Option.Mode.Init then
-         DBCtrl.initDB(  )
+         DBCtrl.initDB( dbPath )
       elseif _switchExp == Option.Mode.Build then
-         local db = DBCtrl.open( "lnstags.sqlite3", false )
+         local db = DBCtrl.open( dbPath, false )
          if  nil == db then
             local _db = db
          
@@ -41,6 +46,26 @@ local function __main( args )
          
          Analyze.start( db, option )
          db:dumpAll(  )
+         db:close(  )
+      elseif _switchExp == Option.Mode.InqDef or _switchExp == Option.Mode.InqRef then
+         Log.setLevel( Log.Level.Err )
+         local db = DBCtrl.open( dbPath, false )
+         if  nil == db then
+            local _db = db
+         
+            print( "error" )
+            return -1
+         end
+         
+         do
+            local _switchExp = option:get_mode()
+            if _switchExp == Option.Mode.InqDef then
+               Inq.InqDef( db, option:get_pattern() )
+            elseif _switchExp == Option.Mode.InqRef then
+               Inq.InqRef( db, option:get_pattern() )
+            end
+         end
+         
          db:close(  )
       elseif _switchExp == Option.Mode.Test then
          DBCtrl.test(  )

@@ -3,6 +3,12 @@
 import lns.tags.DBCtrl;
 import lns.tags.Analyze;
 import lns.tags.Option;
+import lns.tags.Util;
+import lns.tags.Inq;
+import lns.tags.Log;
+
+
+let dbPath = "lnstags.sqlite3";
 
 pub fn __main( args:&List<str> ) : int {
 
@@ -11,10 +17,10 @@ pub fn __main( args:&List<str> ) : int {
 
    _switch option.$mode {
       case .Init {
-         DBCtrl.initDB();
+         DBCtrl.initDB( dbPath );
       }
       case .Build {
-         let! mut db = DBCtrl.open( "lnstags.sqlite3", false ) {
+         let! mut db = DBCtrl.open( dbPath, false ) {
             print( "error" );
             return -1;
          };
@@ -22,6 +28,22 @@ pub fn __main( args:&List<str> ) : int {
          
          Analyze.start( db, option );
          db.dumpAll();
+         db.close();
+      }
+      case .InqDef, .InqRef {
+         Log.setLevel( .Err );
+         let! mut db = DBCtrl.open( dbPath, false ) {
+            print( "error" );
+            return -1;
+         };
+         switch option.$mode {
+            case .InqDef {
+               Inq.InqDef( db, option.$pattern );
+            }
+            case .InqRef {
+               Inq.InqRef( db, option.$pattern );
+            }
+         }
          db.close();
       }
       case .Test {

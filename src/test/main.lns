@@ -1,9 +1,12 @@
 import test.Sub;
 Sub.func();
 let hoge = new Sub.Hoge();
+let ifObj:Sub.IF = hoge;
 hoge.func( .Val1 );
-hoge.func( Sub.Foo.Val1 );
+ifObj.func( Sub.Foo.Val1 );
 Sub.Hoge.sub( .Val2 );
+let hogehoge = new Sub.HogeHoge();
+hogehoge.func( .Val2 );
 
 macro _Macro() {
    Sub.func();

@@ -86,9 +86,15 @@ Mode.__allList[1] = Mode.Init
 Mode.Build = 'build'
 Mode._val2NameMap['build'] = 'Build'
 Mode.__allList[2] = Mode.Build
+Mode.InqDef = 'inq-def'
+Mode._val2NameMap['inq-def'] = 'InqDef'
+Mode.__allList[3] = Mode.InqDef
+Mode.InqRef = 'inq-ref'
+Mode._val2NameMap['inq-ref'] = 'InqRef'
+Mode.__allList[4] = Mode.InqRef
 Mode.Test = 'test'
 Mode._val2NameMap['test'] = 'Test'
-Mode.__allList[3] = Mode.Test
+Mode.__allList[5] = Mode.Test
 
 
 local Option = {}
@@ -102,6 +108,7 @@ end
 function Option:__init() 
    self.pathList = {}
    self.mode = Mode.Build
+   self.pattern = ""
 end
 function Option.setmeta( obj )
   setmetatable( obj, { __index = Option  } )
@@ -111,6 +118,9 @@ function Option:get_pathList()
 end
 function Option:get_mode()
    return self.mode
+end
+function Option:get_pattern()
+   return self.pattern
 end
 
 
@@ -122,6 +132,7 @@ local function printUsage( messages )
    
    print( "usage: lnstags init [option]" )
    print( "usage: lnstags build [option] filepath" )
+   print( "usage: lnstags inq-def pattern" )
    print( "usage: lnstags test [option]" )
    os.exit( 1 )
 end
@@ -167,7 +178,15 @@ local function analyzeArgs( argList )
             
          else
           
-            table.insert( option.pathList, arg )
+            do
+               local _switchExp = mode
+               if _switchExp == Mode.Build then
+                  table.insert( option.pathList, arg )
+               elseif _switchExp == Mode.InqDef or _switchExp == Mode.InqRef then
+                  option.pattern = arg
+               end
+            end
+            
          end
          
       end

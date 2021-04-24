@@ -1,17 +1,13 @@
 LNSC=lnsc
 
 SRCS=
-SRCS += lns/tags/Depend.lns
-SRCS += lns/tags/Log.lns
-SRCS += lns/tags/Option.lns
-SRCS += lns/tags/DBAccess.lns
-SRCS += lns/tags/DBCtrl.lns
-SRCS += lns/tags/Analyze.lns
-SRCS += lns/tags/main.lns
+SRCS += $(shell find lns -iname '*.lns')
 
 
 help:
 	@echo make build
+	@echo make buildDB
+	@echo make inq
 
 build: lnstags
 
@@ -20,12 +16,18 @@ lnstags: $(SRCS)
 		$(LNSC) @- save -langGo --main lns.tags.main $(LNS_OPT)
 	$(LNSC) lns/tags/main.lns mkmain entry.go
 	go build -tags gopherlua
-	$(MAKE) exec
 
-exec: build
-	rm -f lnstags.sqlite3
+buildDB: build
+#	rm -f lnstags.sqlite3
 	./lnstags init
 	./lnstags build test/main.lns
+	$(MAKE) inq
+
+inq: build
+	./lnstags inq-def @test.@Sub.Bar.Val1
+	./lnstags inq-def @test.@Sub.Hoge.func
+	./lnstags inq-ref @test.@Sub.Hoge.func
+	./lnstags inq-ref @test.@Sub.HogeHoge.__init
 
 check: build
 	rm -f lnstags.sqlite3

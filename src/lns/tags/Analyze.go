@@ -19,68 +19,28 @@ func Analyze_convExp169(arg1 []LnsAny) LnsInt {
 func Analyze_convExp355(arg1 []LnsAny) LnsInt {
     return Lns_getFromMulti( arg1, 0 ).(LnsInt)
 }
-// for 77
-func Analyze_convExp532(arg1 []LnsAny) LnsInt {
+// for 75
+func Analyze_convExp492(arg1 []LnsAny) LnsInt {
     return Lns_getFromMulti( arg1, 0 ).(LnsInt)
 }
-// for 77
-func Analyze_convExp598(arg1 []LnsAny) LnsInt {
+// for 127
+func Analyze_convExp733(arg1 []LnsAny) LnsInt {
     return Lns_getFromMulti( arg1, 0 ).(LnsInt)
 }
-// for 77
-func Analyze_convExp665(arg1 []LnsAny) LnsInt {
+// for 83
+func Analyze_convExp819(arg1 []LnsAny) LnsInt {
     return Lns_getFromMulti( arg1, 0 ).(LnsInt)
 }
-// for 77
-func Analyze_convExp732(arg1 []LnsAny) LnsInt {
+// for 83
+func Analyze_convExp939(arg1 []LnsAny) LnsInt {
     return Lns_getFromMulti( arg1, 0 ).(LnsInt)
 }
-// for 77
-func Analyze_convExp810(arg1 []LnsAny) LnsInt {
+// for 83
+func Analyze_convExp1062(arg1 []LnsAny) LnsInt {
     return Lns_getFromMulti( arg1, 0 ).(LnsInt)
 }
-// for 77
-func Analyze_convExp877(arg1 []LnsAny) LnsInt {
-    return Lns_getFromMulti( arg1, 0 ).(LnsInt)
-}
-// for 77
-func Analyze_convExp943(arg1 []LnsAny) LnsInt {
-    return Lns_getFromMulti( arg1, 0 ).(LnsInt)
-}
-// for 77
-func Analyze_convExp1009(arg1 []LnsAny) LnsInt {
-    return Lns_getFromMulti( arg1, 0 ).(LnsInt)
-}
-// for 87
-func Analyze_convExp1078(arg1 []LnsAny) LnsInt {
-    return Lns_getFromMulti( arg1, 0 ).(LnsInt)
-}
-// for 77
-func Analyze_convExp1190(arg1 []LnsAny) LnsInt {
-    return Lns_getFromMulti( arg1, 0 ).(LnsInt)
-}
-// for 87
-func Analyze_convExp1249(arg1 []LnsAny) LnsInt {
-    return Lns_getFromMulti( arg1, 0 ).(LnsInt)
-}
-// for 77
-func Analyze_convExp1361(arg1 []LnsAny) LnsInt {
-    return Lns_getFromMulti( arg1, 0 ).(LnsInt)
-}
-// for 87
-func Analyze_convExp1423(arg1 []LnsAny) LnsInt {
-    return Lns_getFromMulti( arg1, 0 ).(LnsInt)
-}
-// for 87
-func Analyze_convExp1523(arg1 []LnsAny) LnsInt {
-    return Lns_getFromMulti( arg1, 0 ).(LnsInt)
-}
-// for 77
-func Analyze_convExp1654(arg1 []LnsAny) LnsInt {
-    return Lns_getFromMulti( arg1, 0 ).(LnsInt)
-}
-// for 77
-func Analyze_convExp1739(arg1 []LnsAny) LnsInt {
+// for 83
+func Analyze_convExp1162(arg1 []LnsAny) LnsInt {
     return Lns_getFromMulti( arg1, 0 ).(LnsInt)
 }
 
@@ -95,10 +55,14 @@ func Analyze_convExp1739(arg1 []LnsAny) LnsInt {
 
 
 
-// 254: decl @lns.@tags.@Analyze.dumpRoot
-func Analyze_dumpRoot_1107_(rootNode *Nodes.Nodes_RootNode,db *DBCtrl_DBCtrl,option *Option_Option,streamName string) {
+
+
+
+
+// 280: decl @lns.@tags.@Analyze.dumpRoot
+func Analyze_dumpRoot_1109_(rootNode *Nodes.Nodes_RootNode,db *DBCtrl_DBCtrl,option *Option_Option,streamName string) {
     __func__ := "@lns.@tags.@Analyze.dumpRoot"
-    Log_log(Log_Level__Log, __func__, 257, Log_CreateMessage(func() string {
+    Log_log(Log_Level__Log, __func__, 283, Log_CreateMessage(func() string {
         return streamName
     }))
     
@@ -110,7 +74,7 @@ func Analyze_dumpRoot_1107_(rootNode *Nodes.Nodes_RootNode,db *DBCtrl_DBCtrl,opt
 }
 
 
-// 264: decl @lns.@tags.@Analyze.start
+// 290: decl @lns.@tags.@Analyze.start
 func Analyze_start(db *DBCtrl_DBCtrl,option *Option_Option) {
     LnsLog.Log_setLevel(LnsLog.Log_Level__Log)
     for _, _path := range( option.FP.Get_pathList().Items ) {
@@ -126,7 +90,7 @@ func Analyze_start(db *DBCtrl_DBCtrl,option *Option_Option) {
                 _rootNode := Nodes.Nodes_RootNodeDownCastF(ast.FP.Get_node().FP)
                 if _rootNode != nil {
                     rootNode := _rootNode.(*Nodes.Nodes_RootNode)
-                    Analyze_dumpRoot_1107_(rootNode, db, option, ast.FP.Get_streamName())
+                    Analyze_dumpRoot_1109_(rootNode, db, option, ast.FP.Get_streamName())
                 }
             }
         }))
@@ -386,6 +350,17 @@ func (self *Analyze_tagFilter) registerSymbol(symbolInfo *Ast.Ast_SymbolInfo)(Ln
 // 71: decl @lns.@tags.@Analyze.tagFilter.registerDecl
 func (self *Analyze_tagFilter) registerDecl(nodeManager *Nodes.Nodes_NodeManager,fileId LnsInt,processInfo *Ast.Ast_ProcessInfo) {
     __func__ := "@lns.@tags.@Analyze.tagFilter.registerDecl"
+    var registDeclTypeOp func(typeInfo *Ast.Ast_TypeInfo,pos *Types.Types_Position) LnsInt
+    registDeclTypeOp = func(typeInfo *Ast.Ast_TypeInfo,pos *Types.Types_Position) LnsInt {
+        var nsId LnsInt
+        nsId = Analyze_convExp492(Lns_2DDD(self.FP.registerType(typeInfo)))
+        self.db.FP.AddSymbolDecl(nsId, fileId, pos.LineNo, pos.Column)
+        return nsId
+    }
+    var registDeclType func(workNode *Nodes.Nodes_Node) LnsInt
+    registDeclType = func(workNode *Nodes.Nodes_Node) LnsInt {
+        return registDeclTypeOp(workNode.FP.Get_expType(), workNode.FP.Get_pos())
+    }
     var registerAutoMethod func(parentInfo *Ast.Ast_TypeInfo,pos *Types.Types_Position)
     registerAutoMethod = func(parentInfo *Ast.Ast_TypeInfo,pos *Types.Types_Position) {
         for _, _symbolInfo := range( Lns_unwrap( Lns_GetEnv().NilAccFin(Lns_GetEnv().NilAccPush(parentInfo.FP.Get_scope()) && 
@@ -394,85 +369,57 @@ func (self *Analyze_tagFilter) registerDecl(nodeManager *Nodes.Nodes_NodeManager
             var typeInfo *Ast.Ast_TypeInfo
             typeInfo = symbolInfo.FP.Get_typeInfo()
             if typeInfo.FP.Get_autoFlag(){
-                {
-                    var nsId LnsInt
-                    nsId = Analyze_convExp532(Lns_2DDD(self.FP.registerType(typeInfo)))
-                    self.db.FP.AddSymbolDecl(nsId, fileId, pos.LineNo, pos.Column)
-                }
-                
+                registDeclTypeOp(typeInfo, pos)
             }
         }
     }
     for _, _workNode := range( nodeManager.FP.GetDeclFormNodeList().Items ) {
         workNode := _workNode.(Nodes.Nodes_DeclFormNodeDownCast).ToNodes_DeclFormNode()
-        {
-            var nsId LnsInt
-            nsId = Analyze_convExp598(Lns_2DDD(self.FP.registerType(workNode.FP.Get_expType())))
-            self.db.FP.AddSymbolDecl(nsId, fileId, workNode.FP.Get_pos().LineNo, workNode.FP.Get_pos().Column)
-        }
-        
-        
+        registDeclType(&workNode.Nodes_Node)
     }
     for _, _workNode := range( nodeManager.FP.GetProtoClassNodeList().Items ) {
         workNode := _workNode.(Nodes.Nodes_ProtoClassNodeDownCast).ToNodes_ProtoClassNode()
-        {
-            var nsId LnsInt
-            nsId = Analyze_convExp665(Lns_2DDD(self.FP.registerType(workNode.FP.Get_expType())))
-            self.db.FP.AddSymbolDecl(nsId, fileId, workNode.FP.Get_pos().LineNo, workNode.FP.Get_pos().Column)
-        }
-        
-        
+        registDeclType(&workNode.Nodes_Node)
     }
     for _, _workNode := range( nodeManager.FP.GetDeclClassNodeList().Items ) {
         workNode := _workNode.(Nodes.Nodes_DeclClassNodeDownCast).ToNodes_DeclClassNode()
-        {
-            var nsId LnsInt
-            nsId = Analyze_convExp732(Lns_2DDD(self.FP.registerType(workNode.FP.Get_expType())))
-            self.db.FP.AddSymbolDecl(nsId, fileId, workNode.FP.Get_pos().LineNo, workNode.FP.Get_pos().Column)
-        }
-        
-        
+        registDeclType(&workNode.Nodes_Node)
         registerAutoMethod(workNode.FP.Get_expType(), workNode.FP.Get_pos())
     }
     for _, _workNode := range( nodeManager.FP.GetDeclFuncNodeList().Items ) {
         workNode := _workNode.(Nodes.Nodes_DeclFuncNodeDownCast).ToNodes_DeclFuncNode()
-        {
-            var nsId LnsInt
-            nsId = Analyze_convExp810(Lns_2DDD(self.FP.registerType(workNode.FP.Get_expType())))
-            self.db.FP.AddSymbolDecl(nsId, fileId, workNode.FP.Get_pos().LineNo, workNode.FP.Get_pos().Column)
-        }
-        
-        
+        registDeclType(&workNode.Nodes_Node)
     }
     for _, _workNode := range( nodeManager.FP.GetProtoMethodNodeList().Items ) {
         workNode := _workNode.(Nodes.Nodes_ProtoMethodNodeDownCast).ToNodes_ProtoMethodNode()
-        {
-            var nsId LnsInt
-            nsId = Analyze_convExp877(Lns_2DDD(self.FP.registerType(workNode.FP.Get_expType())))
-            self.db.FP.AddSymbolDecl(nsId, fileId, workNode.FP.Get_pos().LineNo, workNode.FP.Get_pos().Column)
-        }
-        
-        
+        registDeclType(&workNode.Nodes_Node)
     }
     for _, _workNode := range( nodeManager.FP.GetDeclMethodNodeList().Items ) {
         workNode := _workNode.(Nodes.Nodes_DeclMethodNodeDownCast).ToNodes_DeclMethodNode()
-        {
-            var nsId LnsInt
-            nsId = Analyze_convExp943(Lns_2DDD(self.FP.registerType(workNode.FP.Get_expType())))
-            self.db.FP.AddSymbolDecl(nsId, fileId, workNode.FP.Get_pos().LineNo, workNode.FP.Get_pos().Column)
+        var nsId LnsInt
+        nsId = registDeclType(&workNode.Nodes_Node)
+        var methodType *Ast.Ast_TypeInfo
+        methodType = workNode.FP.Get_expType()
+        if Lns_op_not(methodType.FP.Get_staticFlag()){
+            {
+                _scope := methodType.FP.Get_parentInfo().FP.Get_scope()
+                if _scope != nil {
+                    scope := _scope.(*Ast.Ast_Scope)
+                    scope.FP.FilterTypeInfoFieldAndIF(false, scope, Ast.Ast_ScopeAccess__Normal, Ast.Ast_filterForm(func(symbolInfo *Ast.Ast_SymbolInfo) bool {
+                        if symbolInfo.FP.Get_name() == methodType.FP.Get_rawTxt(){
+                            var superNsId LnsInt
+                            superNsId = Analyze_convExp733(Lns_2DDD(self.FP.registerType(symbolInfo.FP.Get_typeInfo())))
+                            self.db.FP.AddOverride(nsId, superNsId)
+                        }
+                        return true
+                    }))
+                }
+            }
         }
-        
-        
     }
     for _, _workNode := range( nodeManager.FP.GetDeclEnumNodeList().Items ) {
         workNode := _workNode.(Nodes.Nodes_DeclEnumNodeDownCast).ToNodes_DeclEnumNode()
-        {
-            var nsId LnsInt
-            nsId = Analyze_convExp1009(Lns_2DDD(self.FP.registerType(workNode.FP.Get_expType())))
-            self.db.FP.AddSymbolDecl(nsId, fileId, workNode.FP.Get_pos().LineNo, workNode.FP.Get_pos().Column)
-        }
-        
-        
+        registDeclType(&workNode.Nodes_Node)
         registerAutoMethod(workNode.FP.Get_expType(), workNode.FP.Get_pos())
         for _, _name := range( workNode.FP.Get_valueNameList().Items ) {
             name := _name.(Types.Types_TokenDownCast).ToTypes_Token()
@@ -481,11 +428,11 @@ func (self *Analyze_tagFilter) registerDecl(nodeManager *Nodes.Nodes_NodeManager
                 if __exp != nil {
                     _exp := __exp.(*Ast.Ast_SymbolInfo)
                     var symNsId LnsInt
-                    symNsId = Analyze_convExp1078(Lns_2DDD(self.FP.registerSymbol(_exp)))
+                    symNsId = Analyze_convExp819(Lns_2DDD(self.FP.registerSymbol(_exp)))
                     var pos *Types.Types_Position
                     pos = Lns_unwrap( _exp.FP.Get_pos()).(*Types.Types_Position)
                     self.db.FP.AddSymbolDecl(symNsId, fileId, pos.LineNo, pos.Column)
-                    Log_log(Log_Level__Debug, __func__, 90, Log_CreateMessage(func() string {
+                    Log_log(Log_Level__Debug, __func__, 86, Log_CreateMessage(func() string {
                         return _exp.FP.Get_name()
                     }))
                     
@@ -496,30 +443,24 @@ func (self *Analyze_tagFilter) registerDecl(nodeManager *Nodes.Nodes_NodeManager
     }
     for _, _workNode := range( nodeManager.FP.GetDeclAlgeNodeList().Items ) {
         workNode := _workNode.(Nodes.Nodes_DeclAlgeNodeDownCast).ToNodes_DeclAlgeNode()
+        registDeclType(&workNode.Nodes_Node)
         {
-            var nsId LnsInt
-            nsId = Analyze_convExp1190(Lns_2DDD(self.FP.registerType(workNode.FP.Get_expType())))
-            self.db.FP.AddSymbolDecl(nsId, fileId, workNode.FP.Get_pos().LineNo, workNode.FP.Get_pos().Column)
-        }
-        
-        
-        {
-            __collection1321 := workNode.FP.Get_algeType().FP.Get_valInfoMap()
-            __sorted1321 := __collection1321.CreateKeyListStr()
-            __sorted1321.Sort( LnsItemKindStr, nil )
-            for _, _name := range( __sorted1321.Items ) {
+            __collection1011 := workNode.FP.Get_algeType().FP.Get_valInfoMap()
+            __sorted1011 := __collection1011.CreateKeyListStr()
+            __sorted1011.Sort( LnsItemKindStr, nil )
+            for _, _name := range( __sorted1011.Items ) {
                 name := _name.(string)
                 {
                     __exp := Lns_GetEnv().NilAccFin(Lns_GetEnv().NilAccPush(workNode.FP.Get_algeType().FP.Get_scope()) && 
-                    Lns_NilAccCall1( Lns_GetEnv(), func () LnsAny { return Lns_GetEnv().NilAccPop().(*Ast.Ast_Scope).FP.GetSymbolInfoChild(name)})/* 137:14 */)
+                    Lns_NilAccCall1( Lns_GetEnv(), func () LnsAny { return Lns_GetEnv().NilAccPop().(*Ast.Ast_Scope).FP.GetSymbolInfoChild(name)})/* 147:14 */)
                     if __exp != nil {
                         _exp := __exp.(*Ast.Ast_SymbolInfo)
                         var symNsId LnsInt
-                        symNsId = Analyze_convExp1249(Lns_2DDD(self.FP.registerSymbol(_exp)))
+                        symNsId = Analyze_convExp939(Lns_2DDD(self.FP.registerSymbol(_exp)))
                         var pos *Types.Types_Position
                         pos = Lns_unwrap( _exp.FP.Get_pos()).(*Types.Types_Position)
                         self.db.FP.AddSymbolDecl(symNsId, fileId, pos.LineNo, pos.Column)
-                        Log_log(Log_Level__Debug, __func__, 90, Log_CreateMessage(func() string {
+                        Log_log(Log_Level__Debug, __func__, 86, Log_CreateMessage(func() string {
                             return _exp.FP.Get_name()
                         }))
                         
@@ -531,13 +472,7 @@ func (self *Analyze_tagFilter) registerDecl(nodeManager *Nodes.Nodes_NodeManager
     }
     for _, _workNode := range( nodeManager.FP.GetDeclMacroNodeList().Items ) {
         workNode := _workNode.(Nodes.Nodes_DeclMacroNodeDownCast).ToNodes_DeclMacroNode()
-        {
-            var nsId LnsInt
-            nsId = Analyze_convExp1361(Lns_2DDD(self.FP.registerType(workNode.FP.Get_expType())))
-            self.db.FP.AddSymbolDecl(nsId, fileId, workNode.FP.Get_pos().LineNo, workNode.FP.Get_pos().Column)
-        }
-        
-        
+        registDeclType(&workNode.Nodes_Node)
     }
     for _, _workNode := range( nodeManager.FP.GetDeclVarNodeList().Items ) {
         workNode := _workNode.(Nodes.Nodes_DeclVarNodeDownCast).ToNodes_DeclVarNode()
@@ -545,11 +480,11 @@ func (self *Analyze_tagFilter) registerDecl(nodeManager *Nodes.Nodes_NodeManager
             for _, _symbolInfo := range( workNode.FP.Get_symbolInfoList().Items ) {
                 symbolInfo := _symbolInfo.(Ast.Ast_SymbolInfoDownCast).ToAst_SymbolInfo()
                 var symNsId LnsInt
-                symNsId = Analyze_convExp1423(Lns_2DDD(self.FP.registerSymbol(symbolInfo)))
+                symNsId = Analyze_convExp1062(Lns_2DDD(self.FP.registerSymbol(symbolInfo)))
                 var pos *Types.Types_Position
                 pos = Lns_unwrap( symbolInfo.FP.Get_pos()).(*Types.Types_Position)
                 self.db.FP.AddSymbolDecl(symNsId, fileId, pos.LineNo, pos.Column)
-                Log_log(Log_Level__Debug, __func__, 90, Log_CreateMessage(func() string {
+                Log_log(Log_Level__Debug, __func__, 86, Log_CreateMessage(func() string {
                     return symbolInfo.FP.Get_name()
                 }))
                 
@@ -560,11 +495,11 @@ func (self *Analyze_tagFilter) registerDecl(nodeManager *Nodes.Nodes_NodeManager
     for _, _workNode := range( nodeManager.FP.GetDeclMemberNodeList().Items ) {
         workNode := _workNode.(Nodes.Nodes_DeclMemberNodeDownCast).ToNodes_DeclMemberNode()
         var symNsId LnsInt
-        symNsId = Analyze_convExp1523(Lns_2DDD(self.FP.registerSymbol(workNode.FP.Get_symbolInfo())))
+        symNsId = Analyze_convExp1162(Lns_2DDD(self.FP.registerSymbol(workNode.FP.Get_symbolInfo())))
         var pos *Types.Types_Position
         pos = Lns_unwrap( workNode.FP.Get_symbolInfo().FP.Get_pos()).(*Types.Types_Position)
         self.db.FP.AddSymbolDecl(symNsId, fileId, pos.LineNo, pos.Column)
-        Log_log(Log_Level__Debug, __func__, 90, Log_CreateMessage(func() string {
+        Log_log(Log_Level__Debug, __func__, 86, Log_CreateMessage(func() string {
             return workNode.FP.Get_symbolInfo().FP.Get_name()
         }))
         
@@ -572,34 +507,24 @@ func (self *Analyze_tagFilter) registerDecl(nodeManager *Nodes.Nodes_NodeManager
         if workNode.FP.Get_getterMode() != Ast.Ast_AccessMode__None{
             var name string
             name = Lns_getVM().String_format("get_%s", []LnsAny{workNode.FP.Get_name().Txt})
-            {
-                var nsId LnsInt
-                nsId = Analyze_convExp1654(Lns_2DDD(self.FP.registerType(Lns_unwrap( Lns_GetEnv().NilAccFin(Lns_GetEnv().NilAccPush(workNode.FP.Get_classType().FP.Get_scope()) && 
-                Lns_NilAccCall1( Lns_GetEnv(), func () LnsAny { return Lns_GetEnv().NilAccPop().(*Ast.Ast_Scope).FP.GetTypeInfoChild(name)})/* 1:8 */)).(*Ast.Ast_TypeInfo))))
-                self.db.FP.AddSymbolDecl(nsId, fileId, workNode.FP.Get_pos().LineNo, workNode.FP.Get_pos().Column)
-            }
-            
+            registDeclTypeOp(Lns_unwrap( Lns_GetEnv().NilAccFin(Lns_GetEnv().NilAccPush(workNode.FP.Get_classType().FP.Get_scope()) && 
+            Lns_NilAccCall1( Lns_GetEnv(), func () LnsAny { return Lns_GetEnv().NilAccPop().(*Ast.Ast_Scope).FP.GetTypeInfoChild(name)})/* 169:20 */)).(*Ast.Ast_TypeInfo), workNode.FP.Get_pos())
         }
         if workNode.FP.Get_setterMode() != Ast.Ast_AccessMode__None{
             var name string
             name = Lns_getVM().String_format("set_%s", []LnsAny{workNode.FP.Get_name().Txt})
-            {
-                var nsId LnsInt
-                nsId = Analyze_convExp1739(Lns_2DDD(self.FP.registerType(Lns_unwrap( Lns_GetEnv().NilAccFin(Lns_GetEnv().NilAccPush(workNode.FP.Get_classType().FP.Get_scope()) && 
-                Lns_NilAccCall1( Lns_GetEnv(), func () LnsAny { return Lns_GetEnv().NilAccPop().(*Ast.Ast_Scope).FP.GetTypeInfoChild(name)})/* 1:8 */)).(*Ast.Ast_TypeInfo))))
-                self.db.FP.AddSymbolDecl(nsId, fileId, workNode.FP.Get_pos().LineNo, workNode.FP.Get_pos().Column)
-            }
-            
+            registDeclTypeOp(Lns_unwrap( Lns_GetEnv().NilAccFin(Lns_GetEnv().NilAccPush(workNode.FP.Get_classType().FP.Get_scope()) && 
+            Lns_NilAccCall1( Lns_GetEnv(), func () LnsAny { return Lns_GetEnv().NilAccPop().(*Ast.Ast_Scope).FP.GetTypeInfoChild(name)})/* 174:20 */)).(*Ast.Ast_TypeInfo), workNode.FP.Get_pos())
         }
     }
 }
 
-// 169: decl @lns.@tags.@Analyze.tagFilter.registerRefs
+// 179: decl @lns.@tags.@Analyze.tagFilter.registerRefs
 func (self *Analyze_tagFilter) registerRefs(nodeManager *Nodes.Nodes_NodeManager,fileId LnsInt) {
     var addSymbolRef func(symbolInfo *Ast.Ast_SymbolInfo,pos *Types.Types_Position)
     addSymbolRef = func(symbolInfo *Ast.Ast_SymbolInfo,pos *Types.Types_Position) {
         __func__ := "@lns.@tags.@Analyze.tagFilter.registerRefs.addSymbolRef"
-        if _switch1799 := symbolInfo.FP.Get_name(); _switch1799 == "__func__" || _switch1799 == "__mod__" || _switch1799 == "__line__" {
+        if _switch1346 := symbolInfo.FP.Get_name(); _switch1346 == "__func__" || _switch1346 == "__mod__" || _switch1346 == "__line__" {
             return 
         }
         var nsId LnsInt
@@ -608,8 +533,24 @@ func (self *Analyze_tagFilter) registerRefs(nodeManager *Nodes.Nodes_NodeManager
         if Lns_isCondTrue( Lns_GetEnv().PopVal( Lns_GetEnv().IncStack() ||
             Lns_GetEnv().SetStackVal( added) &&
             Lns_GetEnv().SetStackVal( Lns_op_not(Ast.Ast_isBuiltin(symbolInfo.FP.Get_namespaceTypeInfo().FP.Get_typeId()))) ).(bool)){
-            Log_log(Log_Level__Err, __func__, 179, Log_CreateMessage(func() string {
+            Log_log(Log_Level__Err, __func__, 189, Log_CreateMessage(func() string {
                 return Lns_getVM().String_format("no register sym -- %d:%d:%s", []LnsAny{pos.LineNo, pos.Column, self.FP.getFullNameSym(symbolInfo)})
+            }))
+            
+        }
+        self.db.FP.AddSymbolRef(nsId, fileId, pos.LineNo, pos.Column)
+    }
+    var registerRefType func(typeInfo *Ast.Ast_TypeInfo,pos *Types.Types_Position)
+    registerRefType = func(typeInfo *Ast.Ast_TypeInfo,pos *Types.Types_Position) {
+        __func__ := "@lns.@tags.@Analyze.tagFilter.registerRefs.registerRefType"
+        var nsId LnsInt
+        var added bool
+        nsId,added = self.FP.registerType(typeInfo)
+        if Lns_isCondTrue( Lns_GetEnv().PopVal( Lns_GetEnv().IncStack() ||
+            Lns_GetEnv().SetStackVal( added) &&
+            Lns_GetEnv().SetStackVal( Lns_op_not(Ast.Ast_isBuiltin(typeInfo.FP.Get_typeId()))) ).(bool)){
+            Log_log(Log_Level__Err, __func__, 199, Log_CreateMessage(func() string {
+                return Lns_getVM().String_format("no register type -- %d:%d:%s", []LnsAny{pos.LineNo, pos.Column, self.FP.GetFull(typeInfo, false)})
             }))
             
         }
@@ -617,30 +558,30 @@ func (self *Analyze_tagFilter) registerRefs(nodeManager *Nodes.Nodes_NodeManager
     }
     var registerRefSym func(symbolInfo *Ast.Ast_SymbolInfo,pos *Types.Types_Position)
     registerRefSym = func(symbolInfo *Ast.Ast_SymbolInfo,pos *Types.Types_Position) {
-        __func__ := "@lns.@tags.@Analyze.tagFilter.registerRefs.registerRefSym"
-        if _switch2117 := symbolInfo.FP.Get_namespaceTypeInfo().FP.Get_kind(); _switch2117 == Ast.Ast_TypeInfoKind__Enum || _switch2117 == Ast.Ast_TypeInfoKind__Alge {
+        if _switch1682 := symbolInfo.FP.Get_namespaceTypeInfo().FP.Get_kind(); _switch1682 == Ast.Ast_TypeInfoKind__Enum || _switch1682 == Ast.Ast_TypeInfoKind__Alge {
             addSymbolRef(symbolInfo, pos)
         } else {
-            if _switch2115 := symbolInfo.FP.Get_kind(); _switch2115 == Ast.Ast_SymbolKind__Fun || _switch2115 == Ast.Ast_SymbolKind__Mac || _switch2115 == Ast.Ast_SymbolKind__Mbr || _switch2115 == Ast.Ast_SymbolKind__Mtd || _switch2115 == Ast.Ast_SymbolKind__Typ {
-                var nsId LnsInt
-                var added bool
-                nsId,added = self.FP.registerType(symbolInfo.FP.Get_typeInfo())
-                if Lns_isCondTrue( Lns_GetEnv().PopVal( Lns_GetEnv().IncStack() ||
-                    Lns_GetEnv().SetStackVal( added) &&
-                    Lns_GetEnv().SetStackVal( Lns_op_not(Ast.Ast_isBuiltin(symbolInfo.FP.Get_typeInfo().FP.Get_typeId()))) ).(bool)){
-                    Log_log(Log_Level__Err, __func__, 196, Log_CreateMessage(func() string {
-                        return Lns_getVM().String_format("no register type -- %d:%d:%s", []LnsAny{pos.LineNo, pos.Column, self.FP.GetFull(symbolInfo.FP.Get_typeInfo(), false)})
-                    }))
-                    
-                }
-                self.db.FP.AddSymbolRef(nsId, fileId, pos.LineNo, pos.Column)
-            } else if _switch2115 == Ast.Ast_SymbolKind__Var {
+            if _switch1680 := symbolInfo.FP.Get_kind(); _switch1680 == Ast.Ast_SymbolKind__Fun || _switch1680 == Ast.Ast_SymbolKind__Mac || _switch1680 == Ast.Ast_SymbolKind__Mbr || _switch1680 == Ast.Ast_SymbolKind__Mtd || _switch1680 == Ast.Ast_SymbolKind__Typ {
+                registerRefType(symbolInfo.FP.Get_typeInfo(), pos)
+            } else if _switch1680 == Ast.Ast_SymbolKind__Var {
                 if Ast.Ast_isPubToExternal(symbolInfo.FP.Get_accessMode()){
                     addSymbolRef(symbolInfo, pos)
                 }
-            } else if _switch2115 == Ast.Ast_SymbolKind__Arg {
+            } else if _switch1680 == Ast.Ast_SymbolKind__Arg {
             }
         }
+    }
+    for _, _workNode := range( nodeManager.FP.GetExpNewNodeList().Items ) {
+        workNode := _workNode.(Nodes.Nodes_ExpNewNodeDownCast).ToNodes_ExpNewNode()
+        registerRefType(workNode.FP.Get_ctorTypeInfo(), workNode.FP.Get_pos())
+    }
+    for _, _workNode := range( nodeManager.FP.GetExpCallSuperCtorNodeList().Items ) {
+        workNode := _workNode.(Nodes.Nodes_ExpCallSuperCtorNodeDownCast).ToNodes_ExpCallSuperCtorNode()
+        registerRefType(workNode.FP.Get_methodType(), workNode.FP.Get_pos())
+    }
+    for _, _workNode := range( nodeManager.FP.GetExpCallSuperNodeList().Items ) {
+        workNode := _workNode.(Nodes.Nodes_ExpCallSuperNodeDownCast).ToNodes_ExpCallSuperNode()
+        registerRefType(workNode.FP.Get_methodType(), workNode.FP.Get_pos())
     }
     for _, _workNode := range( nodeManager.FP.GetExpRefNodeList().Items ) {
         workNode := _workNode.(Nodes.Nodes_ExpRefNodeDownCast).ToNodes_ExpRefNode()
@@ -660,7 +601,7 @@ func (self *Analyze_tagFilter) registerRefs(nodeManager *Nodes.Nodes_NodeManager
         workNode := _workNode.(Nodes.Nodes_ExpOmitEnumNodeDownCast).ToNodes_ExpOmitEnumNode()
         {
             __exp := Lns_GetEnv().NilAccFin(Lns_GetEnv().NilAccPush(workNode.FP.Get_enumTypeInfo().FP.Get_scope()) && 
-            Lns_NilAccCall1( Lns_GetEnv(), func () LnsAny { return Lns_GetEnv().NilAccPop().(*Ast.Ast_Scope).FP.GetSymbolInfoChild(workNode.FP.Get_valInfo().FP.Get_name())})/* 226:11 */)
+            Lns_NilAccCall1( Lns_GetEnv(), func () LnsAny { return Lns_GetEnv().NilAccPop().(*Ast.Ast_Scope).FP.GetSymbolInfoChild(workNode.FP.Get_valInfo().FP.Get_name())})/* 252:11 */)
             if __exp != nil {
                 _exp := __exp.(*Ast.Ast_SymbolInfo)
                 registerRefSym(_exp, workNode.FP.Get_pos())
@@ -675,7 +616,7 @@ func (self *Analyze_tagFilter) registerRefs(nodeManager *Nodes.Nodes_NodeManager
             valInfo = matchCase.FP.Get_valInfo()
             {
                 __exp := Lns_GetEnv().NilAccFin(Lns_GetEnv().NilAccPush(valInfo.FP.Get_algeTpye().FP.Get_scope()) && 
-                Lns_NilAccCall1( Lns_GetEnv(), func () LnsAny { return Lns_GetEnv().NilAccPop().(*Ast.Ast_Scope).FP.GetSymbolInfoChild(valInfo.FP.Get_name())})/* 234:14 */)
+                Lns_NilAccCall1( Lns_GetEnv(), func () LnsAny { return Lns_GetEnv().NilAccPop().(*Ast.Ast_Scope).FP.GetSymbolInfoChild(valInfo.FP.Get_name())})/* 260:14 */)
                 if __exp != nil {
                     _exp := __exp.(*Ast.Ast_SymbolInfo)
                     registerRefSym(_exp, matchCase.FP.Get_block().FP.Get_pos())
@@ -685,7 +626,7 @@ func (self *Analyze_tagFilter) registerRefs(nodeManager *Nodes.Nodes_NodeManager
     }
 }
 
-// 241: decl @lns.@tags.@Analyze.tagFilter.processRoot
+// 267: decl @lns.@tags.@Analyze.tagFilter.processRoot
 func (self *Analyze_tagFilter) ProcessRoot(node *Nodes.Nodes_RootNode,_opt LnsAny) {
     var fileId LnsInt
     fileId = self.db.FP.AddFile(self.streamName)

@@ -91,7 +91,7 @@ pub fn DBAccess.mapJoin(
    limit:int!, attrib:str!, func:base.queryMapForm,
    errHandle:base.errHandleForm! ) : bool
 {
-   let mut query = "SELECT %s FROM %s INNER JOIN %s ON %s"
+   let mut query = "SELECT DISTINCT %s FROM %s INNER JOIN %s ON %s"
        (attrib or "*", tableName, otherTable, on );
    when! condition {
       query = "%s WHERE %s" ( query, condition );
@@ -107,7 +107,7 @@ pub fn DBAccess.mapJoin2(
    condition:str!, limit:int!, attrib:str!, func:base.queryMapForm,
    errHandle:base.errHandleForm! ) : bool
 {
-   let mut query = "SELECT %s FROM %s INNER JOIN %s ON %s INNER JOIN %s ON %s"
+   let mut query = "SELECT DISTINCT %s FROM %s INNER JOIN %s ON %s INNER JOIN %s ON %s"
        (attrib or "*", tableName, otherTable, on, otherTable2, on2 );
    when! condition {
       query = "%s WHERE %s" ( query, condition );
@@ -125,7 +125,7 @@ pub fn DBAccess.mapJoin3(
    errHandle:base.errHandleForm! ) : bool
 {
    let mut query =
-      "SELECT %s FROM %s INNER JOIN %s ON %s INNER JOIN %s ON %s INNER JOIN %s ON %s"
+      "SELECT DISTINCT %s FROM %s INNER JOIN %s ON %s INNER JOIN %s ON %s INNER JOIN %s ON %s"
       ( attrib or "*", tableName, otherTable, on, otherTable2, on2, otherTable3, on3 );
    when! condition {
       query = "%s WHERE %s" ( query, condition );
@@ -137,8 +137,8 @@ pub fn DBAccess.mapJoin3(
 }
 
 pub fn DBAccess.mapRowList(
-   tableName:str, condition:str!,
-   limit:int!, attrib:str!, func:base.queryMapForm, errHandle:base.errHandleForm! ) : bool
+   tableName:str, condition:str!, limit:int!, attrib:str!, order:str!,
+   func:base.queryMapForm, errHandle:base.errHandleForm! ) : bool
 {
    let mut query;
    let ATTRIB = unwrap attrib default "*";
@@ -146,6 +146,9 @@ pub fn DBAccess.mapRowList(
       query = "SELECT %s FROM %s WHERE %s" ( ATTRIB, tableName, condition );
    } else {
       query = "SELECT %s FROM %s" ( ATTRIB, tableName );
+   }
+   when! order {
+      query = "%s ORDER BY %s" (query, order);
    }
    when! limit {
       query = "%s LIMIT %d" ( query, limit );

@@ -54,7 +54,7 @@ type DBAccess_DBAccessMtd interface {
     MapJoin(arg1 string, arg2 string, arg3 string, arg4 LnsAny, arg5 LnsAny, arg6 LnsAny, arg7 base.Base_queryMapForm, arg8 LnsAny) bool
     MapJoin2(arg1 string, arg2 string, arg3 string, arg4 string, arg5 string, arg6 LnsAny, arg7 LnsAny, arg8 LnsAny, arg9 base.Base_queryMapForm, arg10 LnsAny) bool
     MapJoin3(arg1 string, arg2 string, arg3 string, arg4 string, arg5 string, arg6 string, arg7 string, arg8 LnsAny, arg9 LnsAny, arg10 LnsAny, arg11 base.Base_queryMapForm, arg12 LnsAny) bool
-    MapRowList(arg1 string, arg2 LnsAny, arg3 LnsAny, arg4 LnsAny, arg5 base.Base_queryMapForm, arg6 LnsAny) bool
+    MapRowList(arg1 string, arg2 LnsAny, arg3 LnsAny, arg4 LnsAny, arg5 LnsAny, arg6 base.Base_queryMapForm, arg7 LnsAny) bool
     outputLog(arg1 string)
     Update(arg1 string, arg2 string, arg3 LnsAny)
 }
@@ -161,7 +161,7 @@ func (self *DBAccess_DBAccess) Exec(stmt string,errHandle LnsAny) {
 // 89: decl @lns.@tags.@DBAccess.DBAccess.mapJoin
 func (self *DBAccess_DBAccess) MapJoin(tableName string,otherTable string,on string,condition LnsAny,limit LnsAny,attrib LnsAny,_func base.Base_queryMapForm,errHandle LnsAny) bool {
     var query string
-    query = Lns_getVM().String_format("SELECT %s FROM %s INNER JOIN %s ON %s", []LnsAny{Lns_GetEnv().PopVal( Lns_GetEnv().IncStack() ||
+    query = Lns_getVM().String_format("SELECT DISTINCT %s FROM %s INNER JOIN %s ON %s", []LnsAny{Lns_GetEnv().PopVal( Lns_GetEnv().IncStack() ||
         Lns_GetEnv().SetStackVal( attrib) ||
         Lns_GetEnv().SetStackVal( "*") ).(string), tableName, otherTable, on})
     if condition != nil{
@@ -180,7 +180,7 @@ func (self *DBAccess_DBAccess) MapJoin(tableName string,otherTable string,on str
 // 105: decl @lns.@tags.@DBAccess.DBAccess.mapJoin2
 func (self *DBAccess_DBAccess) MapJoin2(tableName string,otherTable string,on string,otherTable2 string,on2 string,condition LnsAny,limit LnsAny,attrib LnsAny,_func base.Base_queryMapForm,errHandle LnsAny) bool {
     var query string
-    query = Lns_getVM().String_format("SELECT %s FROM %s INNER JOIN %s ON %s INNER JOIN %s ON %s", []LnsAny{Lns_GetEnv().PopVal( Lns_GetEnv().IncStack() ||
+    query = Lns_getVM().String_format("SELECT DISTINCT %s FROM %s INNER JOIN %s ON %s INNER JOIN %s ON %s", []LnsAny{Lns_GetEnv().PopVal( Lns_GetEnv().IncStack() ||
         Lns_GetEnv().SetStackVal( attrib) ||
         Lns_GetEnv().SetStackVal( "*") ).(string), tableName, otherTable, on, otherTable2, on2})
     if condition != nil{
@@ -199,7 +199,7 @@ func (self *DBAccess_DBAccess) MapJoin2(tableName string,otherTable string,on st
 // 121: decl @lns.@tags.@DBAccess.DBAccess.mapJoin3
 func (self *DBAccess_DBAccess) MapJoin3(tableName string,otherTable string,on string,otherTable2 string,on2 string,otherTable3 string,on3 string,condition LnsAny,limit LnsAny,attrib LnsAny,_func base.Base_queryMapForm,errHandle LnsAny) bool {
     var query string
-    query = Lns_getVM().String_format("SELECT %s FROM %s INNER JOIN %s ON %s INNER JOIN %s ON %s INNER JOIN %s ON %s", []LnsAny{Lns_GetEnv().PopVal( Lns_GetEnv().IncStack() ||
+    query = Lns_getVM().String_format("SELECT DISTINCT %s FROM %s INNER JOIN %s ON %s INNER JOIN %s ON %s INNER JOIN %s ON %s", []LnsAny{Lns_GetEnv().PopVal( Lns_GetEnv().IncStack() ||
         Lns_GetEnv().SetStackVal( attrib) ||
         Lns_GetEnv().SetStackVal( "*") ).(string), tableName, otherTable, on, otherTable2, on2, otherTable3, on3})
     if condition != nil{
@@ -216,32 +216,37 @@ func (self *DBAccess_DBAccess) MapJoin3(tableName string,otherTable string,on st
 }
 
 // 139: decl @lns.@tags.@DBAccess.DBAccess.mapRowList
-func (self *DBAccess_DBAccess) MapRowList(tableName string,condition LnsAny,limit LnsAny,attrib LnsAny,_func base.Base_queryMapForm,errHandle LnsAny) bool {
+func (self *DBAccess_DBAccess) MapRowList(tableName string,condition LnsAny,limit LnsAny,attrib LnsAny,order LnsAny,_func base.Base_queryMapForm,errHandle LnsAny) bool {
     var query string
     var ATTRIB string
     ATTRIB = Lns_unwrapDefault( attrib, "*").(string)
     if condition != nil{
-        condition_178 := condition.(string)
-        query = Lns_getVM().String_format("SELECT %s FROM %s WHERE %s", []LnsAny{ATTRIB, tableName, condition_178})
+        condition_179 := condition.(string)
+        query = Lns_getVM().String_format("SELECT %s FROM %s WHERE %s", []LnsAny{ATTRIB, tableName, condition_179})
         
     } else {
         query = Lns_getVM().String_format("SELECT %s FROM %s", []LnsAny{ATTRIB, tableName})
         
     }
+    if order != nil{
+        order_182 := order.(string)
+        query = Lns_getVM().String_format("%s ORDER BY %s", []LnsAny{query, order_182})
+        
+    }
     if limit != nil{
-        limit_181 := limit.(LnsInt)
-        query = Lns_getVM().String_format("%s LIMIT %d", []LnsAny{query, limit_181})
+        limit_184 := limit.(LnsInt)
+        query = Lns_getVM().String_format("%s LIMIT %d", []LnsAny{query, limit_184})
         
     }
     return self.db.MapQueryAsMap(query, _func, errHandle)
 }
 
-// 156: decl @lns.@tags.@DBAccess.DBAccess.createTables
+// 159: decl @lns.@tags.@DBAccess.DBAccess.createTables
 func (self *DBAccess_DBAccess) CreateTables(sqlTxt string) {
     self.FP.Exec(sqlTxt, base.Base_errHandleForm(DBAccess_createTables___anonymous_1072_))
 }
 
-// 166: decl @lns.@tags.@DBAccess.DBAccess.insert
+// 169: decl @lns.@tags.@DBAccess.DBAccess.insert
 func (self *DBAccess_DBAccess) Insert(tableName string,values string) {
     self.FP.Exec(Lns_getVM().String_format("INSERT INTO %s VALUES ( %s );", []LnsAny{tableName, values}), base.Base_errHandleForm(func(stmt string,message string) {
         if Lns_isCondTrue( Lns_GetEnv().PopVal( Lns_GetEnv().IncStack() ||
@@ -252,7 +257,7 @@ func (self *DBAccess_DBAccess) Insert(tableName string,values string) {
     }))
 }
 
-// 180: decl @lns.@tags.@DBAccess.DBAccess.update
+// 183: decl @lns.@tags.@DBAccess.DBAccess.update
 func (self *DBAccess_DBAccess) Update(tableName string,set string,condition LnsAny) {
     var sql string
     sql = Lns_getVM().String_format("UPDATE %s SET %s", []LnsAny{tableName, set})

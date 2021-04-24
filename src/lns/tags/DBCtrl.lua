@@ -227,7 +227,7 @@ _moduleObj.DBCtrl = DBCtrl
 function DBCtrl.getMaxId( access, tableName, defId )
 
    local id = nil
-   access:mapRowList( tableName, nil, 1, "MAX(id)", function ( items )
+   access:mapRowList( tableName, nil, 1, "MAX(id)", nil, function ( items )
    
       id = items['id']
       return false
@@ -252,7 +252,6 @@ function DBCtrl:__init(access, readonly)
    self.individualStructFlag = false
    self.individualMacroFlag = false
    self.projDir = Depend.getCurDir(  )
-   self.dbPath = "lnstags.sqlite3"
    
    self.idMgrNamespace = IdMgr.new(DBCtrl.getMaxId( access, "namespace", userNsId ))
    self.idMgrSimpleName = IdMgr.new(DBCtrl.getMaxId( access, "simpleName", userNsId ))
@@ -289,7 +288,11 @@ function DBCtrl:update( tableName, set, condition )
 end
 function DBCtrl:mapRowList( tableName, condition, limit, attrib, func, errHandle )
 
-   return self.access:mapRowList( tableName, condition, limit, attrib, func, errHandle )
+   return self.access:mapRowList( tableName, condition, limit, attrib, nil, func, errHandle )
+end
+function DBCtrl:mapRowListSort( tableName, condition, limit, attrib, order, func, errHandle )
+
+   return self.access:mapRowList( tableName, condition, limit, attrib, order, func, errHandle )
 end
 function DBCtrl:getRowList( tableName, condition, limit, attrib, errHandle )
 
@@ -371,9 +374,6 @@ end
 function DBCtrl:get_projDir()
    return self.projDir
 end
-function DBCtrl:get_dbPath()
-   return self.dbPath
-end
 
 
 local ETC = {}
@@ -429,7 +429,7 @@ end
 local function open( path, readonly )
    local __func__ = '@lns.@tags.@DBCtrl.open'
 
-   Log.log( Log.Level.Log, __func__, 173, function (  )
+   Log.log( Log.Level.Log, __func__, 179, function (  )
    
       return "open"
    end )
@@ -453,7 +453,7 @@ local function open( path, readonly )
    if  nil == item then
       local _item = item
    
-      Log.log( Log.Level.Err, __func__, 185, function (  )
+      Log.log( Log.Level.Err, __func__, 191, function (  )
       
          return "unknown version"
       end )
@@ -463,7 +463,7 @@ local function open( path, readonly )
    end
    
    if tonumber( item:get_val() ) ~= DB_VERSION then
-      Log.log( Log.Level.Err, __func__, 190, function (  )
+      Log.log( Log.Level.Err, __func__, 196, function (  )
       
          return string.format( "not support version. -- %s", item:get_val())
       end )
@@ -504,6 +504,7 @@ CREATE TABLE simpleName ( id INTEGER PRIMARY KEY, name VARCHAR UNIQUE COLLATE bi
 CREATE TABLE filePath ( id INTEGER PRIMARY KEY, path VARCHAR UNIQUE COLLATE binary, incFlag INTEGER, digest CHAR(32), currentDir VARCHAR COLLATE binary, invalidSkip INTEGER);
 INSERT INTO filePath VALUES( NULL, '', 0, '', '', 1 );
 
+CREATE TABLE override (nsId INTEGER, superNsId INTEGER, PRIMARY KEY (nsId, superNsId));
 CREATE TABLE symbolDecl ( nsId INTEGER, snameId INTEGER, parentId INTEGER, type INTEGER, fileId INTEGER, line INTEGER, column INTEGER, endLine INTEGER, endColumn INTEGER, charSize INTEGER, comment VARCHAR COLLATE binary, hasBodyFlag INTEGER, PRIMARY KEY( nsId, fileId, line ) );
 INSERT INTO symbolDecl VALUES( 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, '', 0 );
 
@@ -517,6 +518,7 @@ CREATE TABLE incBelong ( id INTEGER, baseFileId INTEGER, nsId INTEGER, PRIMARY K
 CREATE INDEX index_ns ON namespace ( id, snameId, parentId, name, otherName );
 CREATE INDEX index_sName ON simpleName ( id, name );
 CREATE INDEX index_filePath ON filePath ( id, path );
+CREATE INDEX index_override ON override (nsId, superNsId);
 CREATE INDEX index_symDecl ON symbolDecl ( nsId, parentId, snameId, fileId );
 CREATE INDEX index_symRef ON symbolRef ( nsId, snameId, fileId, belongNsId );
 CREATE INDEX index_incRef ON incRef ( id, baseFileId );
@@ -645,6 +647,179 @@ function ItemNamespace._fromMapSub( obj, val )
 end
 
 
+local ItemSymbolDecl = {}
+setmetatable( ItemSymbolDecl, { ifList = {Mapping,} } )
+_moduleObj.ItemSymbolDecl = ItemSymbolDecl
+function ItemSymbolDecl.setmeta( obj )
+  setmetatable( obj, { __index = ItemSymbolDecl  } )
+end
+function ItemSymbolDecl.new( nsId, fileId, line, column )
+   local obj = {}
+   ItemSymbolDecl.setmeta( obj )
+   if obj.__init then
+      obj:__init( nsId, fileId, line, column )
+   end
+   return obj
+end
+function ItemSymbolDecl:__init( nsId, fileId, line, column )
+
+   self.nsId = nsId
+   self.fileId = fileId
+   self.line = line
+   self.column = column
+end
+function ItemSymbolDecl:get_nsId()
+   return self.nsId
+end
+function ItemSymbolDecl:get_fileId()
+   return self.fileId
+end
+function ItemSymbolDecl:get_line()
+   return self.line
+end
+function ItemSymbolDecl:get_column()
+   return self.column
+end
+function ItemSymbolDecl:_toMap()
+  return self
+end
+function ItemSymbolDecl._fromMap( val )
+  local obj, mes = ItemSymbolDecl._fromMapSub( {}, val )
+  if obj then
+     ItemSymbolDecl.setmeta( obj )
+  end
+  return obj, mes
+end
+function ItemSymbolDecl._fromStem( val )
+  return ItemSymbolDecl._fromMap( val )
+end
+
+function ItemSymbolDecl._fromMapSub( obj, val )
+   local memInfo = {}
+   table.insert( memInfo, { name = "nsId", func = _lune._toInt, nilable = false, child = {} } )
+   table.insert( memInfo, { name = "fileId", func = _lune._toInt, nilable = false, child = {} } )
+   table.insert( memInfo, { name = "line", func = _lune._toInt, nilable = false, child = {} } )
+   table.insert( memInfo, { name = "column", func = _lune._toInt, nilable = false, child = {} } )
+   local result, mess = _lune._fromMap( obj, val, memInfo )
+   if not result then
+      return nil, mess
+   end
+   return obj
+end
+
+
+local ItemSymbolRef = {}
+setmetatable( ItemSymbolRef, { ifList = {Mapping,} } )
+_moduleObj.ItemSymbolRef = ItemSymbolRef
+function ItemSymbolRef.setmeta( obj )
+  setmetatable( obj, { __index = ItemSymbolRef  } )
+end
+function ItemSymbolRef.new( nsId, fileId, line, column )
+   local obj = {}
+   ItemSymbolRef.setmeta( obj )
+   if obj.__init then
+      obj:__init( nsId, fileId, line, column )
+   end
+   return obj
+end
+function ItemSymbolRef:__init( nsId, fileId, line, column )
+
+   self.nsId = nsId
+   self.fileId = fileId
+   self.line = line
+   self.column = column
+end
+function ItemSymbolRef:get_nsId()
+   return self.nsId
+end
+function ItemSymbolRef:get_fileId()
+   return self.fileId
+end
+function ItemSymbolRef:get_line()
+   return self.line
+end
+function ItemSymbolRef:get_column()
+   return self.column
+end
+function ItemSymbolRef:_toMap()
+  return self
+end
+function ItemSymbolRef._fromMap( val )
+  local obj, mes = ItemSymbolRef._fromMapSub( {}, val )
+  if obj then
+     ItemSymbolRef.setmeta( obj )
+  end
+  return obj, mes
+end
+function ItemSymbolRef._fromStem( val )
+  return ItemSymbolRef._fromMap( val )
+end
+
+function ItemSymbolRef._fromMapSub( obj, val )
+   local memInfo = {}
+   table.insert( memInfo, { name = "nsId", func = _lune._toInt, nilable = false, child = {} } )
+   table.insert( memInfo, { name = "fileId", func = _lune._toInt, nilable = false, child = {} } )
+   table.insert( memInfo, { name = "line", func = _lune._toInt, nilable = false, child = {} } )
+   table.insert( memInfo, { name = "column", func = _lune._toInt, nilable = false, child = {} } )
+   local result, mess = _lune._fromMap( obj, val, memInfo )
+   if not result then
+      return nil, mess
+   end
+   return obj
+end
+
+
+local ItemOverride = {}
+setmetatable( ItemOverride, { ifList = {Mapping,} } )
+_moduleObj.ItemOverride = ItemOverride
+function ItemOverride.setmeta( obj )
+  setmetatable( obj, { __index = ItemOverride  } )
+end
+function ItemOverride.new( nsId, superNsId )
+   local obj = {}
+   ItemOverride.setmeta( obj )
+   if obj.__init then
+      obj:__init( nsId, superNsId )
+   end
+   return obj
+end
+function ItemOverride:__init( nsId, superNsId )
+
+   self.nsId = nsId
+   self.superNsId = superNsId
+end
+function ItemOverride:get_nsId()
+   return self.nsId
+end
+function ItemOverride:get_superNsId()
+   return self.superNsId
+end
+function ItemOverride:_toMap()
+  return self
+end
+function ItemOverride._fromMap( val )
+  local obj, mes = ItemOverride._fromMapSub( {}, val )
+  if obj then
+     ItemOverride.setmeta( obj )
+  end
+  return obj, mes
+end
+function ItemOverride._fromStem( val )
+  return ItemOverride._fromMap( val )
+end
+
+function ItemOverride._fromMapSub( obj, val )
+   local memInfo = {}
+   table.insert( memInfo, { name = "nsId", func = _lune._toInt, nilable = false, child = {} } )
+   table.insert( memInfo, { name = "superNsId", func = _lune._toInt, nilable = false, child = {} } )
+   local result, mess = _lune._fromMap( obj, val, memInfo )
+   if not result then
+      return nil, mess
+   end
+   return obj
+end
+
+
 function DBCtrl:addFile( path )
 
    if path:find( self.projDir, 1, true ) == 1 then
@@ -674,6 +849,43 @@ function DBCtrl:addFile( path )
    return id
 end
 
+
+function DBCtrl:getName( nsId )
+
+   local name = nil
+   self:mapRowList( "namespace", string.format( "id = %d", nsId), 1, nil, function ( items )
+   
+      do
+         local obj = ItemNamespace._fromStem( items )
+         if obj ~= nil then
+            name = obj:get_name()
+         end
+      end
+      
+      return false
+   end )
+   return name
+end
+
+
+function DBCtrl:getNsId( name )
+
+   local nsId = nil
+   self:mapRowList( "namespace", string.format( "name = '%s'", name), 1, nil, function ( items )
+   
+      do
+         local obj = ItemNamespace._fromStem( items )
+         if obj ~= nil then
+            nsId = obj:get_id()
+         end
+      end
+      
+      return false
+   end )
+   return nsId
+end
+
+
 function DBCtrl:addNamespace( fullName, parentId )
 
    local id = nil
@@ -697,6 +909,30 @@ function DBCtrl:addNamespace( fullName, parentId )
    self:insert( "namespace", string.format( "%d, %d, %d, '', '%s', '', 1", newId, snid, parentId, fullName) )
    
    return newId, true
+end
+
+
+function DBCtrl:getFilePath( fileId )
+
+   local path = nil
+   self:mapRowList( "filePath", string.format( "id = %d", fileId), 1, nil, function ( items )
+   
+      do
+         local obj = ItemFilePath._fromStem( items )
+         if obj ~= nil then
+            path = obj:get_path()
+         end
+      end
+      
+      return false
+   end )
+   return path
+end
+
+
+function DBCtrl:addOverride( nsId, superNsId )
+
+   self:insert( "override", string.format( "%d, %d", nsId, superNsId) )
 end
 
 
@@ -733,15 +969,15 @@ function DBCtrl:addSymbolSet( nsId, fileId, lineNo, column )
 end
 
 
-local function create(  )
+local function create( dbPath )
    local __func__ = '@lns.@tags.@DBCtrl.create'
 
-   Log.log( Log.Level.Log, __func__, 373, function (  )
+   Log.log( Log.Level.Log, __func__, 446, function (  )
    
       return "create"
    end )
    
-   local db = DBAccess.open( "lnstags.sqlite3", false )
+   local db = DBAccess.open( dbPath, false )
    if  nil == db then
       local _db = db
    
@@ -761,11 +997,11 @@ local function create(  )
    
    return dbCtrl
 end
-_moduleObj.create = create
 
-local function initDB(  )
+local function initDB( dbPath )
 
-   local db = create(  )
+   os.remove( dbPath )
+   local db = create( dbPath )
    if  nil == db then
       local _db = db
    
@@ -777,6 +1013,80 @@ local function initDB(  )
    db:close(  )
 end
 _moduleObj.initDB = initDB
+
+
+function DBCtrl:mapSymbolDecl( name, callback )
+
+   local nsId = self:getNsId( name )
+   if  nil == nsId then
+      local _nsId = nsId
+   
+      return 
+   end
+   
+   local overrideStr = string.format( "%d", nsId)
+   self:mapRowList( "override", string.format( "superNsId = %d", nsId), nil, nil, function ( items )
+   
+      do
+         local item = ItemOverride._fromStem( items )
+         if item ~= nil then
+            overrideStr = string.format( "%s, %d", overrideStr, item:get_nsId())
+         end
+      end
+      
+      return true
+   end )
+   
+   self:mapRowListSort( "symbolDecl", string.format( "nsId IN (%s)", overrideStr), nil, nil, "fileId, line", function ( items )
+   
+      do
+         local item = ItemSymbolDecl._fromStem( items )
+         if item ~= nil then
+            return callback( item )
+         end
+      end
+      
+      return true
+   end )
+end
+
+
+
+function DBCtrl:mapSymbolRef( name, callback )
+
+   local nsId = self:getNsId( name )
+   if  nil == nsId then
+      local _nsId = nsId
+   
+      return 
+   end
+   
+   local overrideStr = string.format( "%d", nsId)
+   self:mapRowList( "override", string.format( "nsId = %d", nsId), nil, nil, function ( items )
+   
+      do
+         local item = ItemOverride._fromStem( items )
+         if item ~= nil then
+            overrideStr = string.format( "%s, %d", overrideStr, item:get_superNsId())
+         end
+      end
+      
+      return true
+   end )
+   
+   self:mapRowListSort( "symbolRef", string.format( "nsId IN (%s)", overrideStr), nil, nil, "fileId, line", function ( items )
+   
+      do
+         local item = ItemSymbolRef._fromStem( items )
+         if item ~= nil then
+            return callback( item )
+         end
+      end
+      
+      return true
+   end )
+end
+
 
 function DBCtrl:dumpAll(  )
 
@@ -791,6 +1101,13 @@ function DBCtrl:dumpAll(  )
    self:mapRowList( "namespace", nil, nil, nil, function ( items )
    
       print( items['id'], items['name'] )
+      return true
+   end )
+   
+   print( "override" )
+   self:mapRowList( "override", nil, nil, nil, function ( items )
+   
+      print( items['nsId'], items['superNsId'] )
       return true
    end )
    
@@ -819,12 +1136,13 @@ end
 
 local function test(  )
 
+   local dbPath = "lnstags.sqlite3"
    do
-      initDB(  )
+      initDB( dbPath )
    end
    
    
-   local db = open( "lnstags.sqlite3", false )
+   local db = open( dbPath, false )
    if  nil == db then
       local _db = db
    
@@ -852,7 +1170,7 @@ local function test(  )
    
    do
       local _
-      local _405, added = db:addNamespace( "@hoge", _moduleObj.rootNsId )
+      local _538, added = db:addNamespace( "@hoge", _moduleObj.rootNsId )
       print( "added", added )
    end
    

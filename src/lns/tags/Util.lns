@@ -1,0 +1,55 @@
+pub class SourceCodeLineAccessor {
+   let path:str {pub};
+   let mut lineList:List<str>;
+
+   pub fn getLine( lineNo:int ) : str! {
+      if lineNo < 0 or #self.lineList < lineNo {
+         return nil;
+      }
+      return self.lineList[ lineNo ];
+   }
+}
+
+pub class SourceCodeLineAccessorFactory {
+   let mut path2accessor:Map<str,SourceCodeLineAccessor>;
+
+   pub fn __init() {
+      self.path2accessor = {};
+   }
+   
+   pub fn create( filePath:str, fileContents:str! ) mut : &SourceCodeLineAccessor!
+   {
+      if! self.path2accessor[ filePath ] {
+         return _exp;
+      }
+      let mut lineList:List<str> = [];
+      when! fileContents {
+         apply line of string.gmatch( fileContents, "[^\n]*\n" ) {
+            lineList.insert( string.sub( line, 1, #line - 1 ) );
+         }
+      } else {
+         let! mut handle = io.open( filePath, "r" ) {
+            return nil;
+         };
+         while true {
+	    let! text = handle.read( '*l' ) {
+               break;
+            };
+            lineList.insert( text );
+         }
+      }
+      let mut accessor = new SourceCodeLineAccessor( filePath, lineList );
+      self.path2accessor[ filePath ] = accessor;
+      return accessor;
+   }
+}
+
+pub fn outputLocate(
+   stream:oStream, symbol:str, path:str,
+   lineAccessor:&SourceCodeLineAccessor!, lineNo:int )
+{
+   let! line = lineAccessor$.getLine$( lineNo ) {
+      line = "";
+   };
+   stream.write( "%-16s %4d %-16s %s\n" ( symbol, lineNo, path, line ) );
+}

@@ -7,10 +7,14 @@ var Option__mod__ string
 type Option_Mode = string
 const Option_Mode__Build = "build"
 const Option_Mode__Init = "init"
+const Option_Mode__InqDef = "inq-def"
+const Option_Mode__InqRef = "inq-ref"
 const Option_Mode__Test = "test"
 var Option_ModeList_ = NewLnsList( []LnsAny {
   Option_Mode__Init,
   Option_Mode__Build,
+  Option_Mode__InqDef,
+  Option_Mode__InqRef,
   Option_Mode__Test,
 })
 func Option_Mode_get__allList() *LnsList{
@@ -19,6 +23,8 @@ func Option_Mode_get__allList() *LnsList{
 var Option_ModeMap_ = map[string]string {
   Option_Mode__Build: "Mode.Build",
   Option_Mode__Init: "Mode.Init",
+  Option_Mode__InqDef: "Mode.InqDef",
+  Option_Mode__InqRef: "Mode.InqRef",
   Option_Mode__Test: "Mode.Test",
 }
 func Option_Mode__from(arg1 string) LnsAny{
@@ -29,20 +35,21 @@ func Option_Mode__from(arg1 string) LnsAny{
 func Option_Mode_getTxt(arg1 string) string {
     return Option_ModeMap_[arg1];
 }
-// 17: decl @lns.@tags.@Option.printUsage
-func Option_printUsage_1045_(messages LnsAny) {
+// 21: decl @lns.@tags.@Option.printUsage
+func Option_printUsage_1048_(messages LnsAny) {
     if messages != nil{
-        messages_26 := messages.(string)
-        Lns_io_stderr.Write(Lns_getVM().String_format("%s\n", []LnsAny{messages_26}))
+        messages_30 := messages.(string)
+        Lns_io_stderr.Write(Lns_getVM().String_format("%s\n", []LnsAny{messages_30}))
     }
     Lns_print([]LnsAny{"usage: lnstags init [option]"})
     Lns_print([]LnsAny{"usage: lnstags build [option] filepath"})
+    Lns_print([]LnsAny{"usage: lnstags inq-def pattern"})
     Lns_print([]LnsAny{"usage: lnstags test [option]"})
     Lns_getVM().OS_exit(1)
 }
 
 
-// 27: decl @lns.@tags.@Option.analyzeArgs
+// 32: decl @lns.@tags.@Option.analyzeArgs
 func Option_analyzeArgs(argList *LnsList) *Option_Option {
     var index LnsInt
     index = 1
@@ -80,21 +87,26 @@ func Option_analyzeArgs(argList *LnsList) *Option_Option {
                         mode = work
                         
                     } else {
-                        Option_printUsage_1045_(Lns_getVM().String_format("illegal option -- %s", []LnsAny{arg}))
+                        Option_printUsage_1048_(Lns_getVM().String_format("illegal option -- %s", []LnsAny{arg}))
                     }
                 }
             } else { 
-                option.pathList.Insert(arg)
+                if _switch280 := mode; _switch280 == Option_Mode__Build {
+                    option.pathList.Insert(arg)
+                } else if _switch280 == Option_Mode__InqDef || _switch280 == Option_Mode__InqRef {
+                    option.pattern = arg
+                    
+                }
             }
         }
     }
     if mode != nil{
-        mode_50 := mode.(string)
-        option.mode = mode_50
+        mode_56 := mode.(string)
+        option.mode = mode_56
         
         return option
     }
-    Option_printUsage_1045_("none mode")
+    Option_printUsage_1048_("none mode")
 // insert a dummy
     return nil
 }
@@ -103,10 +115,12 @@ func Option_analyzeArgs(argList *LnsList) *Option_Option {
 type Option_OptionMtd interface {
     Get_mode() string
     Get_pathList() *LnsList
+    Get_pattern() string
 }
 type Option_Option struct {
     pathList *LnsList
     mode string
+    pattern string
     FP Option_OptionMtd
 }
 func Option_Option2Stem( obj LnsAny ) LnsAny {
@@ -137,11 +151,14 @@ func NewOption_Option() *Option_Option {
 }
 func (self *Option_Option) Get_pathList() *LnsList{ return self.pathList }
 func (self *Option_Option) Get_mode() string{ return self.mode }
-// 11: DeclConstr
+func (self *Option_Option) Get_pattern() string{ return self.pattern }
+// 14: DeclConstr
 func (self *Option_Option) InitOption_Option() {
     self.pathList = NewLnsList([]LnsAny{})
     
     self.mode = Option_Mode__Build
+    
+    self.pattern = ""
     
 }
 

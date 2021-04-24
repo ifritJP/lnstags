@@ -9,8 +9,11 @@ pub alge Bar {
    Val1,
    Val2,
 }
-pub proto class Hoge extend (Mapping);
-pub class Hoge extend (Mapping) {
+pub interface IF {
+   pub fn func(val:Foo);
+}
+pub proto class Hoge extend (Mapping, IF);
+pub class Hoge extend (Mapping, IF) {
    let mut val:int{pub,pub};
    pub fn __init() {
       self.val = 0;
@@ -31,5 +34,18 @@ pub fn Hoge.func(val:Foo) {
       }
       case .Val2 {
       }
+   }
+}
+pub class HogeHoge extend Hoge {
+   pub override fn func( val:Foo ) {
+      super( val );
+   }
+}
+class HogeHogeHoge extend HogeHoge {
+   pub fn __init() {
+      super();
+   }
+   pub override fn func( val:Foo ) {
+      super( val );
    }
 }

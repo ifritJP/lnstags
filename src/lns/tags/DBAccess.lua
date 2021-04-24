@@ -200,7 +200,7 @@ end
 
 function DBAccess:mapJoin( tableName, otherTable, on, condition, limit, attrib, func, errHandle )
 
-   local query = string.format( "SELECT %s FROM %s INNER JOIN %s ON %s", attrib or "*", tableName, otherTable, on)
+   local query = string.format( "SELECT DISTINCT %s FROM %s INNER JOIN %s ON %s", attrib or "*", tableName, otherTable, on)
    if condition ~= nil then
       query = string.format( "%s WHERE %s", query, condition)
    end
@@ -215,7 +215,7 @@ end
 
 function DBAccess:mapJoin2( tableName, otherTable, on, otherTable2, on2, condition, limit, attrib, func, errHandle )
 
-   local query = string.format( "SELECT %s FROM %s INNER JOIN %s ON %s INNER JOIN %s ON %s", attrib or "*", tableName, otherTable, on, otherTable2, on2)
+   local query = string.format( "SELECT DISTINCT %s FROM %s INNER JOIN %s ON %s INNER JOIN %s ON %s", attrib or "*", tableName, otherTable, on, otherTable2, on2)
    if condition ~= nil then
       query = string.format( "%s WHERE %s", query, condition)
    end
@@ -230,7 +230,7 @@ end
 
 function DBAccess:mapJoin3( tableName, otherTable, on, otherTable2, on2, otherTable3, on3, condition, limit, attrib, func, errHandle )
 
-   local query = string.format( "SELECT %s FROM %s INNER JOIN %s ON %s INNER JOIN %s ON %s INNER JOIN %s ON %s", attrib or "*", tableName, otherTable, on, otherTable2, on2, otherTable3, on3)
+   local query = string.format( "SELECT DISTINCT %s FROM %s INNER JOIN %s ON %s INNER JOIN %s ON %s INNER JOIN %s ON %s", attrib or "*", tableName, otherTable, on, otherTable2, on2, otherTable3, on3)
    if condition ~= nil then
       query = string.format( "%s WHERE %s", query, condition)
    end
@@ -243,7 +243,7 @@ function DBAccess:mapJoin3( tableName, otherTable, on, otherTable2, on2, otherTa
 end
 
 
-function DBAccess:mapRowList( tableName, condition, limit, attrib, func, errHandle )
+function DBAccess:mapRowList( tableName, condition, limit, attrib, order, func, errHandle )
 
    local query
    
@@ -252,6 +252,10 @@ function DBAccess:mapRowList( tableName, condition, limit, attrib, func, errHand
       query = string.format( "SELECT %s FROM %s WHERE %s", ATTRIB, tableName, condition)
    else
       query = string.format( "SELECT %s FROM %s", ATTRIB, tableName)
+   end
+   
+   if order ~= nil then
+      query = string.format( "%s ORDER BY %s", query, order)
    end
    
    if limit ~= nil then
