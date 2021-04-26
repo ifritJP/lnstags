@@ -43,6 +43,7 @@ func Log_Level_getTxt(arg1 LnsInt) string {
 }
 var Log_name2levelMap *LnsMap
 var Log_outputLevel LnsInt
+var Log_detail bool
 var Log_logStream Lns_oStream
 type Log_CreateMessage func () string
 // 20: decl @lns.@tags.@Log.str2level
@@ -50,18 +51,28 @@ func Log_str2level(txt string) LnsAny {
     return Log_name2levelMap.Items[txt]
 }
 
-// 26: decl @lns.@tags.@Log.setLevel
+// 25: decl @lns.@tags.@Log.setLevel
 func Log_setLevel(level LnsInt) {
     Log_outputLevel = level
     
 }
 
-// 34: decl @lns.@tags.@Log.log
+// 30: decl @lns.@tags.@Log.enableDetail
+func Log_enableDetail(flag bool) {
+    Log_detail = flag
+    
+}
+
+// 39: decl @lns.@tags.@Log.log
 func Log_log(level LnsInt,funcName string,lineNo LnsInt,callback Log_CreateMessage) {
     if level <= Log_outputLevel{
-        var nowClock LnsReal
-        nowClock = Lns_getVM().OS_clock()
-        Log_logStream.Write(Lns_getVM().String_format("%6d:%s:%s:%d:", []LnsAny{(LnsInt)((nowClock * LnsReal(1000))), Log_Level_getTxt( level), funcName, lineNo}))
+        if Log_detail{
+            var nowClock LnsReal
+            nowClock = Lns_getVM().OS_clock()
+            Log_logStream.Write(Lns_getVM().String_format("%6d:%s:%s:%d:", []LnsAny{(LnsInt)((nowClock * LnsReal(1000))), Log_Level_getTxt( level), funcName, lineNo}))
+        } else { 
+            Log_logStream.Write(Lns_getVM().String_format("%s:%s:", []LnsAny{Log_Level_getTxt( level), funcName}))
+        }
         Log_logStream.Write(callback())
         Log_logStream.Write("\n")
     }
@@ -81,6 +92,7 @@ func Lns_Log_init() {
     Log_name2levelMap.Set("debug",Log_Level__Debug)
     Log_name2levelMap.Set("trace",Log_Level__Trace)
     Log_outputLevel = Log_Level__Log
+    Log_detail = true
     Log_logStream = Lns_io_stderr
 }
 func init() {

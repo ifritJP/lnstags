@@ -119,12 +119,18 @@ end
 _moduleObj.str2level = str2level
 
 local outputLevel = Level.Log
-
 local function setLevel( level )
 
    outputLevel = level
 end
 _moduleObj.setLevel = setLevel
+
+local detail = true
+local function enableDetail( flag )
+
+   detail = flag
+end
+_moduleObj.enableDetail = enableDetail
 
 
 
@@ -133,9 +139,16 @@ local logStream = io.stderr
 local function log( level, funcName, lineNo, callback )
 
    if level <= outputLevel then
-      local nowClock = os.clock(  )
-      logStream:write( string.format( "%6d:%s:%s:%d:", math.floor((nowClock * 1000 )), Level:_getTxt( level)
-      , funcName, lineNo) )
+      if detail then
+         local nowClock = os.clock(  )
+         logStream:write( string.format( "%6d:%s:%s:%d:", math.floor((nowClock * 1000 )), Level:_getTxt( level)
+         , funcName, lineNo) )
+      else
+       
+         logStream:write( string.format( "%s:%s:", Level:_getTxt( level)
+         , funcName) )
+      end
+      
       logStream:write( callback(  ) )
       logStream:write( "\n" )
    end

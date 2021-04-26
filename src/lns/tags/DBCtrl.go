@@ -380,8 +380,8 @@ func DBCtrl_DBCtrl_getMaxId_1040_(access *DBAccess_DBAccess,tableName string,def
         return false
     }), base.Base_errHandleForm(DBCtrl_getMaxId___anonymous_1050_))
     if id != nil{
-        id_124 := id
-        return Lns_forceCastInt(id_124)
+        id_125 := id
+        return Lns_forceCastInt(id_125)
     }
     return defId
 }
@@ -545,8 +545,8 @@ func (self *DBCtrl_DBCtrl) AddFile(path string) LnsInt {
         return false
     }), nil)
     if fileId != nil{
-        fileId_347 := fileId.(LnsInt)
-        return fileId_347
+        fileId_348 := fileId.(LnsInt)
+        return fileId_348
     }
     var id LnsInt
     id = self.idMgrFilePath.FP.getIdNext()
@@ -606,8 +606,8 @@ func (self *DBCtrl_DBCtrl) AddNamespace(fullName string,parentId LnsInt)(LnsInt,
         return false
     }), nil)
     if id != nil{
-        id_384 := id.(LnsInt)
-        return id_384, false
+        id_385 := id.(LnsInt)
+        return id_385, false
     }
     var snid LnsInt
     snid = DBCtrl_rootNsId

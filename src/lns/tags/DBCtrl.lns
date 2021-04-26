@@ -518,7 +518,7 @@ pub fn DBCtrl.mapSymbolRef( name:str, callback:callbackSymbolRef ) {
          }
          return true;
       }##);
-   
+
    self.mapRowListSort(
       "symbolRef", "nsId IN (%s)" (overrideStr), nil, nil, "fileId, line",
       fn (items:&Map<str,&stem>): bool

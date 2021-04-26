@@ -10,6 +10,23 @@ import lns.tags.Log;
 
 let dbPath = "lnstags.sqlite3";
 
+fn inq( inqMode:Option.InqMode, pattern:str ) : int {
+   let! mut db = DBCtrl.open( dbPath, false ) {
+      print( "error" );
+      return -1;
+   };
+   switch inqMode {
+      case .Def {
+         Inq.InqDef( db, pattern );
+      }
+      case .Ref {
+         Inq.InqRef( db, pattern );
+      }
+   }
+   db.close();
+   return 0;
+}
+
 pub fn __main( args:&List<str> ) : int {
 
 
@@ -22,7 +39,7 @@ pub fn __main( args:&List<str> ) : int {
       case .Build {
          let! mut db = DBCtrl.open( dbPath, false ) {
             print( "error" );
-            return -1;
+            return 1;
          };
          db.commit();
          
@@ -30,21 +47,18 @@ pub fn __main( args:&List<str> ) : int {
          db.dumpAll();
          db.close();
       }
-      case .InqDef, .InqRef {
-         Log.setLevel( .Err );
-         let! mut db = DBCtrl.open( dbPath, false ) {
-            print( "error" );
-            return -1;
+      case .Inq {
+         inq( option.$inqMode, option.$pattern );
+      }
+      case .InqAt {
+         let analyzeFileInfo = option.$analyzeFileInfo;
+         let! pattern = Analyze.getPatterAt( analyzeFileInfo ) {
+            print( "illegal pos -- %s:%d:%d"
+                   ( analyzeFileInfo.$path,
+                     analyzeFileInfo.$lineNo, analyzeFileInfo.$column ) );
+            return 1;
          };
-         switch option.$mode {
-            case .InqDef {
-               Inq.InqDef( db, option.$pattern );
-            }
-            case .InqRef {
-               Inq.InqRef( db, option.$pattern );
-            }
-         }
-         db.close();
+         inq( option.$inqMode, pattern );
       }
       case .Test {
          DBCtrl.test();

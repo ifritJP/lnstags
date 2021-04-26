@@ -4,21 +4,43 @@ import . "github.com/ifritJP/LuneScript/src/lune/base/runtime_go"
 var init_main bool
 var main__mod__ string
 var main_dbPath string
-// 13: decl @lns.@tags.@main.__main
+// 13: decl @lns.@tags.@main.inq
+func main_inq_1007_(inqMode string,pattern string) LnsInt {
+    var db *DBCtrl_DBCtrl
+    
+    {
+        _db := DBCtrl_open(main_dbPath, false)
+        if _db == nil{
+            Lns_print([]LnsAny{"error"})
+            return -1
+        } else {
+            db = _db.(*DBCtrl_DBCtrl)
+        }
+    }
+    if _switch78 := inqMode; _switch78 == Option_InqMode__Def {
+        Inq_InqDef(db, pattern)
+    } else if _switch78 == Option_InqMode__Ref {
+        Inq_InqRef(db, pattern)
+    }
+    db.FP.Close()
+    return 0
+}
+
+// 30: decl @lns.@tags.@main.__main
 func Main___main(args *LnsList) LnsInt {
     Lns_main_init()
     var option *Option_Option
     option = Option_analyzeArgs(args)
-    if _switch189 := option.FP.Get_mode(); _switch189 == Option_Mode__Init {
+    if _switch260 := option.FP.Get_mode(); _switch260 == Option_Mode__Init {
         DBCtrl_initDB(main_dbPath)
-    } else if _switch189 == Option_Mode__Build {
+    } else if _switch260 == Option_Mode__Build {
         var db *DBCtrl_DBCtrl
         
         {
             _db := DBCtrl_open(main_dbPath, false)
             if _db == nil{
                 Lns_print([]LnsAny{"error"})
-                return -1
+                return 1
             } else {
                 db = _db.(*DBCtrl_DBCtrl)
             }
@@ -27,26 +49,24 @@ func Main___main(args *LnsList) LnsInt {
         Analyze_start(db, option)
         db.FP.DumpAll()
         db.FP.Close()
-    } else if _switch189 == Option_Mode__InqDef || _switch189 == Option_Mode__InqRef {
-        Log_setLevel(Log_Level__Err)
-        var db *DBCtrl_DBCtrl
+    } else if _switch260 == Option_Mode__Inq {
+        main_inq_1007_(option.FP.Get_inqMode(), option.FP.Get_pattern())
+    } else if _switch260 == Option_Mode__InqAt {
+        var analyzeFileInfo *Option_AnalyzeFileInfo
+        analyzeFileInfo = option.FP.Get_analyzeFileInfo()
+        var pattern string
         
         {
-            _db := DBCtrl_open(main_dbPath, false)
-            if _db == nil{
-                Lns_print([]LnsAny{"error"})
-                return -1
+            _pattern := Analyze_getPatterAt(analyzeFileInfo)
+            if _pattern == nil{
+                Lns_print([]LnsAny{Lns_getVM().String_format("illegal pos -- %s:%d:%d", []LnsAny{analyzeFileInfo.FP.Get_path(), analyzeFileInfo.FP.Get_lineNo(), analyzeFileInfo.FP.Get_column()})})
+                return 1
             } else {
-                db = _db.(*DBCtrl_DBCtrl)
+                pattern = _pattern.(string)
             }
         }
-        if _switch173 := option.FP.Get_mode(); _switch173 == Option_Mode__InqDef {
-            Inq_InqDef(db, option.FP.Get_pattern())
-        } else if _switch173 == Option_Mode__InqRef {
-            Inq_InqRef(db, option.FP.Get_pattern())
-        }
-        db.FP.Close()
-    } else if _switch189 == Option_Mode__Test {
+        main_inq_1007_(option.FP.Get_inqMode(), pattern)
+    } else if _switch260 == Option_Mode__Test {
         DBCtrl_test()
     }
     return 0

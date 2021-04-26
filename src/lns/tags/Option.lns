@@ -1,20 +1,46 @@
+import lns.tags.Log;
+
+pub enum InqMode {
+   Def = "def",
+   Ref = "ref",
+}
+
 pub enum Mode {
    Init = "init",
    Build = "build",
-   InqDef = "inq-def",
-   InqRef = "inq-ref",
+   Inq = "inq",
+   InqAt = "inq-at",
    Test = "test",
+}
+
+pub class AnalyzeFileInfo {
+   local let mut path:str {pub};
+   local let mut lineNo:int {pub};
+   local let mut column:int {pub};
+   local let mut stdinFlag:bool {pub};
+   local fn __init() {
+      self.path = "";
+      self.lineNo = 0;
+      self.column = 0;
+      self.stdinFlag = false;
+   }
 }
 
 pub class Option {
    local let mut pathList:List<str> {pub&};
    local let mut mode:Mode {pub};
+   local let mut inqMode:InqMode {pub};
    local let mut pattern:str {pub&};
+   local let mut analyzeFileInfo:AnalyzeFileInfo {pub&};
+   local let mut logLevel:Log.Level! {pub};
 
    local fn __init() {
+      self.logLevel = nil;
       self.pathList = [];
       self.mode = .Build;
+      self.inqMode = .Def;
       self.pattern = "";
+      self.analyzeFileInfo = new AnalyzeFileInfo();
    }
 }
 
@@ -24,51 +50,114 @@ fn printUsage( messages:str! ) : __ {
    }
    print( "usage: lnstags init [option]" );
    print( "usage: lnstags build [option] filepath" );
-   print( "usage: lnstags inq-def pattern" );
+   print( "usage: lnstags inq <def|ref> pattern" );
+   print( "usage: lnstags inq-at <def|ref> filepath lineno column" );
    print( "usage: lnstags test [option]" );
    os.exit( 1 );
 }
 
 pub fn analyzeArgs( argList:&List<str> ) : &Option {
+   let mut option = new Option();
 
    let mut index = 1;
+   form getNextOpNonNilFunc( mess:str ):str;
+   let mut getNextOpNonNil:getNextOpNonNilFunc;
+   getNextOpNonNil = fn ( mess:str ): str {
+      printUsage( "" );
+   };
+   
    fn getNextOp():str! {
-      if #argList <= index {
-         return nil;
+      while true {
+         if #argList <= index {
+            return nil;
+         }
+         index = index + 1;
+         let arg = argList[ index ];
+         if arg.find( "^-" ## ) {
+            // オプション解析
+            switch arg {
+               case "-i" {
+                  option.analyzeFileInfo.stdinFlag = true;
+               }
+               case "--log" {
+                  option.logLevel = Log.str2level( getNextOpNonNil( "logLevel" ) );
+               }
+               case "--simpleLog" {
+                  Log.enableDetail( false );
+               }
+            }
+         } else {
+            return arg;
+         }
       }
-      index = index + 1;
-      return argList[ index ];
+   }
+
+   getNextOpNonNil = fn( mess:str ):str {
+      if! let arg = getNextOp() {
+         return arg;
+      }
+      printUsage( mess );
+   };
+   fn getNextOpInt( mess:str ):int {
+      if! let arg = getNextOp() {
+         if! let num = tonumber( arg ##) {
+            return num@@int;
+         }
+         printUsage( "illegal num -- %s" (arg) );
+      }
+      printUsage( mess );
+   }
+
+   
+   fn getInqMode() : InqMode {
+      let! nextToken = getNextOp() {
+         printUsage( "illegal inqMod" );
+      };
+      let! inqMode = InqMode._from( nextToken ) {
+         printUsage( "illegal inqMod -- %s" (nextToken) );
+      };
+      return inqMode;
    }
 
    let mut mode:Mode! = nil;
-   let mut option = new Option();
    
    while true {
       let! mut arg = getNextOp() {
          break;
       };
 
-      if arg.find( "^-" ## ) {
-      } else {
-         if not mode {
-            if! let work = Mode._from( arg ) {
-               mode = work;
-            } else {
-               printUsage( "illegal option -- %s" (arg) );
+      if not mode {
+         if! let work = Mode._from( arg ) {
+            mode = work;
+            switch mode {
+               case .Inq {
+                  option.inqMode = getInqMode();
+                  option.pattern = getNextOpNonNil( "none pattern" );
+                  Log.setLevel( .Warn );
+               }
+               case .InqAt {
+                  option.inqMode = getInqMode();
+                  option.analyzeFileInfo.path = getNextOpNonNil( "none path" );
+                  option.analyzeFileInfo.lineNo = getNextOpInt( "none lineno" );
+                  option.analyzeFileInfo.column = getNextOpInt( "none column" );
+               }
             }
          } else {
-            switch mode {
-               case .Build {   
-                  option.pathList.insert( arg );
-               }
-               case .InqDef, .InqRef {
-                  option.pattern = arg;
-               }
+            printUsage( "illegal option -- %s" (arg) );
+         }
+      } else {
+         switch mode {
+            case .Build {   
+               option.pathList.insert( arg );
             }
          }
       }
    }
+   if! let logLevel = option.logLevel {
+      Log.setLevel( logLevel );
+   }
 
+   
    when! mode {
       option.mode = mode;
 

@@ -12,3 +12,4 @@ macro _Macro() {
    Sub.func();
 }
 _Macro();
+print( Sub.Val );

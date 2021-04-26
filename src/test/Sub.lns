@@ -49,3 +49,5 @@ class HogeHogeHoge extend HogeHoge {
       super( val );
    }
 }
+pub let Val = 1;
+

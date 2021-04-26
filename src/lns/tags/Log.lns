@@ -22,10 +22,15 @@ pub fn str2level( txt:str ) : Level! {
 }
 
 let mut outputLevel = Level.Log;
-
 pub fn setLevel( level:Level ) {
    outputLevel = level;
 }
+
+let mut detail = true;
+pub fn enableDetail( flag:bool ) {
+   detail = flag;
+}
+
 
 pub form CreateMessage(): str;
 
@@ -33,10 +38,14 @@ let mut logStream:oStream = io.stderr;
 
 pub fn log( level:Level, funcName:str, lineNo:int, callback: CreateMessage ) {
    if level <= outputLevel {
-      let nowClock = os.clock();
-      logStream.write(
-         "%6d:%s:%s:%d:" (( nowClock * 1000 )@@int,
-                           level.$_txt, funcName, lineNo) );
+      if detail {
+         let nowClock = os.clock();
+         logStream.write(
+            "%6d:%s:%s:%d:" (( nowClock * 1000 )@@int,
+                              level.$_txt, funcName, lineNo) );
+      } else {
+         logStream.write( "%s:%s:" (level.$_txt, funcName) );
+      }
       logStream.write( callback() );
       logStream.write( "\n" );
    }

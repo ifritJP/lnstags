@@ -24,6 +24,29 @@ local Log = _lune.loadModule( 'lns.tags.Log' )
 
 local dbPath = "lnstags.sqlite3"
 
+local function inq( inqMode, pattern )
+
+   local db = DBCtrl.open( dbPath, false )
+   if  nil == db then
+      local _db = db
+   
+      print( "error" )
+      return -1
+   end
+   
+   do
+      local _switchExp = inqMode
+      if _switchExp == Option.InqMode.Def then
+         Inq.InqDef( db, pattern )
+      elseif _switchExp == Option.InqMode.Ref then
+         Inq.InqRef( db, pattern )
+      end
+   end
+   
+   db:close(  )
+   return 0
+end
+
 local function __main( args )
 
    
@@ -39,7 +62,7 @@ local function __main( args )
             local _db = db
          
             print( "error" )
-            return -1
+            return 1
          end
          
          db:commit(  )
@@ -47,26 +70,19 @@ local function __main( args )
          Analyze.start( db, option )
          db:dumpAll(  )
          db:close(  )
-      elseif _switchExp == Option.Mode.InqDef or _switchExp == Option.Mode.InqRef then
-         Log.setLevel( Log.Level.Err )
-         local db = DBCtrl.open( dbPath, false )
-         if  nil == db then
-            local _db = db
+      elseif _switchExp == Option.Mode.Inq then
+         inq( option:get_inqMode(), option:get_pattern() )
+      elseif _switchExp == Option.Mode.InqAt then
+         local analyzeFileInfo = option:get_analyzeFileInfo()
+         local pattern = Analyze.getPatterAt( analyzeFileInfo )
+         if  nil == pattern then
+            local _pattern = pattern
          
-            print( "error" )
-            return -1
+            print( string.format( "illegal pos -- %s:%d:%d", analyzeFileInfo:get_path(), analyzeFileInfo:get_lineNo(), analyzeFileInfo:get_column()) )
+            return 1
          end
          
-         do
-            local _switchExp = option:get_mode()
-            if _switchExp == Option.Mode.InqDef then
-               Inq.InqDef( db, option:get_pattern() )
-            elseif _switchExp == Option.Mode.InqRef then
-               Inq.InqRef( db, option:get_pattern() )
-            end
-         end
-         
-         db:close(  )
+         inq( option:get_inqMode(), pattern )
       elseif _switchExp == Option.Mode.Test then
          DBCtrl.test(  )
       end

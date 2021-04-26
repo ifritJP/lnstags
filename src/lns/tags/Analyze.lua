@@ -238,6 +238,7 @@ local Ast = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.As
 local Types = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Types' )
 local LuaVer = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.LuaVer' )
 local LnsLog = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Log' )
+local LnsUtil = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Util' )
 
 local Opt = {}
 function Opt.setmeta( obj )
@@ -292,7 +293,7 @@ function tagFilter:registerType( typeInfo )
    local parentNsId = self:registerType( typeInfo:get_parentInfo() )
    local name = self:getFull( typeInfo, false )
    local nsId, added = self.db:addNamespace( name, parentNsId )
-   Log.log( Log.Level.Debug, __func__, 46, function (  )
+   Log.log( Log.Level.Debug, __func__, 47, function (  )
    
       return string.format( "%s %s %d", name, added, nsId)
    end )
@@ -302,12 +303,15 @@ function tagFilter:registerType( typeInfo )
 end
 
 
-function tagFilter:getFullNameSym( symbolInfo )
+local function getFullNameSym( filter, symbolInfo )
 
-   local name = string.format( "%s.%s", self:getFull( symbolInfo:get_namespaceTypeInfo(), false ), symbolInfo:get_name())
+   if symbolInfo:get_namespaceTypeInfo() == Ast.headTypeInfo then
+      return symbolInfo:get_name()
+   end
+   
+   local name = string.format( "%s.%s", filter:getFull( symbolInfo:get_namespaceTypeInfo(), false ), symbolInfo:get_name())
    return name
 end
-
 
 function tagFilter:registerSymbol( symbolInfo )
    local __func__ = '@lns.@tags.@Analyze.tagFilter.registerSymbol'
@@ -321,9 +325,9 @@ function tagFilter:registerSymbol( symbolInfo )
    end
    
    local parentNsId = self:registerType( symbolInfo:get_namespaceTypeInfo() )
-   local name = self:getFullNameSym( symbolInfo )
+   local name = getFullNameSym( self, symbolInfo )
    local nsId, added = self.db:addNamespace( name, parentNsId )
-   Log.log( Log.Level.Debug, __func__, 66, function (  )
+   Log.log( Log.Level.Debug, __func__, 70, function (  )
    
       return string.format( "%s %s %d", name, added, nsId)
    end )
@@ -417,7 +421,7 @@ function tagFilter:registerDecl( nodeManager, fileId, processInfo )
                local symNsId = self:registerSymbol( _exp )
                local pos = _lune.unwrap( _exp:get_pos())
                self.db:addSymbolDecl( symNsId, fileId, pos.lineNo, pos.column )
-               Log.log( Log.Level.Debug, __func__, 86, function (  )
+               Log.log( Log.Level.Debug, __func__, 90, function (  )
                
                   return _exp:get_name()
                end )
@@ -440,7 +444,7 @@ function tagFilter:registerDecl( nodeManager, fileId, processInfo )
          end
          table.sort( __sorted )
          for __index, name in ipairs( __sorted ) do
-            local _5897 = __map[ name ]
+            local _5945 = __map[ name ]
             do
                do
                   local _exp = _lune.nilacc( workNode:get_algeType():get_scope(), 'getSymbolInfoChild', 'callmtd' , name )
@@ -449,7 +453,7 @@ function tagFilter:registerDecl( nodeManager, fileId, processInfo )
                      local symNsId = self:registerSymbol( _exp )
                      local pos = _lune.unwrap( _exp:get_pos())
                      self.db:addSymbolDecl( symNsId, fileId, pos.lineNo, pos.column )
-                     Log.log( Log.Level.Debug, __func__, 86, function (  )
+                     Log.log( Log.Level.Debug, __func__, 90, function (  )
                      
                         return _exp:get_name()
                      end )
@@ -476,7 +480,7 @@ function tagFilter:registerDecl( nodeManager, fileId, processInfo )
             local symNsId = self:registerSymbol( symbolInfo )
             local pos = _lune.unwrap( symbolInfo:get_pos())
             self.db:addSymbolDecl( symNsId, fileId, pos.lineNo, pos.column )
-            Log.log( Log.Level.Debug, __func__, 86, function (  )
+            Log.log( Log.Level.Debug, __func__, 90, function (  )
             
                return symbolInfo:get_name()
             end )
@@ -493,7 +497,7 @@ function tagFilter:registerDecl( nodeManager, fileId, processInfo )
       local symNsId = self:registerSymbol( workNode:get_symbolInfo() )
       local pos = _lune.unwrap( workNode:get_symbolInfo():get_pos())
       self.db:addSymbolDecl( symNsId, fileId, pos.lineNo, pos.column )
-      Log.log( Log.Level.Debug, __func__, 86, function (  )
+      Log.log( Log.Level.Debug, __func__, 90, function (  )
       
          return workNode:get_symbolInfo():get_name()
       end )
@@ -515,6 +519,7 @@ end
 
 
 function tagFilter:registerRefs( nodeManager, fileId )
+   local __func__ = '@lns.@tags.@Analyze.tagFilter.registerRefs'
 
    
    local function addSymbolRef( symbolInfo, pos )
@@ -529,9 +534,9 @@ function tagFilter:registerRefs( nodeManager, fileId )
       
       local nsId, added = self:registerSymbol( symbolInfo )
       if added and not Ast.isBuiltin( symbolInfo:get_namespaceTypeInfo():get_typeId() ) then
-         Log.log( Log.Level.Err, __func__, 189, function (  )
+         Log.log( Log.Level.Err, __func__, 193, function (  )
          
-            return string.format( "no register sym -- %d:%d:%s", pos.lineNo, pos.column, self:getFullNameSym( symbolInfo ))
+            return string.format( "no register sym -- %d:%d:%s", pos.lineNo, pos.column, getFullNameSym( self, symbolInfo ))
          end )
          
       end
@@ -544,7 +549,7 @@ function tagFilter:registerRefs( nodeManager, fileId )
    
       local nsId, added = self:registerType( typeInfo )
       if added and not Ast.isBuiltin( typeInfo:get_typeId() ) then
-         Log.log( Log.Level.Err, __func__, 199, function (  )
+         Log.log( Log.Level.Err, __func__, 203, function (  )
          
             return string.format( "no register type -- %d:%d:%s", pos.lineNo, pos.column, self:getFull( typeInfo, false ))
          end )
@@ -564,8 +569,10 @@ function tagFilter:registerRefs( nodeManager, fileId )
             
                do
                   local _switchExp = symbolInfo:get_kind()
-                  if _switchExp == Ast.SymbolKind.Fun or _switchExp == Ast.SymbolKind.Mac or _switchExp == Ast.SymbolKind.Mbr or _switchExp == Ast.SymbolKind.Mtd or _switchExp == Ast.SymbolKind.Typ then
+                  if _switchExp == Ast.SymbolKind.Fun or _switchExp == Ast.SymbolKind.Mac or _switchExp == Ast.SymbolKind.Mtd or _switchExp == Ast.SymbolKind.Typ then
                      registerRefType( symbolInfo:get_typeInfo(), pos )
+                  elseif _switchExp == Ast.SymbolKind.Mbr then
+                     addSymbolRef( symbolInfo, pos )
                   elseif _switchExp == Ast.SymbolKind.Var then
                      if Ast.isPubToExternal( symbolInfo:get_accessMode() ) then
                         addSymbolRef( symbolInfo, pos )
@@ -604,6 +611,12 @@ function tagFilter:registerRefs( nodeManager, fileId )
          local _exp = workNode:get_symbolInfo()
          if _exp ~= nil then
             registerRefSym( _exp, workNode:get_pos() )
+         else
+            Log.log( Log.Level.Warn, __func__, 257, function (  )
+            
+               return string.format( "no symbolInfo -- %s", workNode:get_field().txt)
+            end )
+            
          end
       end
       
@@ -653,7 +666,7 @@ end
 local function dumpRoot( rootNode, db, option, streamName )
    local __func__ = '@lns.@tags.@Analyze.dumpRoot'
 
-   Log.log( Log.Level.Log, __func__, 283, function (  )
+   Log.log( Log.Level.Log, __func__, 292, function (  )
    
       return streamName
    end )
@@ -664,14 +677,21 @@ local function dumpRoot( rootNode, db, option, streamName )
    db:commit(  )
 end
 
+local function buildAst( logLevel, path, astCallback )
+
+   LnsLog.setLevel( logLevel )
+   LnsUtil.setDebugFlag( false )
+   
+   local lnsOpt = LnsOpt.createDefaultOption( path )
+   lnsOpt.targetLuaVer = LuaVer.ver53
+   lnsOpt.transCtrlInfo.uptodateMode = Types.CheckingUptodateMode.Force
+   front.build( lnsOpt, astCallback )
+end
+
 local function start( db, option )
 
-   LnsLog.setLevel( LnsLog.Level.Log )
    for __index, path in pairs( option:get_pathList() ) do
-      local lnsOpt = LnsOpt.createDefaultOption( path )
-      lnsOpt.targetLuaVer = LuaVer.ver53
-      lnsOpt.transCtrlInfo.uptodateMode = Types.CheckingUptodateMode.Force
-      front.build( lnsOpt, function ( ast )
+      buildAst( LnsLog.Level.Log, path, function ( ast )
       
          do
             local rootNode = _lune.__Cast( ast:get_node(), 3, Nodes.RootNode )
@@ -685,5 +705,331 @@ local function start( db, option )
    
 end
 _moduleObj.start = start
+
+
+
+local SyntaxFilter = {}
+setmetatable( SyntaxFilter, { __index = Nodes.Filter } )
+function SyntaxFilter.new( ast )
+   local obj = {}
+   SyntaxFilter.setmeta( obj )
+   if obj.__init then obj:__init( ast ); end
+   return obj
+end
+function SyntaxFilter:__init(ast) 
+   Nodes.Filter.__init( self,true, ast:get_moduleTypeInfo(), ast:get_moduleTypeInfo():get_scope())
+   
+   self.ast = ast
+end
+function SyntaxFilter:getPatternFromNode( analyzeFileInfo, nearest )
+   local __func__ = '@lns.@tags.@Analyze.SyntaxFilter.getPatternFromNode'
+
+   local function isInner( pos, name )
+   
+      if pos.lineNo == analyzeFileInfo:get_lineNo() and pos.column <= analyzeFileInfo:get_column() and pos.column + #name >= analyzeFileInfo:get_column() then
+         return true
+      end
+      
+      return false
+   end
+   
+   
+   
+   Log.log( Log.Level.Log, __func__, 326, function (  )
+   
+      return string.format( "%s %s:%4d:%3d -- %s", "nearestNode -- ", nearest:get_effectivePos().streamName, nearest:get_effectivePos().lineNo, nearest:get_effectivePos().column, Nodes.getNodeKindName( nearest:get_kind() ))
+   end )
+   
+   
+   do
+      local workNode = _lune.__Cast( nearest, 3, Nodes.ExpRefNode )
+      if workNode ~= nil then
+         return getFullNameSym( self, workNode:get_symbolInfo() )
+      end
+   end
+   
+   do
+      local workNode = _lune.__Cast( nearest, 3, Nodes.RefFieldNode )
+      if workNode ~= nil then
+         if isInner( workNode:get_field().pos, workNode:get_field().txt ) then
+            do
+               local symbolInfo = workNode:get_symbolInfo()
+               if symbolInfo ~= nil then
+                  return getFullNameSym( self, symbolInfo )
+               end
+            end
+            
+         end
+         
+      end
+   end
+   
+   do
+      local workNode = _lune.__Cast( nearest, 3, Nodes.DeclVarNode )
+      if workNode ~= nil then
+         for __index, varSym in pairs( workNode:get_symbolInfoList() ) do
+            
+            if isInner( _lune.unwrap( varSym:get_pos()), varSym:get_name() ) then
+               return getFullNameSym( self, varSym )
+            end
+            
+            
+         end
+         
+      end
+   end
+   
+   do
+      local workNode = _lune.__Cast( nearest, 3, Nodes.ExpOmitEnumNode )
+      if workNode ~= nil then
+         if isInner( workNode:get_effectivePos(), workNode:get_valInfo():get_name() ) then
+            return getFullNameSym( self, workNode:get_valInfo():get_symbolInfo() )
+         end
+         
+      end
+   end
+   
+   do
+      local workNode = _lune.__Cast( nearest, 3, Nodes.NewAlgeValNode )
+      if workNode ~= nil then
+         if isInner( workNode:get_effectivePos(), workNode:get_valInfo():get_name() ) then
+            return getFullNameSym( self, workNode:get_valInfo():get_symbolInfo() )
+         end
+         
+      end
+   end
+   
+   do
+      local workNode = _lune.__Cast( nearest, 3, Nodes.ExpMacroExpNode )
+      if workNode ~= nil then
+         if isInner( workNode:get_effectivePos(), workNode:get_expType():get_rawTxt() ) then
+            return self:getFull( workNode:get_macroType(), false )
+         end
+         
+      end
+   end
+   
+   do
+      local workNode = _lune.__Cast( nearest, 3, Nodes.DeclFuncNode )
+      if workNode ~= nil then
+         do
+            local name = workNode:get_declInfo():get_name()
+            if name ~= nil then
+               if isInner( name.pos, name.txt ) then
+                  return self:getFull( workNode:get_expType(), false )
+               end
+               
+            end
+         end
+         
+      end
+   end
+   
+   do
+      local workNode = _lune.__Cast( nearest, 3, Nodes.DeclEnumNode )
+      if workNode ~= nil then
+         local name = workNode:get_name()
+         if isInner( name.pos, name.txt ) then
+            return self:getFull( workNode:get_expType(), false )
+         end
+         
+         for __index, valInfo in pairs( workNode:get_enumType():get_name2EnumValInfo() ) do
+            
+            if isInner( _lune.unwrap( valInfo:get_symbolInfo():get_pos()), valInfo:get_symbolInfo():get_name() ) then
+               return getFullNameSym( self, valInfo:get_symbolInfo() )
+            end
+            
+            
+         end
+         
+      end
+   end
+   
+   do
+      local workNode = _lune.__Cast( nearest, 3, Nodes.DeclAlgeNode )
+      if workNode ~= nil then
+         local name = workNode:get_name()
+         if isInner( name.pos, name.txt ) then
+            return self:getFull( workNode:get_expType(), false )
+         end
+         
+         for __index, valInfo in pairs( workNode:get_algeType():get_valInfoMap() ) do
+            
+            if isInner( _lune.unwrap( valInfo:get_symbolInfo():get_pos()), valInfo:get_symbolInfo():get_name() ) then
+               return getFullNameSym( self, valInfo:get_symbolInfo() )
+            end
+            
+            
+         end
+         
+      end
+   end
+   
+   do
+      local workNode = _lune.__Cast( nearest, 3, Nodes.DeclClassNode )
+      if workNode ~= nil then
+         if isInner( workNode:get_name().pos, workNode:get_name().txt ) then
+            return self:getFull( workNode:get_expType(), false )
+         end
+         
+      end
+   end
+   
+   do
+      local workNode = _lune.__Cast( nearest, 3, Nodes.DeclMethodNode )
+      if workNode ~= nil then
+         do
+            local name = workNode:get_declInfo():get_name()
+            if name ~= nil then
+               if isInner( name.pos, name.txt ) then
+                  return self:getFull( workNode:get_expType(), false )
+               end
+               
+            end
+         end
+         
+      end
+   end
+   
+   do
+      local workNode = _lune.__Cast( nearest, 3, Nodes.ProtoClassNode )
+      if workNode ~= nil then
+         local name = workNode:get_name()
+         if isInner( name.pos, name.txt ) then
+            return self:getFull( workNode:get_expType(), false )
+         end
+         
+      end
+   end
+   
+   do
+      local workNode = _lune.__Cast( nearest, 3, Nodes.DeclMemberNode )
+      if workNode ~= nil then
+         
+         if isInner( _lune.unwrap( workNode:get_symbolInfo():get_pos()), workNode:get_symbolInfo():get_name() ) then
+            return getFullNameSym( self, workNode:get_symbolInfo() )
+         end
+         
+         
+      end
+   end
+   
+   do
+      local workNode = _lune.__Cast( nearest, 3, Nodes.DeclConstrNode )
+      if workNode ~= nil then
+         do
+            local name = workNode:get_declInfo():get_name()
+            if name ~= nil then
+               if isInner( name.pos, name.txt ) then
+                  return self:getFull( workNode:get_expType(), false )
+               end
+               
+            end
+         end
+         
+      end
+   end
+   
+   Log.log( Log.Level.Err, __func__, 442, function (  )
+   
+      return string.format( "unknown pattern -- %s", Nodes.getNodeKindName( nearest:get_kind() ))
+   end )
+   
+   return nil
+end
+function SyntaxFilter:getPattern( analyzeFileInfo )
+
+   local pattern = nil
+   if self.ast:get_streamName() == analyzeFileInfo:get_path() then
+      local nearestNode = nil
+      self.ast:get_node():visit( function ( node, parent, relation, depth )
+         local __func__ = '@lns.@tags.@Analyze.SyntaxFilter.getPattern.<anonymous>'
+      
+         if analyzeFileInfo:get_path() == node:get_effectivePos().streamName then
+            if analyzeFileInfo:get_lineNo() == node:get_effectivePos().lineNo and analyzeFileInfo:get_column() >= node:get_effectivePos().column then
+               do
+                  local nearest = nearestNode
+                  if nearest ~= nil then
+                     if nearest:get_effectivePos().lineNo ~= analyzeFileInfo:get_lineNo() then
+                        nearestNode = node
+                     end
+                     
+                     if nearest:get_effectivePos().column < node:get_effectivePos().column then
+                        nearestNode = node
+                     elseif nearest:get_effectivePos().column == node:get_effectivePos().column then
+                        nearestNode = node
+                     end
+                     
+                  else
+                     nearestNode = node
+                  end
+               end
+               
+            else
+             
+               do
+                  local nearest = nearestNode
+                  if nearest ~= nil then
+                     if nearest:get_effectivePos().lineNo < node:get_pos().lineNo and node:get_pos().lineNo < analyzeFileInfo:get_lineNo() then
+                        nearestNode = node
+                     end
+                     
+                  else
+                     nearestNode = node
+                  end
+               end
+               
+            end
+            
+            
+            Log.log( Log.Level.Trace, __func__, 326, function (  )
+            
+               return string.format( "%s %s:%4d:%3d -- %s", "visit:", node:get_effectivePos().streamName, node:get_effectivePos().lineNo, node:get_effectivePos().column, Nodes.getNodeKindName( node:get_kind() ))
+            end )
+            
+            
+            return Nodes.NodeVisitMode.Child
+         end
+         
+         return Nodes.NodeVisitMode.Next
+      end, 0 )
+      do
+         local nearest = nearestNode
+         if nearest ~= nil then
+            pattern = self:getPatternFromNode( analyzeFileInfo, nearest )
+         end
+      end
+      
+   end
+   
+   return pattern
+end
+function SyntaxFilter.setmeta( obj )
+  setmetatable( obj, { __index = SyntaxFilter  } )
+end
+
+
+local function getPatterAt( analyzeFileInfo )
+
+   
+   local pattern = nil
+   buildAst( LnsLog.Level.Err, analyzeFileInfo:get_path(), function ( ast )
+      local __func__ = '@lns.@tags.@Analyze.getPatterAt.<anonymous>'
+   
+      if ast:get_streamName() == analyzeFileInfo:get_path() then
+         local filter = SyntaxFilter.new(ast)
+         pattern = filter:getPattern( analyzeFileInfo )
+         Log.log( Log.Level.Log, __func__, 501, function (  )
+         
+            return string.format( "pattern -- %s", pattern)
+         end )
+         
+      end
+      
+   end )
+   
+   return pattern
+end
+_moduleObj.getPatterAt = getPatterAt
 
 return _moduleObj
