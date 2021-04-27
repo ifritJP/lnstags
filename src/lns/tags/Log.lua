@@ -118,7 +118,7 @@ local function str2level( txt )
 end
 _moduleObj.str2level = str2level
 
-local outputLevel = Level.Log
+local outputLevel = Level.Warn
 local function setLevel( level )
 
    outputLevel = level

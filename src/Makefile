@@ -25,6 +25,7 @@ buildDB: build
 
 inq: build
 	./lnstags --simpleLog inq-at def test/main.lns 2 6 --log debug
+	./lnstags --simpleLog inq-at def test/main.lns 3 12 --log debug
 	./lnstags --simpleLog inq-at def test/main.lns 3 21 --log debug
 	./lnstags --simpleLog inq-at def test/main.lns 4 15 --log debug
 	./lnstags --simpleLog inq-at def test/main.lns 5 7 --log debug
@@ -33,6 +34,7 @@ inq: build
 	./lnstags --simpleLog inq-at def test/main.lns 6 22 --log debug
 	./lnstags --simpleLog inq-at def test/main.lns 7 10 --log debug
 	./lnstags --simpleLog inq-at def test/main.lns 7 16 --log debug
+	./lnstags --simpleLog inq-at ref test/main.lns 11 7 --log debug
 	./lnstags --simpleLog inq-at def test/main.lns 14 1 --log debug
 	./lnstags --simpleLog inq-at def test/main.lns 15 12 --log debug
 	./lnstags --simpleLog inq-at ref test/Sub.lns 1 10 --log debug
@@ -49,14 +51,20 @@ inq: build
 	./lnstags --simpleLog inq-at ref test/Sub.lns 16 33 --log debug
 	./lnstags --simpleLog inq-at ref test/Sub.lns 17 12 --log debug
 	./lnstags --simpleLog inq-at ref test/Sub.lns 18 12 --log debug
-	./lnstags --simpleLog inq-at ref test/Sub.lns 23 13 --log debug
+	./lnstags --simpleLog inq-at def test/Sub.lns 21 21 --log debug
+	./lnstags --simpleLog inq-at def test/Sub.lns 24 16 --log debug
+	./lnstags --simpleLog inq-at def test/Sub.lns 33 14 --log debug
+	./lnstags --simpleLog inq-at def test/Sub.lns 41 9 --log debug
+	./lnstags --simpleLog inq-at def test/Sub.lns 46 9 --log debug
+	./lnstags --simpleLog inq-at def test/Sub.lns 54 9 --log debug
+	cat test/Sub2.lns | ./lnstags --simpleLog inq-at ref -i test/Sub.lns 2 5 --log debug
 	./lnstags --simpleLog inq def @test.@Sub.Bar.Val1
 	./lnstags --simpleLog inq def @test.@Sub.Hoge.func
 	./lnstags --simpleLog inq ref @test.@Sub.Hoge.func
 	./lnstags --simpleLog inq ref @test.@Sub.HogeHoge.__init
 
 check: build
-	$(MAKE) inq > work/output.new.txt 2>&1
+	$(MAKE) inq 2>&1 | grep -v -e '^make\[' > work/output.new.txt 
 	diff test/output.txt work/output.new.txt
 
 

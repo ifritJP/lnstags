@@ -1,17 +1,7 @@
 --lns/tags/main.lns
 local _moduleObj = {}
 local __mod__ = '@lns.@tags.@main'
-local _lune = {}
-if _lune3 then
-   _lune = _lune3
-end
-function _lune.loadModule( mod )
-   if __luneScript then
-      return  __luneScript:loadModule( mod )
-   end
-   return require( mod )
-end
-
+local _lune = require( "lune.base.runtime3" )
 if not _lune3 then
    _lune3 = _lune
 end
@@ -68,7 +58,6 @@ local function __main( args )
          db:commit(  )
          
          Analyze.start( db, option )
-         db:dumpAll(  )
          db:close(  )
       elseif _switchExp == Option.Mode.Inq then
          inq( option:get_inqMode(), option:get_pattern() )
@@ -83,6 +72,18 @@ local function __main( args )
          end
          
          inq( option:get_inqMode(), pattern )
+      elseif _switchExp == Option.Mode.Dump then
+         local db = DBCtrl.open( dbPath, true )
+         if  nil == db then
+            local _db = db
+         
+            print( "error" )
+            return 1
+         end
+         
+         db:dumpAll(  )
+         
+         db:close(  )
       elseif _switchExp == Option.Mode.Test then
          DBCtrl.test(  )
       end

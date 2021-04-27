@@ -12,8 +12,17 @@
   - [x] module 宣言
   - [x] Mapping, accessor の自動生成
   - [x] =__func__=, =__mod__= 系
+  - [ ] alias
+  - [ ] generic の型パラメータ
+- [ ] pattern 取得    
+  - [ ] $getter
+  - [ ] accessor の定義から、参照位置にジャンプできるように対応する
+  - [ ] getterの定義をメンバの参照に加える
+  - [ ] setterの定義をメンバの設定に加える
 - [x] new 演算子の登録
 - [x] super() コール
 - [x] override 関数コール
 - [ ] belongns 対応
-- [ ] emacs mode
+- [x] emacs mode
+- [ ] go の github モジュールのように、別ディレクトリのモジュールジャンプすると、
+      ジャンプ後の db が参照できない。

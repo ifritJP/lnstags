@@ -44,7 +44,6 @@ pub fn __main( args:&List<str> ) : int {
          db.commit();
          
          Analyze.start( db, option );
-         db.dumpAll();
          db.close();
       }
       case .Inq {
@@ -59,6 +58,15 @@ pub fn __main( args:&List<str> ) : int {
             return 1;
          };
          inq( option.$inqMode, pattern );
+      }
+      case .Dump {
+         let! mut db = DBCtrl.open( dbPath, true ) {
+            print( "error" );
+            return 1;
+         };
+         db.dumpAll();
+
+         db.close();
       }
       case .Test {
          DBCtrl.test();

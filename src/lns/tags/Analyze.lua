@@ -1,229 +1,7 @@
 --lns/tags/Analyze.lns
 local _moduleObj = {}
 local __mod__ = '@lns.@tags.@Analyze'
-local _lune = {}
-if _lune3 then
-   _lune = _lune3
-end
-function _lune.newAlge( kind, vals )
-   local memInfoList = kind[ 2 ]
-   if not memInfoList then
-      return kind
-   end
-   return { kind[ 1 ], vals }
-end
-
-function _lune._fromList( obj, list, memInfoList )
-   if type( list ) ~= "table" then
-      return false
-   end
-   for index, memInfo in ipairs( memInfoList ) do
-      local val, key = memInfo.func( list[ index ], memInfo.child )
-      if val == nil and not memInfo.nilable then
-         return false, key and string.format( "%s[%s]", memInfo.name, key) or memInfo.name
-      end
-      obj[ index ] = val
-   end
-   return true
-end
-function _lune._AlgeFrom( Alge, val )
-   local work = Alge._name2Val[ val[ 1 ] ]
-   if not work then
-      return nil
-   end
-   if #work == 1 then
-     return work
-   end
-   local paramList = {}
-   local result, mess = _lune._fromList( paramList, val[ 2 ], work[ 2 ] )
-   if not result then
-      return nil, mess
-   end
-   return { work[ 1 ], paramList }
-end
-
-function _lune._Set_or( setObj, otherSet )
-   for val in pairs( otherSet ) do
-      setObj[ val ] = true
-   end
-   return setObj
-end
-function _lune._Set_and( setObj, otherSet )
-   local delValList = {}
-   for val in pairs( setObj ) do
-      if not otherSet[ val ] then
-         table.insert( delValList, val )
-      end
-   end
-   for index, val in ipairs( delValList ) do
-      setObj[ val ] = nil
-   end
-   return setObj
-end
-function _lune._Set_has( setObj, val )
-   return setObj[ val ] ~= nil
-end
-function _lune._Set_sub( setObj, otherSet )
-   local delValList = {}
-   for val in pairs( setObj ) do
-      if otherSet[ val ] then
-         table.insert( delValList, val )
-      end
-   end
-   for index, val in ipairs( delValList ) do
-      setObj[ val ] = nil
-   end
-   return setObj
-end
-function _lune._Set_len( setObj )
-   local total = 0
-   for val in pairs( setObj ) do
-      total = total + 1
-   end
-   return total
-end
-function _lune._Set_clone( setObj )
-   local obj = {}
-   for val in pairs( setObj ) do
-      obj[ val ] = true
-   end
-   return obj
-end
-
-function _lune._toSet( val, toKeyInfo )
-   if type( val ) == "table" then
-      local tbl = {}
-      for key, mem in pairs( val ) do
-         local mapKey, keySub = toKeyInfo.func( key, toKeyInfo.child )
-         local mapVal = _lune._toBool( mem )
-         if mapKey == nil or mapVal == nil then
-            if mapKey == nil then
-               return nil
-            end
-            if keySub == nil then
-               return nil, mapKey
-            end
-            return nil, string.format( "%s.%s", mapKey, keySub)
-         end
-         tbl[ mapKey ] = mapVal
-      end
-      return tbl
-   end
-   return nil
-end
-
-function _lune.nilacc( val, fieldName, access, ... )
-   if not val then
-      return nil
-   end
-   if fieldName then
-      local field = val[ fieldName ]
-      if not field then
-         return nil
-      end
-      if access == "item" then
-         local typeId = type( field )
-         if typeId == "table" then
-            return field[ ... ]
-         elseif typeId == "string" then
-            return string.byte( field, ... )
-         end
-      elseif access == "call" then
-         return field( ... )
-      elseif access == "callmtd" then
-         return field( val, ... )
-      end
-      return field
-   end
-   if access == "item" then
-      local typeId = type( val )
-      if typeId == "table" then
-         return val[ ... ]
-      elseif typeId == "string" then
-         return string.byte( val, ... )
-      end
-   elseif access == "call" then
-      return val( ... )
-   elseif access == "list" then
-      local list, arg = ...
-      if not list then
-         return nil
-      end
-      return val( list, arg )
-   end
-   error( string.format( "illegal access -- %s", access ) )
-end
-
-function _lune.unwrap( val )
-   if val == nil then
-      __luneScript:error( 'unwrap val is nil' )
-   end
-   return val
-end
-function _lune.unwrapDefault( val, defval )
-   if val == nil then
-      return defval
-   end
-   return val
-end
-
-function _lune.loadModule( mod )
-   if __luneScript then
-      return  __luneScript:loadModule( mod )
-   end
-   return require( mod )
-end
-
-function _lune.__isInstanceOf( obj, class )
-   while obj do
-      local meta = getmetatable( obj )
-      if not meta then
-	 return false
-      end
-      local indexTbl = meta.__index
-      if indexTbl == class then
-	 return true
-      end
-      if meta.ifList then
-         for index, ifType in ipairs( meta.ifList ) do
-            if ifType == class then
-               return true
-            end
-            if _lune.__isInstanceOf( ifType, class ) then
-               return true
-            end
-         end
-      end
-      obj = indexTbl
-   end
-   return false
-end
-
-function _lune.__Cast( obj, kind, class )
-   if kind == 0 then -- int
-      if type( obj ) ~= "number" then
-         return nil
-      end
-      if math.floor( obj ) ~= obj then
-         return nil
-      end
-      return obj
-   elseif kind == 1 then -- real
-      if type( obj ) ~= "number" then
-         return nil
-      end
-      return obj
-   elseif kind == 2 then -- str
-      if type( obj ) ~= "string" then
-         return nil
-      end
-      return obj
-   elseif kind == 3 then -- class
-      return _lune.__isInstanceOf( obj, class ) and obj or nil
-   end
-   return nil
-end
-
+local _lune = require( "lune.base.runtime3" )
 if not _lune3 then
    _lune3 = _lune
 end
@@ -232,6 +10,7 @@ local Option = _lune.loadModule( 'lns.tags.Option' )
 local Log = _lune.loadModule( 'lns.tags.Log' )
 local LnsOpt = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Option' )
 local Nodes = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Nodes' )
+local Parser = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Parser' )
 local TransUnit = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.TransUnit' )
 local front = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.front' )
 local Ast = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Ast' )
@@ -293,7 +72,7 @@ function tagFilter:registerType( typeInfo )
    local parentNsId = self:registerType( typeInfo:get_parentInfo() )
    local name = self:getFull( typeInfo, false )
    local nsId, added = self.db:addNamespace( name, parentNsId )
-   Log.log( Log.Level.Debug, __func__, 47, function (  )
+   Log.log( Log.Level.Debug, __func__, 48, function (  )
    
       return string.format( "%s %s %d", name, added, nsId)
    end )
@@ -327,7 +106,7 @@ function tagFilter:registerSymbol( symbolInfo )
    local parentNsId = self:registerType( symbolInfo:get_namespaceTypeInfo() )
    local name = getFullNameSym( self, symbolInfo )
    local nsId, added = self.db:addNamespace( name, parentNsId )
-   Log.log( Log.Level.Debug, __func__, 70, function (  )
+   Log.log( Log.Level.Debug, __func__, 71, function (  )
    
       return string.format( "%s %s %d", name, added, nsId)
    end )
@@ -363,31 +142,36 @@ function tagFilter:registerDecl( nodeManager, fileId, processInfo )
       end
       
    end
-   for __index, workNode in pairs( nodeManager:getDeclFormNodeList(  ) ) do
+   for __index, workNode in ipairs( nodeManager:getDeclFormNodeList(  ) ) do
       registDeclType( workNode )
    end
    
    
-   for __index, workNode in pairs( nodeManager:getProtoClassNodeList(  ) ) do
+   for __index, workNode in ipairs( nodeManager:getProtoClassNodeList(  ) ) do
       registDeclType( workNode )
    end
    
    
-   for __index, workNode in pairs( nodeManager:getDeclClassNodeList(  ) ) do
+   for __index, workNode in ipairs( nodeManager:getDeclClassNodeList(  ) ) do
       registDeclType( workNode )
       registerAutoMethod( workNode:get_expType(), workNode:get_pos() )
    end
    
    
-   for __index, workNode in pairs( nodeManager:getDeclFuncNodeList(  ) ) do
+   for __index, workNode in ipairs( nodeManager:getDeclConstrNodeList(  ) ) do
       registDeclType( workNode )
    end
    
-   for __index, workNode in pairs( nodeManager:getProtoMethodNodeList(  ) ) do
+   
+   for __index, workNode in ipairs( nodeManager:getDeclFuncNodeList(  ) ) do
       registDeclType( workNode )
    end
    
-   for __index, workNode in pairs( nodeManager:getDeclMethodNodeList(  ) ) do
+   for __index, workNode in ipairs( nodeManager:getProtoMethodNodeList(  ) ) do
+      registDeclType( workNode )
+   end
+   
+   for __index, workNode in ipairs( nodeManager:getDeclMethodNodeList(  ) ) do
       local nsId = registDeclType( workNode )
       local methodType = workNode:get_expType()
       if not methodType:get_staticFlag() then
@@ -410,10 +194,10 @@ function tagFilter:registerDecl( nodeManager, fileId, processInfo )
       
    end
    
-   for __index, workNode in pairs( nodeManager:getDeclEnumNodeList(  ) ) do
+   for __index, workNode in ipairs( nodeManager:getDeclEnumNodeList(  ) ) do
       registDeclType( workNode )
       registerAutoMethod( workNode:get_expType(), workNode:get_pos() )
-      for __index, name in pairs( workNode:get_valueNameList() ) do
+      for __index, name in ipairs( workNode:get_valueNameList() ) do
          do
             local _exp = workNode:get_scope():getSymbolInfoChild( name.txt )
             if _exp ~= nil then
@@ -421,7 +205,7 @@ function tagFilter:registerDecl( nodeManager, fileId, processInfo )
                local symNsId = self:registerSymbol( _exp )
                local pos = _lune.unwrap( _exp:get_pos())
                self.db:addSymbolDecl( symNsId, fileId, pos.lineNo, pos.column )
-               Log.log( Log.Level.Debug, __func__, 90, function (  )
+               Log.log( Log.Level.Debug, __func__, 91, function (  )
                
                   return _exp:get_name()
                end )
@@ -434,7 +218,7 @@ function tagFilter:registerDecl( nodeManager, fileId, processInfo )
       
    end
    
-   for __index, workNode in pairs( nodeManager:getDeclAlgeNodeList(  ) ) do
+   for __index, workNode in ipairs( nodeManager:getDeclAlgeNodeList(  ) ) do
       registDeclType( workNode )
       do
          local __sorted = {}
@@ -444,7 +228,7 @@ function tagFilter:registerDecl( nodeManager, fileId, processInfo )
          end
          table.sort( __sorted )
          for __index, name in ipairs( __sorted ) do
-            local _5945 = __map[ name ]
+            local _5959 = __map[ name ]
             do
                do
                   local _exp = _lune.nilacc( workNode:get_algeType():get_scope(), 'getSymbolInfoChild', 'callmtd' , name )
@@ -453,7 +237,7 @@ function tagFilter:registerDecl( nodeManager, fileId, processInfo )
                      local symNsId = self:registerSymbol( _exp )
                      local pos = _lune.unwrap( _exp:get_pos())
                      self.db:addSymbolDecl( symNsId, fileId, pos.lineNo, pos.column )
-                     Log.log( Log.Level.Debug, __func__, 90, function (  )
+                     Log.log( Log.Level.Debug, __func__, 91, function (  )
                      
                         return _exp:get_name()
                      end )
@@ -468,19 +252,19 @@ function tagFilter:registerDecl( nodeManager, fileId, processInfo )
       
    end
    
-   for __index, workNode in pairs( nodeManager:getDeclMacroNodeList(  ) ) do
+   for __index, workNode in ipairs( nodeManager:getDeclMacroNodeList(  ) ) do
       registDeclType( workNode )
    end
    
    
-   for __index, workNode in pairs( nodeManager:getDeclVarNodeList(  ) ) do
+   for __index, workNode in ipairs( nodeManager:getDeclVarNodeList(  ) ) do
       if Ast.isPubToExternal( workNode:get_accessMode() ) then
-         for __index, symbolInfo in pairs( workNode:get_symbolInfoList() ) do
+         for __index, symbolInfo in ipairs( workNode:get_symbolInfoList() ) do
             
             local symNsId = self:registerSymbol( symbolInfo )
             local pos = _lune.unwrap( symbolInfo:get_pos())
             self.db:addSymbolDecl( symNsId, fileId, pos.lineNo, pos.column )
-            Log.log( Log.Level.Debug, __func__, 90, function (  )
+            Log.log( Log.Level.Debug, __func__, 91, function (  )
             
                return symbolInfo:get_name()
             end )
@@ -492,12 +276,12 @@ function tagFilter:registerDecl( nodeManager, fileId, processInfo )
       
    end
    
-   for __index, workNode in pairs( nodeManager:getDeclMemberNodeList(  ) ) do
+   for __index, workNode in ipairs( nodeManager:getDeclMemberNodeList(  ) ) do
       
       local symNsId = self:registerSymbol( workNode:get_symbolInfo() )
       local pos = _lune.unwrap( workNode:get_symbolInfo():get_pos())
       self.db:addSymbolDecl( symNsId, fileId, pos.lineNo, pos.column )
-      Log.log( Log.Level.Debug, __func__, 90, function (  )
+      Log.log( Log.Level.Debug, __func__, 91, function (  )
       
          return workNode:get_symbolInfo():get_name()
       end )
@@ -534,7 +318,7 @@ function tagFilter:registerRefs( nodeManager, fileId )
       
       local nsId, added = self:registerSymbol( symbolInfo )
       if added and not Ast.isBuiltin( symbolInfo:get_namespaceTypeInfo():get_typeId() ) then
-         Log.log( Log.Level.Err, __func__, 193, function (  )
+         Log.log( Log.Level.Err, __func__, 198, function (  )
          
             return string.format( "no register sym -- %d:%d:%s", pos.lineNo, pos.column, getFullNameSym( self, symbolInfo ))
          end )
@@ -549,7 +333,7 @@ function tagFilter:registerRefs( nodeManager, fileId )
    
       local nsId, added = self:registerType( typeInfo )
       if added and not Ast.isBuiltin( typeInfo:get_typeId() ) then
-         Log.log( Log.Level.Err, __func__, 203, function (  )
+         Log.log( Log.Level.Err, __func__, 208, function (  )
          
             return string.format( "no register type -- %d:%d:%s", pos.lineNo, pos.column, self:getFull( typeInfo, false ))
          end )
@@ -587,32 +371,32 @@ function tagFilter:registerRefs( nodeManager, fileId )
       end
       
    end
-   for __index, workNode in pairs( nodeManager:getExpNewNodeList(  ) ) do
+   for __index, workNode in ipairs( nodeManager:getExpNewNodeList(  ) ) do
       registerRefType( workNode:get_ctorTypeInfo(), workNode:get_pos() )
    end
    
    
-   for __index, workNode in pairs( nodeManager:getExpCallSuperCtorNodeList(  ) ) do
+   for __index, workNode in ipairs( nodeManager:getExpCallSuperCtorNodeList(  ) ) do
       registerRefType( workNode:get_methodType(), workNode:get_pos() )
    end
    
    
-   for __index, workNode in pairs( nodeManager:getExpCallSuperNodeList(  ) ) do
+   for __index, workNode in ipairs( nodeManager:getExpCallSuperNodeList(  ) ) do
       registerRefType( workNode:get_methodType(), workNode:get_pos() )
    end
    
    
-   for __index, workNode in pairs( nodeManager:getExpRefNodeList(  ) ) do
+   for __index, workNode in ipairs( nodeManager:getExpRefNodeList(  ) ) do
       registerRefSym( workNode:get_symbolInfo(), workNode:get_pos() )
    end
    
-   for __index, workNode in pairs( nodeManager:getRefFieldNodeList(  ) ) do
+   for __index, workNode in ipairs( nodeManager:getRefFieldNodeList(  ) ) do
       do
          local _exp = workNode:get_symbolInfo()
          if _exp ~= nil then
             registerRefSym( _exp, workNode:get_pos() )
          else
-            Log.log( Log.Level.Warn, __func__, 257, function (  )
+            Log.log( Log.Level.Warn, __func__, 262, function (  )
             
                return string.format( "no symbolInfo -- %s", workNode:get_field().txt)
             end )
@@ -622,7 +406,7 @@ function tagFilter:registerRefs( nodeManager, fileId )
       
    end
    
-   for __index, workNode in pairs( nodeManager:getExpOmitEnumNodeList(  ) ) do
+   for __index, workNode in ipairs( nodeManager:getExpOmitEnumNodeList(  ) ) do
       do
          local _exp = _lune.nilacc( workNode:get_enumTypeInfo():get_scope(), 'getSymbolInfoChild', 'callmtd' , workNode:get_valInfo():get_name() )
          if _exp ~= nil then
@@ -633,8 +417,8 @@ function tagFilter:registerRefs( nodeManager, fileId )
    end
    
    
-   for __index, workNode in pairs( nodeManager:getMatchNodeList(  ) ) do
-      for __index, matchCase in pairs( workNode:get_caseList() ) do
+   for __index, workNode in ipairs( nodeManager:getMatchNodeList(  ) ) do
+      for __index, matchCase in ipairs( workNode:get_caseList() ) do
          local valInfo = matchCase:get_valInfo()
          do
             local _exp = _lune.nilacc( valInfo:get_algeTpye():get_scope(), 'getSymbolInfoChild', 'callmtd' , valInfo:get_name() )
@@ -666,7 +450,7 @@ end
 local function dumpRoot( rootNode, db, option, streamName )
    local __func__ = '@lns.@tags.@Analyze.dumpRoot'
 
-   Log.log( Log.Level.Log, __func__, 292, function (  )
+   Log.log( Log.Level.Log, __func__, 297, function (  )
    
       return streamName
    end )
@@ -677,21 +461,33 @@ local function dumpRoot( rootNode, db, option, streamName )
    db:commit(  )
 end
 
-local function buildAst( logLevel, path, astCallback )
+local function buildAst( logLevel, path, useStdInMod, forceAll, astCallback )
 
    LnsLog.setLevel( logLevel )
    LnsUtil.setDebugFlag( false )
    
+   if useStdInMod ~= nil then
+      Parser.StreamParser.setStdinStream( useStdInMod )
+   end
+   
+   
    local lnsOpt = LnsOpt.createDefaultOption( path )
    lnsOpt.targetLuaVer = LuaVer.ver53
-   lnsOpt.transCtrlInfo.uptodateMode = Types.CheckingUptodateMode.Force
+   if forceAll then
+      lnsOpt.transCtrlInfo.uptodateMode = _lune.newAlge( Types.CheckingUptodateMode.ForceAll)
+   else
+    
+      lnsOpt.transCtrlInfo.uptodateMode = _lune.newAlge( Types.CheckingUptodateMode.Force1, {LnsUtil.scriptPath2Module( path )})
+   end
+   
+   
    front.build( lnsOpt, astCallback )
 end
 
 local function start( db, option )
 
-   for __index, path in pairs( option:get_pathList() ) do
-      buildAst( LnsLog.Level.Log, path, function ( ast )
+   for __index, path in ipairs( option:get_pathList() ) do
+      buildAst( LnsLog.Level.Log, path, nil, true, function ( ast )
       
          do
             local rootNode = _lune.__Cast( ast:get_node(), 3, Nodes.RootNode )
@@ -735,7 +531,7 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, nearest )
    
    
    
-   Log.log( Log.Level.Log, __func__, 326, function (  )
+   Log.log( Log.Level.Log, __func__, 342, function (  )
    
       return string.format( "%s %s:%4d:%3d -- %s", "nearestNode -- ", nearest:get_effectivePos().streamName, nearest:get_effectivePos().lineNo, nearest:get_effectivePos().column, Nodes.getNodeKindName( nearest:get_kind() ))
    end )
@@ -767,7 +563,7 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, nearest )
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.DeclVarNode )
       if workNode ~= nil then
-         for __index, varSym in pairs( workNode:get_symbolInfoList() ) do
+         for __index, varSym in ipairs( workNode:get_symbolInfoList() ) do
             
             if isInner( _lune.unwrap( varSym:get_pos()), varSym:get_name() ) then
                return getFullNameSym( self, varSym )
@@ -930,7 +726,51 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, nearest )
       end
    end
    
-   Log.log( Log.Level.Err, __func__, 442, function (  )
+   do
+      local workNode = _lune.__Cast( nearest, 3, Nodes.ExpCallSuperCtorNode )
+      if workNode ~= nil then
+         return self:getFull( workNode:get_methodType(), false )
+      end
+   end
+   
+   do
+      local workNode = _lune.__Cast( nearest, 3, Nodes.ExpCallSuperNode )
+      if workNode ~= nil then
+         return self:getFull( workNode:get_methodType(), false )
+      end
+   end
+   
+   do
+      local workNode = _lune.__Cast( nearest, 3, Nodes.ExpNewNode )
+      if workNode ~= nil then
+         if isInner( workNode:get_pos(), "new" ) then
+            return self:getFull( workNode:get_ctorTypeInfo(), false )
+         end
+         
+      end
+   end
+   
+   do
+      local workNode = _lune.__Cast( nearest, 3, Nodes.DeclMacroNode )
+      if workNode ~= nil then
+         if isInner( workNode:get_declInfo():get_name().pos, workNode:get_declInfo():get_name().txt ) then
+            return self:getFull( workNode:get_expType(), false )
+         end
+         
+      end
+   end
+   
+   do
+      local workNode = _lune.__Cast( nearest, 3, Nodes.ExpMacroExpNode )
+      if workNode ~= nil then
+         if isInner( workNode:get_pos(), workNode:get_macroType():get_rawTxt() ) then
+            return self:getFull( workNode:get_macroType(), false )
+         end
+         
+      end
+   end
+   
+   Log.log( Log.Level.Err, __func__, 479, function (  )
    
       return string.format( "unknown pattern -- %s", Nodes.getNodeKindName( nearest:get_kind() ))
    end )
@@ -970,7 +810,7 @@ function SyntaxFilter:getPattern( analyzeFileInfo )
                do
                   local nearest = nearestNode
                   if nearest ~= nil then
-                     if nearest:get_effectivePos().lineNo < node:get_pos().lineNo and node:get_pos().lineNo < analyzeFileInfo:get_lineNo() then
+                     if nearest:get_effectivePos().lineNo < node:get_effectivePos().lineNo and node:get_effectivePos().lineNo < analyzeFileInfo:get_lineNo() then
                         nearestNode = node
                      end
                      
@@ -982,7 +822,7 @@ function SyntaxFilter:getPattern( analyzeFileInfo )
             end
             
             
-            Log.log( Log.Level.Trace, __func__, 326, function (  )
+            Log.log( Log.Level.Trace, __func__, 342, function (  )
             
                return string.format( "%s %s:%4d:%3d -- %s", "visit:", node:get_effectivePos().streamName, node:get_effectivePos().lineNo, node:get_effectivePos().column, Nodes.getNodeKindName( node:get_kind() ))
             end )
@@ -992,7 +832,7 @@ function SyntaxFilter:getPattern( analyzeFileInfo )
          end
          
          return Nodes.NodeVisitMode.Next
-      end, 0 )
+      end, 0, {} )
       do
          local nearest = nearestNode
          if nearest ~= nil then
@@ -1013,13 +853,23 @@ local function getPatterAt( analyzeFileInfo )
 
    
    local pattern = nil
-   buildAst( LnsLog.Level.Err, analyzeFileInfo:get_path(), function ( ast )
+   local useStdInMod
+   
+   if analyzeFileInfo:get_stdinFlag() then
+      useStdInMod = front.scriptPath2Module( analyzeFileInfo:get_path() )
+   else
+    
+      useStdInMod = nil
+   end
+   
+   
+   buildAst( LnsLog.Level.Err, analyzeFileInfo:get_path(), useStdInMod, false, function ( ast )
       local __func__ = '@lns.@tags.@Analyze.getPatterAt.<anonymous>'
    
       if ast:get_streamName() == analyzeFileInfo:get_path() then
          local filter = SyntaxFilter.new(ast)
          pattern = filter:getPattern( analyzeFileInfo )
-         Log.log( Log.Level.Log, __func__, 501, function (  )
+         Log.log( Log.Level.Log, __func__, 546, function (  )
          
             return string.format( "pattern -- %s", pattern)
          end )

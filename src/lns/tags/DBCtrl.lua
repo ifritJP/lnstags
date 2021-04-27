@@ -1,191 +1,7 @@
 --lns/tags/DBCtrl.lns
 local _moduleObj = {}
 local __mod__ = '@lns.@tags.@DBCtrl'
-local _lune = {}
-if _lune3 then
-   _lune = _lune3
-end
-function _lune.nilacc( val, fieldName, access, ... )
-   if not val then
-      return nil
-   end
-   if fieldName then
-      local field = val[ fieldName ]
-      if not field then
-         return nil
-      end
-      if access == "item" then
-         local typeId = type( field )
-         if typeId == "table" then
-            return field[ ... ]
-         elseif typeId == "string" then
-            return string.byte( field, ... )
-         end
-      elseif access == "call" then
-         return field( ... )
-      elseif access == "callmtd" then
-         return field( val, ... )
-      end
-      return field
-   end
-   if access == "item" then
-      local typeId = type( val )
-      if typeId == "table" then
-         return val[ ... ]
-      elseif typeId == "string" then
-         return string.byte( val, ... )
-      end
-   elseif access == "call" then
-      return val( ... )
-   elseif access == "list" then
-      local list, arg = ...
-      if not list then
-         return nil
-      end
-      return val( list, arg )
-   end
-   error( string.format( "illegal access -- %s", access ) )
-end
-
-function _lune._toStem( val )
-   return val
-end
-function _lune._toInt( val )
-   if type( val ) == "number" then
-      return math.floor( val )
-   end
-   return nil
-end
-function _lune._toReal( val )
-   if type( val ) == "number" then
-      return val
-   end
-   return nil
-end
-function _lune._toBool( val )
-   if type( val ) == "boolean" then
-      return val
-   end
-   return nil
-end
-function _lune._toStr( val )
-   if type( val ) == "string" then
-      return val
-   end
-   return nil
-end
-function _lune._toList( val, toValInfoList )
-   if type( val ) == "table" then
-      local tbl = {}
-      local toValInfo = toValInfoList[ 1 ]
-      for index, mem in ipairs( val ) do
-         local memval, mess = toValInfo.func( mem, toValInfo.child )
-         if memval == nil and not toValInfo.nilable then
-            if mess then
-              return nil, string.format( "%d.%s", index, mess )
-            end
-            return nil, index
-         end
-         tbl[ index ] = memval
-      end
-      return tbl
-   end
-   return nil
-end
-function _lune._toMap( val, toValInfoList )
-   if type( val ) == "table" then
-      local tbl = {}
-      local toKeyInfo = toValInfoList[ 1 ]
-      local toValInfo = toValInfoList[ 2 ]
-      for key, mem in pairs( val ) do
-         local mapKey, keySub = toKeyInfo.func( key, toKeyInfo.child )
-         local mapVal, valSub = toValInfo.func( mem, toValInfo.child )
-         if mapKey == nil or mapVal == nil then
-            if mapKey == nil then
-               return nil
-            end
-            if keySub == nil then
-               return nil, mapKey
-            end
-            return nil, string.format( "%s.%s", mapKey, keySub)
-         end
-         tbl[ mapKey ] = mapVal
-      end
-      return tbl
-   end
-   return nil
-end
-function _lune._fromMap( obj, map, memInfoList )
-   if type( map ) ~= "table" then
-      return false
-   end
-   for index, memInfo in ipairs( memInfoList ) do
-      local val, key = memInfo.func( map[ memInfo.name ], memInfo.child )
-      if val == nil and not memInfo.nilable then
-         return false, key and string.format( "%s.%s", memInfo.name, key) or memInfo.name
-      end
-      obj[ memInfo.name ] = val
-   end
-   return true
-end
-
-function _lune.loadModule( mod )
-   if __luneScript then
-      return  __luneScript:loadModule( mod )
-   end
-   return require( mod )
-end
-
-function _lune.__isInstanceOf( obj, class )
-   while obj do
-      local meta = getmetatable( obj )
-      if not meta then
-	 return false
-      end
-      local indexTbl = meta.__index
-      if indexTbl == class then
-	 return true
-      end
-      if meta.ifList then
-         for index, ifType in ipairs( meta.ifList ) do
-            if ifType == class then
-               return true
-            end
-            if _lune.__isInstanceOf( ifType, class ) then
-               return true
-            end
-         end
-      end
-      obj = indexTbl
-   end
-   return false
-end
-
-function _lune.__Cast( obj, kind, class )
-   if kind == 0 then -- int
-      if type( obj ) ~= "number" then
-         return nil
-      end
-      if math.floor( obj ) ~= obj then
-         return nil
-      end
-      return obj
-   elseif kind == 1 then -- real
-      if type( obj ) ~= "number" then
-         return nil
-      end
-      return obj
-   elseif kind == 2 then -- str
-      if type( obj ) ~= "string" then
-         return nil
-      end
-      return obj
-   elseif kind == 3 then -- class
-      return _lune.__isInstanceOf( obj, class ) and obj or nil
-   end
-   return nil
-end
-
+local _lune = require( "lune.base.runtime3" )
 if not _lune3 then
    _lune3 = _lune
 end
@@ -1152,13 +968,13 @@ local function test(  )
    
    
    local fileId = _moduleObj.rootNsId
-   for __index, path in pairs( {"aa.lns", "bb.lns", "cc.lns"} ) do
+   for __index, path in ipairs( {"aa.lns", "bb.lns", "cc.lns"} ) do
       fileId = db:addFile( path )
    end
    
    
    local parentId = _moduleObj.rootNsId
-   for index, name in pairs( {"@hoge", "@hoge.@foo", "@hoge.@foo.bar"} ) do
+   for index, name in ipairs( {"@hoge", "@hoge.@foo", "@hoge.@foo.bar"} ) do
       local newid = db:addNamespace( name, parentId )
       db:addSymbolDecl( newid, fileId, 100 + index, index * 10 )
       db:addSymbolRef( newid, fileId, 200 + index, index * 20 )

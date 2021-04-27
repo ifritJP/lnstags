@@ -21,7 +21,7 @@ pub fn str2level( txt:str ) : Level! {
    return name2levelMap[ txt ];
 }
 
-let mut outputLevel = Level.Log;
+let mut outputLevel = Level.Warn;
 pub fn setLevel( level:Level ) {
    outputLevel = level;
 }

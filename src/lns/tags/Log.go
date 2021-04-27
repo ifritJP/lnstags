@@ -91,7 +91,7 @@ func Lns_Log_init() {
     Log_name2levelMap.Set("info",Log_Level__Info)
     Log_name2levelMap.Set("debug",Log_Level__Debug)
     Log_name2levelMap.Set("trace",Log_Level__Trace)
-    Log_outputLevel = Log_Level__Log
+    Log_outputLevel = Log_Level__Warn
     Log_detail = true
     Log_logStream = Lns_io_stderr
 }

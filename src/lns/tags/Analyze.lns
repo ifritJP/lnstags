@@ -5,6 +5,7 @@ import lns.tags.Option;
 import lns.tags.Log;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Option as LnsOpt;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Nodes;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Parser;
 import go/github:com.ifritJP.LuneScript.src.lune.base.TransUnit;
 import go/github:com.ifritJP.LuneScript.src.lune.base.front;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Ast;
@@ -111,6 +112,10 @@ fn tagFilter.registerDecl(
    foreach workNode in nodeManager.getDeclClassNodeList() {
       registDeclType( workNode );
       registerAutoMethod( workNode.$expType, workNode.$pos );
+   }
+
+   foreach workNode in nodeManager.getDeclConstrNodeList() {
+      registDeclType( workNode );
    }
 
    foreach workNode in nodeManager.getDeclFuncNodeList() {
@@ -296,9 +301,15 @@ fn dumpRoot( rootNode:&Nodes.RootNode, db:DBCtrl.DBCtrl,
    db.commit();
 }
 
-fn buildAst( logLevel:LnsLog.Level, path:str, astCallback:front.AstCallback ) {
+fn buildAst( logLevel:LnsLog.Level, path:str, useStdInMod:str!, forceAll:bool,
+             astCallback:front.AstCallback )
+{
    LnsLog.setLevel( logLevel );
    LnsUtil.setDebugFlag( false );
+
+   when! useStdInMod {
+      Parser.StreamParser.setStdinStream( useStdInMod );
+   }
    
    let mut lnsOpt = LnsOpt.createDefaultOption( path );
    // ver 51, 52 では構文エラーになるケースがあるので、
@@ -306,7 +317,12 @@ fn buildAst( logLevel:LnsLog.Level, path:str, astCallback:front.AstCallback ) {
    // 本来はオプション指定した方が良いかも。
    lnsOpt.targetLuaVer = LuaVer.ver53;
    // .meta があったときでも ast 解析するように .Force 設定
-   lnsOpt.transCtrlInfo.uptodateMode = .Force;
+   if forceAll {
+      lnsOpt.transCtrlInfo.uptodateMode = .ForceAll;
+   } else {
+      lnsOpt.transCtrlInfo.uptodateMode = .Force1( LnsUtil.scriptPath2Module( path ) );
+   }
+      
    front.build( lnsOpt, astCallback );
 }
 
@@ -314,7 +330,7 @@ fn buildAst( logLevel:LnsLog.Level, path:str, astCallback:front.AstCallback ) {
 pub fn start( db:DBCtrl.DBCtrl, option:&Option.Option ) {
    // lns のログレベル設定
    foreach path in option.$pathList {
-      buildAst( .Log, path, fn ( ast: TransUnit.ASTInfo ) {
+      buildAst( .Log, path, nil, true, fn ( ast: TransUnit.ASTInfo ) {
          if! let rootNode = ast.$node@@@Nodes.RootNode {
             dumpRoot( rootNode, db, option, ast.$streamName );
          }
@@ -439,6 +455,27 @@ class SyntaxFilter extend Nodes.Filter<str> {
             }
          }
       }
+      if! let workNode = nearest@@@Nodes.ExpCallSuperCtorNode {
+         return self.getFull( workNode.$methodType, false );
+      }
+      if! let workNode = nearest@@@Nodes.ExpCallSuperNode {
+         return self.getFull( workNode.$methodType, false );
+      }
+      if! let workNode = nearest@@@Nodes.ExpNewNode {
+         if isInner( workNode.$pos, "new" ) {
+            return self.getFull( workNode.$ctorTypeInfo, false );
+         }
+      }
+      if! let workNode = nearest@@@Nodes.DeclMacroNode {
+         if isInner( workNode.$declInfo.$name.pos, workNode.$declInfo.$name.txt ) {
+            return self.getFull( workNode.$expType, false );
+         }
+      }
+      if! let workNode = nearest@@@Nodes.ExpMacroExpNode {
+         if isInner( workNode.$pos, workNode.$macroType.$rawTxt ) {
+            return self.getFull( workNode.$macroType, false );
+         }
+      }
       Log._log( .Err, "unknown pattern -- %s" (Nodes.getNodeKindName( nearest.$kind )) );
       return nil;
    }
@@ -469,8 +506,8 @@ class SyntaxFilter extend Nodes.Filter<str> {
                      }
                   } else {
                      if! let nearest = nearestNode {
-                        if nearest.$effectivePos.lineNo < node.$pos.lineNo and
-                           node.$pos.lineNo < analyzeFileInfo.$lineNo
+                        if nearest.$effectivePos.lineNo < node.$effectivePos.lineNo and
+                           node.$effectivePos.lineNo < analyzeFileInfo.$lineNo
                         {
                            nearestNode = node;
                         }
@@ -482,7 +519,7 @@ class SyntaxFilter extend Nodes.Filter<str> {
                   return .Child;
                }
                return .Next;
-            }, 0 );
+            }, 0, (@) );
          if! let nearest = nearestNode {
             pattern = self.getPatternFromNode( analyzeFileInfo, nearest );
          }
@@ -494,13 +531,21 @@ class SyntaxFilter extend Nodes.Filter<str> {
 pub fn getPatterAt( analyzeFileInfo:&Option.AnalyzeFileInfo ) : str! {
 
    let mut pattern:str! = nil;
-   buildAst( .Err, analyzeFileInfo.$path, fn ( ast: TransUnit.ASTInfo ) {
-      if ast.$streamName == analyzeFileInfo.$path {
-         let mut filter = new SyntaxFilter( ast );
-         pattern = filter.getPattern( analyzeFileInfo );
-         Log._log( .Log, "pattern -- %s" (pattern) );
-      }
-   });
+   let useStdInMod:str!;
+   if analyzeFileInfo.$stdinFlag {
+      useStdInMod = front.scriptPath2Module( analyzeFileInfo.$path );
+   } else {
+      useStdInMod = nil;
+   }
+   
+   buildAst( .Err, analyzeFileInfo.$path, useStdInMod, false,
+             fn ( ast: TransUnit.ASTInfo ) {
+                if ast.$streamName == analyzeFileInfo.$path {
+                   let mut filter = new SyntaxFilter( ast );
+                   pattern = filter.getPattern( analyzeFileInfo );
+                   Log._log( .Log, "pattern -- %s" (pattern) );
+                }
+             });
 
    return pattern;
 }

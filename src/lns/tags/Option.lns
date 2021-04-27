@@ -3,6 +3,7 @@ import lns.tags.Log;
 pub enum InqMode {
    Def = "def",
    Ref = "ref",
+   Set = "set",
 }
 
 pub enum Mode {
@@ -10,6 +11,7 @@ pub enum Mode {
    Build = "build",
    Inq = "inq",
    InqAt = "inq-at",
+   Dump = "dump",
    Test = "test",
 }
 

@@ -31,9 +31,9 @@ func Main___main(args *LnsList) LnsInt {
     Lns_main_init()
     var option *Option_Option
     option = Option_analyzeArgs(args)
-    if _switch260 := option.FP.Get_mode(); _switch260 == Option_Mode__Init {
+    if _switch296 := option.FP.Get_mode(); _switch296 == Option_Mode__Init {
         DBCtrl_initDB(main_dbPath)
-    } else if _switch260 == Option_Mode__Build {
+    } else if _switch296 == Option_Mode__Build {
         var db *DBCtrl_DBCtrl
         
         {
@@ -47,11 +47,10 @@ func Main___main(args *LnsList) LnsInt {
         }
         db.FP.Commit()
         Analyze_start(db, option)
-        db.FP.DumpAll()
         db.FP.Close()
-    } else if _switch260 == Option_Mode__Inq {
+    } else if _switch296 == Option_Mode__Inq {
         main_inq_1007_(option.FP.Get_inqMode(), option.FP.Get_pattern())
-    } else if _switch260 == Option_Mode__InqAt {
+    } else if _switch296 == Option_Mode__InqAt {
         var analyzeFileInfo *Option_AnalyzeFileInfo
         analyzeFileInfo = option.FP.Get_analyzeFileInfo()
         var pattern string
@@ -66,7 +65,21 @@ func Main___main(args *LnsList) LnsInt {
             }
         }
         main_inq_1007_(option.FP.Get_inqMode(), pattern)
-    } else if _switch260 == Option_Mode__Test {
+    } else if _switch296 == Option_Mode__Dump {
+        var db *DBCtrl_DBCtrl
+        
+        {
+            _db := DBCtrl_open(main_dbPath, true)
+            if _db == nil{
+                Lns_print([]LnsAny{"error"})
+                return 1
+            } else {
+                db = _db.(*DBCtrl_DBCtrl)
+            }
+        }
+        db.FP.DumpAll()
+        db.FP.Close()
+    } else if _switch296 == Option_Mode__Test {
         DBCtrl_test()
     }
     return 0
