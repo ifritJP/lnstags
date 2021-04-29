@@ -3,12 +3,13 @@
 import lns.tags.DBCtrl;
 import lns.tags.Option;
 import lns.tags.Log;
+import lns.tags.Ast;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Option as LnsOpt;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Nodes;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Parser;
 import go/github:com.ifritJP.LuneScript.src.lune.base.TransUnit;
 import go/github:com.ifritJP.LuneScript.src.lune.base.front;
-import go/github:com.ifritJP.LuneScript.src.lune.base.Ast;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Ast as LnsAst;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Types;
 import go/github:com.ifritJP.LuneScript.src.lune.base.LuaVer;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Log as LnsLog;
@@ -21,23 +22,35 @@ class tagFilter extend Nodes.Filter<Opt> {
    let option:&Option.Option;
    let mut db:DBCtrl.DBCtrl;
    let streamName:str;
-   let mut type2nsid:Map<&Ast.TypeInfo,int>;
-   let mut sym2nsid:Map<&Ast.SymbolInfo,int>;
+   let mut type2nsid:Map<&LnsAst.TypeInfo,int>;
+   let mut sym2nsid:Map<&LnsAst.SymbolInfo,int>;
+   let mut file2id:Map<str,int>;
 
    local fn __init( rootNode:&Nodes.RootNode,
                   option:&Option.Option, db:DBCtrl.DBCtrl, streamName:str )
    {
       super( true, rootNode.$moduleTypeInfo, rootNode.$moduleTypeInfo.$scope );
+      self.file2id = {};
       self.option = option;
       self.db = db;
       self.streamName = streamName;
       self.type2nsid = {};
       self.sym2nsid = {};
    }
+
+   fn getFileId( path:str ) mut : int {
+      if! self.file2id[ path ] {
+         return _exp;
+      }
+      let fileId = self.db.addFile( path );
+      Log._log( .Debug, "add file -- %d, %s" (fileId, path) );
+      self.file2id[ path ] = fileId;
+      return fileId;
+   }
    
 }
 
-fn tagFilter.registerType( mut typeInfo:&Ast.TypeInfo ) mut : int, bool {
+fn tagFilter.registerType( mut typeInfo:&LnsAst.TypeInfo ) mut : int, bool {
    typeInfo = typeInfo.$nonnilableType.$srcTypeInfo.$genSrcTypeInfo;
    if! self.type2nsid[ typeInfo ] {
       return _exp, false;
@@ -50,48 +63,52 @@ fn tagFilter.registerType( mut typeInfo:&Ast.TypeInfo ) mut : int, bool {
    return nsId, added;
 }
 
-fn getFullNameSym<T>( filter:&Nodes.Filter<T>, symbolInfo:&Ast.SymbolInfo ) : str {
-   if symbolInfo.$namespaceTypeInfo == Ast.headTypeInfo {
-      return symbolInfo.$name;
-   }
-   let name = "%s.%s"
-       ( filter.getFull( symbolInfo.$namespaceTypeInfo, false ), symbolInfo.$name );
-   return name;
-}
-
-fn tagFilter.registerSymbol( mut symbolInfo:&Ast.SymbolInfo ) mut : int, bool
+fn tagFilter.registerSymbol( mut symbolInfo:&LnsAst.SymbolInfo ) mut : int, bool
 {
    symbolInfo = symbolInfo.getOrg();
    if! self.sym2nsid[ symbolInfo ] {
       return _exp, false;
    }
    let parentNsId = self.registerType( symbolInfo.$namespaceTypeInfo );
-   let name = getFullNameSym( self, symbolInfo );
+   let name = Ast.getFullNameSym( self, symbolInfo );
    let nsId, added = self.db.addNamespace( name, parentNsId );
    Log._log( .Debug, "%s %s %d" (name, added, nsId ) );
    self.sym2nsid[ symbolInfo ] = nsId;
    return nsId, added;
 }
 
-fn tagFilter.registerDecl(
-   nodeManager:&Nodes.NodeManager, fileId:int, processInfo: Ast.ProcessInfo ) mut
+fn tagFilter.registDeclSym( symbolInfo:&LnsAst.SymbolInfo ) mut : int {
+   let symNsId = self.registerSymbol( symbolInfo );
+   let pos = unwrap symbolInfo.$pos$.$orgPos;
+   let fileId = self.getFileId( pos.streamName );
+   self.db.addSymbolDecl( symNsId, fileId, pos.lineNo, pos.column );
+   Log._log( .Debug, symbolInfo.$name );
+   return symNsId;
+}
+
+fn tagFilter.addSymbolRef( mbrNsId:int, mut pos:&Types.Position ) mut
 {
-   fn registDeclTypeOp( typeInfo:&Ast.TypeInfo, pos:&Types.Position ) : int {
+   pos = pos.$orgPos;
+   self.db.addSymbolRef(
+      mbrNsId, self.getFileId( pos.streamName ), pos.lineNo, pos.column );
+}
+
+
+
+fn tagFilter.registerDecl(
+   nodeManager:&Nodes.NodeManager, processInfo: LnsAst.ProcessInfo ) mut
+{
+   fn registDeclTypeOp( typeInfo:&LnsAst.TypeInfo, pos:&Types.Position ) : int {
       let nsId = self.registerType( typeInfo );
-      self.db.addSymbolDecl( nsId, fileId, pos.lineNo, pos.column );
+      self.db.addSymbolDecl( nsId, self.getFileId( pos.streamName ),
+                             pos.lineNo, pos.column );   
       return nsId;
    }
    fn registDeclType( workNode:&Nodes.Node ) : int {
       return registDeclTypeOp( workNode.$expType, workNode.$pos );
    }
-   macro _registDeclSym( symbolInfo:__exp ) {
-      let symNsId = self.registerSymbol( ,,symbolInfo );
-      let pos = unwrap ,,symbolInfo.$pos;
-      self.db.addSymbolDecl( symNsId, fileId, pos.lineNo, pos.column );
-      Log._log( .Debug, ,,symbolInfo.$name );
-   }
 
-   fn registerAutoMethod( parentInfo:&Ast.TypeInfo, pos:&Types.Position ) {
+   fn registerAutoMethod( parentInfo:&LnsAst.TypeInfo, pos:&Types.Position ) {
       foreach symbolInfo in unwrap parentInfo.$scope$.$symbol2SymbolInfoMap {
          let typeInfo = symbolInfo.$typeInfo;
          if typeInfo.$autoFlag {
@@ -124,14 +141,14 @@ fn tagFilter.registerDecl(
    foreach workNode in nodeManager.getProtoMethodNodeList() {
       registDeclType( workNode );
    }
-   foreach workNode in nodeManager.getDeclMethodNodeList() {
-      let nsId = registDeclType( workNode );
-      let methodType = workNode.$expType;
+
+   fn addMethod( methodType:&LnsAst.TypeInfo, pos:&Types.Position ) : int {
+      let nsId = registDeclTypeOp( methodType, pos );
       if not methodType.$staticFlag {
          if! let scope = methodType.$parentInfo.$scope {
             scope.filterTypeInfoFieldAndIF(
                false, scope, .Normal,
-               fn ( symbolInfo:&Ast.SymbolInfo ) : bool {
+               fn ( symbolInfo:&LnsAst.SymbolInfo ) : bool {
                   if symbolInfo.$name == methodType.$rawTxt {
                      let superNsId = self.registerType( symbolInfo.$typeInfo );
                      self.db.addOverride( nsId, superNsId );
@@ -140,13 +157,17 @@ fn tagFilter.registerDecl(
                } );
          }
       }
+      return nsId;
+   }
+   foreach workNode in nodeManager.getDeclMethodNodeList() {
+      addMethod( workNode.$expType, workNode.$pos );
    }
    foreach workNode in nodeManager.getDeclEnumNodeList() {
       registDeclType( workNode );
       registerAutoMethod( workNode.$expType, workNode.$pos );
       foreach name in workNode.$valueNameList {
          if! workNode.$scope.getSymbolInfoChild( name.txt ) {
-            _registDeclSym( _exp );
+            self.registDeclSym( _exp );
          }
       }
    }
@@ -154,7 +175,7 @@ fn tagFilter.registerDecl(
       registDeclType( workNode );
       forsort _, name in workNode.$algeType.$valInfoMap {
          if! workNode.$algeType.$scope$.getSymbolInfoChild$( name ) {
-            _registDeclSym( _exp );
+            self.registDeclSym( _exp );
          }
       }
    }
@@ -164,56 +185,60 @@ fn tagFilter.registerDecl(
 
    // ======== シンボルの定義系 ======
    foreach workNode in nodeManager.getDeclVarNodeList() {
-      if Ast.isPubToExternal( workNode.$accessMode ) {
+      if LnsAst.isPubToExternal( workNode.$accessMode ) {
          foreach symbolInfo in workNode.$symbolInfoList {
-            _registDeclSym( symbolInfo );
+            self.registDeclSym( symbolInfo );
          }
       }
    }
    foreach workNode in nodeManager.getDeclMemberNodeList() {
-      _registDeclSym( workNode.$symbolInfo );
+      let mbrNsId = self.registDeclSym( workNode.$symbolInfo );
       if workNode.$getterMode ~= .None {
          let name = "get_%s" (workNode.$name.txt);
-         registDeclTypeOp(
-            unwrap workNode.$classType.$scope$.getTypeInfoChild$( name ), workNode.$pos );
+         let pos = unwrap workNode.$getterToken$.pos;
+         addMethod(
+            unwrap workNode.$classType.$scope$.getTypeInfoChild$( name ), pos );      
+         // getter に、メンバー参照を追加
+         self.addSymbolRef( mbrNsId, pos );
       }
       if workNode.$setterMode ~= .None {
          let name = "set_%s" (workNode.$name.txt);
-         registDeclTypeOp(
-            unwrap workNode.$classType.$scope$.getTypeInfoChild$( name ), workNode.$pos );
+         let pos = unwrap workNode.$setterToken$.pos;
+         addMethod(
+            unwrap workNode.$classType.$scope$.getTypeInfoChild$( name ), pos );
+         // setter に、メンバー参照を追加
+         self.addSymbolRef( mbrNsId, pos );
       }
    }
 }
 
-fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager, fileId:int ) mut {
+fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
 
-   fn addSymbolRef( symbolInfo:&Ast.SymbolInfo, pos:&Types.Position ) {
+   fn addSymbolRef( symbolInfo:&LnsAst.SymbolInfo, pos:&Types.Position ) {
       switch symbolInfo.$name {
          case "__func__", "__mod__", "__line__" {
             return;
          }
       }
       let nsId, added = self.registerSymbol( symbolInfo );
-      if added and not Ast.isBuiltin( symbolInfo.$namespaceTypeInfo.$typeId ) {
+      if added and not LnsAst.isBuiltin( symbolInfo.$namespaceTypeInfo.$typeId ) {
          Log._log( .Err, "no register sym -- %d:%d:%s"
-                   ( pos.lineNo, pos.column, getFullNameSym( self, symbolInfo ) ) );
+                   ( pos.lineNo, pos.column, Ast.getFullNameSym( self, symbolInfo ) ) );
       }
-      self.db.addSymbolRef(
-         nsId, fileId, pos.lineNo, pos.column );
+      self.addSymbolRef( nsId, pos );
    }
 
-   fn registerRefType( typeInfo:&Ast.TypeInfo, pos:&Types.Position ) {
+   fn registerRefType( typeInfo:&LnsAst.TypeInfo, pos:&Types.Position ) {
       let nsId, added = self.registerType( typeInfo );
-      if added and not Ast.isBuiltin( typeInfo.$typeId ) {
+      if added and not LnsAst.isBuiltin( typeInfo.$typeId ) {
          Log._log( .Err, "no register type -- %d:%d:%s"
                    ( pos.lineNo, pos.column, self.getFull( typeInfo, false ) ) );
       }
-      self.db.addSymbolRef(
-         nsId, fileId, pos.lineNo, pos.column );
+      self.addSymbolRef( nsId, pos );
    }
 
    
-   fn registerRefSym( symbolInfo:&Ast.SymbolInfo, pos:&Types.Position ) {
+   fn registerRefSym( symbolInfo:&LnsAst.SymbolInfo, pos:&Types.Position ) {
       switch symbolInfo.$namespaceTypeInfo.$kind {
          case .Enum, .Alge {
             addSymbolRef( symbolInfo, pos );
@@ -227,7 +252,7 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager, fileId:int ) mut {
                   addSymbolRef( symbolInfo, pos );
                }
                case .Var {
-                  if Ast.isPubToExternal( symbolInfo.$accessMode ) {
+                  if LnsAst.isPubToExternal( symbolInfo.$accessMode ) {
                      addSymbolRef( symbolInfo, pos );
                   }
                }
@@ -262,6 +287,9 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager, fileId:int ) mut {
          Log._log( .Warn, "no symbolInfo -- %s" (workNode.$field.txt ) );
       }
    }
+   foreach workNode in nodeManager.getGetFieldNodeList() {
+      registerRefType( workNode.$getterTypeInfo, workNode.$pos );
+   }
    foreach workNode in nodeManager.getExpOmitEnumNodeList() {
       if! workNode.$enumTypeInfo.$scope$.getSymbolInfoChild$( workNode.$valInfo.$name ) {
          registerRefSym( _exp, workNode.$pos );
@@ -281,13 +309,11 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager, fileId:int ) mut {
 pub override fn tagFilter.processRoot(
    node: Nodes.RootNode, opt:Opt ) mut
 {
-   let fileId = self.db.addFile( self.streamName );
-
-   self.type2nsid[ Ast.headTypeInfo ] = DBCtrl.rootNsId;
+   self.type2nsid[ LnsAst.headTypeInfo ] = DBCtrl.rootNsId;
    self.registerType( node.$moduleTypeInfo );
 
-   self.registerDecl( node.$nodeManager, fileId, node.$processInfo );
-   self.registerRefs( node.$nodeManager, fileId );
+   self.registerDecl( node.$nodeManager, node.$processInfo );
+   self.registerRefs( node.$nodeManager );
 };
 
 
@@ -296,256 +322,18 @@ fn dumpRoot( rootNode:&Nodes.RootNode, db:DBCtrl.DBCtrl,
 {
    Log._log( .Log, streamName );
    let mut filter = new tagFilter( rootNode, option, db, streamName );
-   db.begin();
    rootNode.processFilter( filter, new Opt() );
-   db.commit();
 }
-
-fn buildAst( logLevel:LnsLog.Level, path:str, useStdInMod:str!, forceAll:bool,
-             astCallback:front.AstCallback )
-{
-   LnsLog.setLevel( logLevel );
-   LnsUtil.setDebugFlag( false );
-
-   when! useStdInMod {
-      Parser.StreamParser.setStdinStream( useStdInMod );
-   }
-   
-   let mut lnsOpt = LnsOpt.createDefaultOption( path );
-   // ver 51, 52 では構文エラーになるケースがあるので、
-   // ここでは 53 として処理する。
-   // 本来はオプション指定した方が良いかも。
-   lnsOpt.targetLuaVer = LuaVer.ver53;
-   // .meta があったときでも ast 解析するように .Force 設定
-   if forceAll {
-      lnsOpt.transCtrlInfo.uptodateMode = .ForceAll;
-   } else {
-      lnsOpt.transCtrlInfo.uptodateMode = .Force1( LnsUtil.scriptPath2Module( path ) );
-   }
-      
-   front.build( lnsOpt, astCallback );
-}
-
 
 pub fn start( db:DBCtrl.DBCtrl, option:&Option.Option ) {
    // lns のログレベル設定
    foreach path in option.$pathList {
-      buildAst( .Log, path, nil, true, fn ( ast: TransUnit.ASTInfo ) {
+      Ast.buildAst( .Log, path, nil, true, fn ( ast: TransUnit.ASTInfo ) {
          if! let rootNode = ast.$node@@@Nodes.RootNode {
+            db.begin();
             dumpRoot( rootNode, db, option, ast.$streamName );
+            db.commit();
          }
       });
    }
-}
-
-macro _logNode( logLevel:Log.Level, node:__exp, mess:__exp ) {
-   Log._log( ,,logLevel, "%s %s:%4d:%3d -- %s"
-             ( ,,mess, ,,node.$effectivePos.streamName,
-               ,,node.$effectivePos.lineNo, ,,node.$effectivePos.column,
-               Nodes.getNodeKindName( ,,node.$kind ) ));
-}
-
-class SyntaxFilter extend Nodes.Filter<str> {
-   let ast: TransUnit.ASTInfo;
-   local fn __init( ast: TransUnit.ASTInfo )
-   {
-      super( true, ast.$moduleTypeInfo, ast.$moduleTypeInfo.$scope );
-      self.ast = ast;
-   }
-
-   fn getPatternFromNode( analyzeFileInfo:&Option.AnalyzeFileInfo,
-                          mut nearest:&Nodes.Node ) : str!
-   {
-      fn isInner( pos:&Types.Position, name:str ) : bool {
-         if pos.lineNo == analyzeFileInfo.$lineNo and
-            pos.column <= analyzeFileInfo.$column and
-            pos.column + #name >= analyzeFileInfo.$column
-         {
-            return true;
-         }
-         return false;
-      }
-      macro _patternDeclSym(symbolInfo:__exp) {
-         if isInner( unwrap ,,symbolInfo.$pos, ,,symbolInfo.$name ) {
-            return getFullNameSym( self, ,,symbolInfo );
-         }
-      }
-      
-      _logNode( .Log, nearest, "nearestNode -- " );
-      if! let workNode = nearest@@@Nodes.ExpRefNode {
-         return getFullNameSym( self, workNode.$symbolInfo );
-      }
-      if! let workNode = nearest@@@Nodes.RefFieldNode {
-         if isInner( workNode.$field.$pos, workNode.$field.txt ) {
-            if! let symbolInfo = workNode.$symbolInfo {
-               return getFullNameSym( self, symbolInfo );
-            }
-         }
-      }
-      if! let workNode = nearest@@@Nodes.DeclVarNode {
-         foreach varSym in workNode.$symbolInfoList {
-            _patternDeclSym( varSym );
-         }
-      }
-      if! let workNode = nearest@@@Nodes.ExpOmitEnumNode {
-         if isInner( workNode.$effectivePos, workNode.$valInfo.$name ) {
-            return getFullNameSym( self, workNode.$valInfo.$symbolInfo );
-         }
-      }
-      if! let workNode = nearest@@@Nodes.NewAlgeValNode {
-         if isInner( workNode.$effectivePos, workNode.$valInfo.$name ) {
-            return getFullNameSym( self, workNode.$valInfo.$symbolInfo );
-         }
-      }
-      if! let workNode = nearest@@@Nodes.ExpMacroExpNode {
-         if isInner( workNode.$effectivePos, workNode.$expType.$rawTxt ) {
-            return self.getFull( workNode.$macroType, false );
-         }
-      }
-      if! let workNode = nearest@@@Nodes.DeclFuncNode {
-         if! let name = workNode.$declInfo.$name {
-            if isInner( name.pos, name.txt ) {
-               return self.getFull( workNode.$expType, false );
-            }
-         }
-      }
-      if! let workNode = nearest@@@Nodes.DeclEnumNode {
-         let name = workNode.$name;
-         if isInner( name.pos, name.txt ) {
-            return self.getFull( workNode.$expType, false );
-         }
-         foreach valInfo in workNode.$enumType.$name2EnumValInfo {
-            _patternDeclSym( valInfo.$symbolInfo );
-         }
-      }
-      if! let workNode = nearest@@@Nodes.DeclAlgeNode {
-         let name = workNode.$name;
-         if isInner( name.pos, name.txt ) {
-            return self.getFull( workNode.$expType, false );
-         }
-         foreach valInfo in workNode.$algeType.$valInfoMap {
-            _patternDeclSym( valInfo.$symbolInfo );
-         }
-      }
-      if! let workNode = nearest@@@Nodes.DeclClassNode {
-         if isInner( workNode.$name.pos, workNode.$name.txt ) {
-            return self.getFull( workNode.$expType, false );
-         }
-      }
-      if! let workNode = nearest@@@Nodes.DeclMethodNode {
-         if! let name = workNode.$declInfo.$name {
-            if isInner( name.pos, name.txt ) {
-               return self.getFull( workNode.$expType, false );
-            }
-         }
-      }
-      if! let workNode = nearest@@@Nodes.ProtoClassNode {
-         let name = workNode.$name;
-         if isInner( name.pos, name.txt ) {
-            return self.getFull( workNode.$expType, false );
-         }
-      }
-      if! let workNode = nearest@@@Nodes.DeclMemberNode {
-         _patternDeclSym( workNode.$symbolInfo );
-      }
-      if! let workNode = nearest@@@Nodes.DeclConstrNode {
-         if! let name = workNode.$declInfo.$name {
-            if isInner( name.pos, name.txt ) {
-               return self.getFull( workNode.$expType, false );
-            }
-         }
-      }
-      if! let workNode = nearest@@@Nodes.ExpCallSuperCtorNode {
-         return self.getFull( workNode.$methodType, false );
-      }
-      if! let workNode = nearest@@@Nodes.ExpCallSuperNode {
-         return self.getFull( workNode.$methodType, false );
-      }
-      if! let workNode = nearest@@@Nodes.ExpNewNode {
-         if isInner( workNode.$pos, "new" ) {
-            return self.getFull( workNode.$ctorTypeInfo, false );
-         }
-      }
-      if! let workNode = nearest@@@Nodes.DeclMacroNode {
-         if isInner( workNode.$declInfo.$name.pos, workNode.$declInfo.$name.txt ) {
-            return self.getFull( workNode.$expType, false );
-         }
-      }
-      if! let workNode = nearest@@@Nodes.ExpMacroExpNode {
-         if isInner( workNode.$pos, workNode.$macroType.$rawTxt ) {
-            return self.getFull( workNode.$macroType, false );
-         }
-      }
-      Log._log( .Err, "unknown pattern -- %s" (Nodes.getNodeKindName( nearest.$kind )) );
-      return nil;
-   }
-
-   pub fn getPattern( analyzeFileInfo:&Option.AnalyzeFileInfo ) : str! {
-      let mut pattern:str! = nil;
-      if self.ast.$streamName == analyzeFileInfo.$path {
-         let mut nearestNode:&Nodes.Node! = nil;
-         self.ast.$node.visit(
-            fn ( node:&Nodes.Node, parent:&Nodes.Node,
-                 relation:str, depth:int ): Nodes.NodeVisitMode
-            {
-               if analyzeFileInfo.$path == node.$effectivePos.streamName {
-                  if analyzeFileInfo.$lineNo == node.$effectivePos.lineNo and
-                     analyzeFileInfo.$column >= node.$effectivePos.column
-                  {
-                     if! let nearest = nearestNode {
-                        if nearest.$effectivePos.lineNo ~= analyzeFileInfo.$lineNo {
-                           nearestNode = node;
-                        }
-                        if nearest.$effectivePos.column < node.$effectivePos.column {
-                           nearestNode = node;
-                        } elseif nearest.$effectivePos.column == node.$effectivePos.column {
-                           nearestNode = node;
-                        }
-                     } else {
-                        nearestNode = node;
-                     }
-                  } else {
-                     if! let nearest = nearestNode {
-                        if nearest.$effectivePos.lineNo < node.$effectivePos.lineNo and
-                           node.$effectivePos.lineNo < analyzeFileInfo.$lineNo
-                        {
-                           nearestNode = node;
-                        }
-                     } else {
-                        nearestNode = node;
-                     }
-                  }
-                  _logNode( .Trace, node, "visit:" );
-                  return .Child;
-               }
-               return .Next;
-            }, 0, (@) );
-         if! let nearest = nearestNode {
-            pattern = self.getPatternFromNode( analyzeFileInfo, nearest );
-         }
-      }
-      return pattern;
-   }
-}
-
-pub fn getPatterAt( analyzeFileInfo:&Option.AnalyzeFileInfo ) : str! {
-
-   let mut pattern:str! = nil;
-   let useStdInMod:str!;
-   if analyzeFileInfo.$stdinFlag {
-      useStdInMod = front.scriptPath2Module( analyzeFileInfo.$path );
-   } else {
-      useStdInMod = nil;
-   }
-   
-   buildAst( .Err, analyzeFileInfo.$path, useStdInMod, false,
-             fn ( ast: TransUnit.ASTInfo ) {
-                if ast.$streamName == analyzeFileInfo.$path {
-                   let mut filter = new SyntaxFilter( ast );
-                   pattern = filter.getPattern( analyzeFileInfo );
-                   Log._log( .Log, "pattern -- %s" (pattern) );
-                }
-             });
-
-   return pattern;
 }

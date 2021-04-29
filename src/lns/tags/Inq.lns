@@ -5,7 +5,9 @@ pub fn InqDef( db:DBCtrl.DBCtrl, pattern:str ) {
    let mut factory = new Util.SourceCodeLineAccessorFactory();
    db.mapSymbolDecl(
       pattern, fn (item:&DBCtrl.ItemSymbolDecl):bool {
-         let path = unwrap db.getFilePath( item.$fileId );
+         let! path = db.getFilePath( item.$fileId ) {
+            error( "file id is illegal -- %d" (item.$fileId) );
+         };
          Util.outputLocate(
             io.stdout, pattern, path,
             factory.create( path## ), item.$line );
@@ -17,7 +19,9 @@ pub fn InqRef( db:DBCtrl.DBCtrl, pattern:str ) {
    let mut factory = new Util.SourceCodeLineAccessorFactory();
    db.mapSymbolRef(
       pattern, fn (item:&DBCtrl.ItemSymbolRef):bool {
-         let path = unwrap db.getFilePath( item.$fileId );
+         let! path = db.getFilePath( item.$fileId ) {
+            error( "file id is illegal -- %d" (item.$fileId) );
+         };
          Util.outputLocate(
             io.stdout, pattern, path,
             factory.create( path## ), item.$line );

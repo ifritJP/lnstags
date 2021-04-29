@@ -300,9 +300,10 @@ pub class ItemOverride extend (Mapping) {
 登録済みの場合、登録済みの ID を返す。
 
 @param path ファイルパス
-@return 登録 ID
+@return int 登録 ID
+@return bool 新規登録した場合 true
 */
-pub fn DBCtrl.addFile( mut path:str ) mut : int
+pub fn DBCtrl.addFile( mut path:str ) mut : int, bool
 {
    if path.find( self.projDir, 1, true ) == 1 {
       path = "|%s" (path.sub( #path + 1 ## ));
@@ -310,7 +311,7 @@ pub fn DBCtrl.addFile( mut path:str ) mut : int
 
    let mut fileId:int! = nil;
    self.mapRowList(
-      "filePath", "path = '%s'", 1, nil, fn( items: &Map<str,&stem> ) : bool
+      "filePath", "path = '%s'" (path), 1, nil, fn( items: &Map<str,&stem> ) : bool
       {
          if! let filePath = ItemFilePath._fromStem( items ) {
             fileId = filePath.$id;
@@ -318,12 +319,12 @@ pub fn DBCtrl.addFile( mut path:str ) mut : int
          return false;
       }##);
    when! fileId {
-      return fileId;
+      return fileId, false;
    }
    let id = self.idMgrFilePath.getIdNext();
    self.insert( "filePath", "%d,'%s',0,'','|',0" ( id, path ) );
 
-   return id;
+   return id, true;
 }
 
 fn DBCtrl.getName( nsId:int ) : str! {
@@ -530,8 +531,7 @@ pub fn DBCtrl.mapSymbolRef( name:str, callback:callbackSymbolRef ) {
       }##);
 }
 
-
-pub fn DBCtrl.dumpAll() {
+pub fn DBCtrl.dumpFile() {
    print( "filePath" );
    self.mapRowList(
       "filePath", nil, nil, nil,
@@ -540,6 +540,10 @@ pub fn DBCtrl.dumpAll() {
          print( items.id, items.path );
          return true;
       }##);
+}
+
+
+pub fn DBCtrl.dumpAll() {
 
    print( "namespace" );
    self.mapRowList(

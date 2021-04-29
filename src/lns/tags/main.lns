@@ -6,6 +6,7 @@ import lns.tags.Option;
 import lns.tags.Util;
 import lns.tags.Inq;
 import lns.tags.Log;
+import lns.tags.Pattern;
 
 
 let dbPath = "lnstags.sqlite3";
@@ -37,6 +38,8 @@ pub fn __main( args:&List<str> ) : int {
          DBCtrl.initDB( dbPath );
       }
       case .Build {
+         // 現状は build 時に init する
+         DBCtrl.initDB( dbPath );
          let! mut db = DBCtrl.open( dbPath, false ) {
             print( "error" );
             return 1;
@@ -51,7 +54,7 @@ pub fn __main( args:&List<str> ) : int {
       }
       case .InqAt {
          let analyzeFileInfo = option.$analyzeFileInfo;
-         let! pattern = Analyze.getPatterAt( analyzeFileInfo ) {
+         let! pattern = Pattern.getPatterAt( analyzeFileInfo ) {
             print( "illegal pos -- %s:%d:%d"
                    ( analyzeFileInfo.$path,
                      analyzeFileInfo.$lineNo, analyzeFileInfo.$column ) );
@@ -64,7 +67,8 @@ pub fn __main( args:&List<str> ) : int {
             print( "error" );
             return 1;
          };
-         db.dumpAll();
+         // db.dumpAll();
+         db.dumpFile();
 
          db.close();
       }

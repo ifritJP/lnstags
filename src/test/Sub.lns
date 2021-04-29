@@ -55,4 +55,19 @@ class HogeHogeHogeHoge extend HogeHogeHoge {
    }
 }
 pub let Val = 1;
-
+pub abstract class Sub {
+   pub abstract fn get_val() : int;
+   pub abstract fn set_val(val:int) mut;
+}
+pub class SubSub extend Sub {
+   let mut val:int{pub,pub};
+}
+pub macro _Hoge() {
+   {
+      let test = `{ print("hoge"); };
+   }
+   ,,test;
+}
+pub macro _Hoge2( test:stat ) {
+   ,,test;
+}

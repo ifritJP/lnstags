@@ -1,0 +1,270 @@
+// -*- coding: utf-8 -*-
+
+import lns.tags.DBCtrl;
+import lns.tags.Option;
+import lns.tags.Log;
+import lns.tags.Ast;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Option as LnsOpt;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Nodes;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Parser;
+import go/github:com.ifritJP.LuneScript.src.lune.base.TransUnit;
+import go/github:com.ifritJP.LuneScript.src.lune.base.front;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Types;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Ast as LnsAst;
+import go/github:com.ifritJP.LuneScript.src.lune.base.LuaVer;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Log as LnsLog;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Util as LnsUtil;
+
+macro _logNode( logLevel:Log.Level, node:__exp, mess:__exp ) {
+   Log._log( ,,logLevel, "%s %s:%4d:%3d -- %s"
+             ( ,,mess, ,,node.$effectivePos.streamName,
+               ,,node.$effectivePos.lineNo, ,,node.$effectivePos.column,
+               Nodes.getNodeKindName( ,,node.$kind ) ));
+}
+
+class SyntaxFilter extend Nodes.Filter<str> {
+   let ast: TransUnit.ASTInfo;
+   local fn __init( ast: TransUnit.ASTInfo )
+   {
+      super( true, ast.$moduleTypeInfo, ast.$moduleTypeInfo.$scope );
+      self.ast = ast;
+   }
+
+   fn getPatternFromNode( analyzeFileInfo:&Option.AnalyzeFileInfo,
+                          mut nearest:&Nodes.Node ) : str!
+   {
+      fn isInner( pos:&Types.Position, name:str ) : bool {
+         if pos.lineNo == analyzeFileInfo.$lineNo and
+            pos.column <= analyzeFileInfo.$column and
+            pos.column + #name >= analyzeFileInfo.$column
+         {
+            return true;
+         }
+         return false;
+      }
+      macro _patternDeclSym(symbolInfo:__exp) {
+         if isInner( unwrap ,,symbolInfo.$pos, ,,symbolInfo.$name ) {
+            return Ast.getFullNameSym( self, ,,symbolInfo );
+         }
+      }
+      
+      _logNode( .Log, nearest, "nearestNode -- " );
+      if! let workNode = nearest@@@Nodes.ExpRefNode {
+         return Ast.getFullNameSym( self, workNode.$symbolInfo );
+      }
+      if! let workNode = nearest@@@Nodes.RefFieldNode {
+         if isInner( workNode.$field.$pos, workNode.$field.txt ) {
+            if! let symbolInfo = workNode.$symbolInfo {
+               return Ast.getFullNameSym( self, symbolInfo );
+            }
+         }
+      }
+      if! let workNode = nearest@@@Nodes.DeclVarNode {
+         foreach varSym in workNode.$symbolInfoList {
+            _patternDeclSym( varSym );
+         }
+      }
+      if! let workNode = nearest@@@Nodes.ExpOmitEnumNode {
+         if isInner( workNode.$effectivePos, workNode.$valInfo.$name ) {
+            return Ast.getFullNameSym( self, workNode.$valInfo.$symbolInfo );
+         }
+      }
+      if! let workNode = nearest@@@Nodes.NewAlgeValNode {
+         if isInner( workNode.$effectivePos, workNode.$valInfo.$name ) {
+            return Ast.getFullNameSym( self, workNode.$valInfo.$symbolInfo );
+         }
+      }
+      if! let workNode = nearest@@@Nodes.ExpMacroExpNode {
+         if isInner( workNode.$effectivePos, workNode.$expType.$rawTxt ) {
+            return self.getFull( workNode.$macroType, false );
+         }
+      }
+      if! let workNode = nearest@@@Nodes.DeclFuncNode {
+         if! let name = workNode.$declInfo.$name {
+            if isInner( name.pos, name.txt ) {
+               return self.getFull( workNode.$expType, false );
+            }
+         }
+      }
+      if! let workNode = nearest@@@Nodes.DeclEnumNode {
+         let name = workNode.$name;
+         if isInner( name.pos, name.txt ) {
+            return self.getFull( workNode.$expType, false );
+         }
+         foreach valInfo in workNode.$enumType.$name2EnumValInfo {
+            _patternDeclSym( valInfo.$symbolInfo );
+         }
+      }
+      if! let workNode = nearest@@@Nodes.DeclAlgeNode {
+         let name = workNode.$name;
+         if isInner( name.pos, name.txt ) {
+            return self.getFull( workNode.$expType, false );
+         }
+         foreach valInfo in workNode.$algeType.$valInfoMap {
+            _patternDeclSym( valInfo.$symbolInfo );
+         }
+      }
+      if! let workNode = nearest@@@Nodes.DeclClassNode {
+         if isInner( workNode.$name.pos, workNode.$name.txt ) {
+            return self.getFull( workNode.$expType, false );
+         }
+      }
+      if! let workNode = nearest@@@Nodes.DeclMethodNode {
+         if! let name = workNode.$declInfo.$name {
+            if isInner( name.pos, name.txt ) {
+               return self.getFull( workNode.$expType, false );
+            }
+         }
+      }
+      if! let workNode = nearest@@@Nodes.ProtoClassNode {
+         let name = workNode.$name;
+         if isInner( name.pos, name.txt ) {
+            return self.getFull( workNode.$expType, false );
+         }
+      }
+      if! let workNode = nearest@@@Nodes.DeclMemberNode {
+         _patternDeclSym( workNode.$symbolInfo );
+         if! let token, symbol = workNode.$getterToken, workNode.getGetterSym() {
+            if isInner( token.pos, token.txt ) {
+               return Ast.getFullNameSym( self, symbol );
+            }
+         }
+         if! let token, symbol = workNode.$setterToken, workNode.getSetterSym() {
+            if isInner( token.pos, token.txt ) {
+               return Ast.getFullNameSym( self, symbol );
+            }
+         }
+      }
+      if! let workNode = nearest@@@Nodes.DeclConstrNode {
+         if! let name = workNode.$declInfo.$name {
+            if isInner( name.pos, name.txt ) {
+               return self.getFull( workNode.$expType, false );
+            }
+         }
+      }
+      if! let workNode = nearest@@@Nodes.ExpCallSuperCtorNode {
+         return self.getFull( workNode.$methodType, false );
+      }
+      if! let workNode = nearest@@@Nodes.ExpCallSuperNode {
+         return self.getFull( workNode.$methodType, false );
+      }
+      if! let workNode = nearest@@@Nodes.ExpNewNode {
+         if isInner( workNode.$pos, "new" ) {
+            return self.getFull( workNode.$ctorTypeInfo, false );
+         }
+      }
+      if! let workNode = nearest@@@Nodes.DeclMacroNode {
+         if isInner( workNode.$declInfo.$name.pos, workNode.$declInfo.$name.txt ) {
+            return self.getFull( workNode.$expType, false );
+         }
+      }
+      if! let workNode = nearest@@@Nodes.ExpMacroExpNode {
+         if isInner( workNode.$pos, workNode.$macroType.$rawTxt ) {
+            return self.getFull( workNode.$macroType, false );
+         }
+      }
+      if! let workNode = nearest@@@Nodes.GetFieldNode {
+         if! let symbolInfo = workNode.$symbolInfo {
+            if isInner( workNode.$field.pos, workNode.$field.txt ) {
+               return Ast.getFullNameSym( self, symbolInfo );
+            }
+         }
+      }
+      Log._log( .Err, "unknown pattern -- %s" (Nodes.getNodeKindName( nearest.$kind )) );
+      return nil;
+   }
+
+   pub fn getPattern( analyzeFileInfo:&Option.AnalyzeFileInfo ) : str! {
+      fn isInner( pos:&Types.Position, name:str ) : bool {
+         if pos.lineNo == analyzeFileInfo.$lineNo and
+            pos.column <= analyzeFileInfo.$column and
+            pos.column + #name >= analyzeFileInfo.$column
+         {
+            return true;
+         }
+         return false;
+      }
+      
+      let mut pattern:str! = nil;
+      if self.ast.$streamName == analyzeFileInfo.$path {
+         let mut nearestNode:&Nodes.Node! = nil;
+         self.ast.$node.visit(
+            fn ( node:&Nodes.Node, parent:&Nodes.Node,
+                 relation:str, depth:int ): Nodes.NodeVisitMode
+            {
+               if analyzeFileInfo.$path == node.$effectivePos.streamName {
+                  if analyzeFileInfo.$lineNo == node.$effectivePos.lineNo and
+                     analyzeFileInfo.$column >= node.$effectivePos.column
+                  {
+                     if! let declMemberNode = node@@@Nodes.DeclMemberNode {
+                        if! let token = declMemberNode.$getterToken {
+                           if isInner( token.pos, token.txt ) {
+                              nearestNode = node;
+                              return .End;
+                           }
+                        }
+                        if! let token = declMemberNode.$setterToken {
+                           if isInner( token.pos, token.txt ) {
+                              nearestNode = node;
+                              return .End;
+                           }
+                        }
+                     }
+                     
+                     if! let nearest = nearestNode {
+                        if nearest.$effectivePos.lineNo ~= analyzeFileInfo.$lineNo {
+                           nearestNode = node;
+                        }
+                        if nearest.$effectivePos.column < node.$effectivePos.column {
+                           nearestNode = node;
+                        } elseif nearest.$effectivePos.column == node.$effectivePos.column {
+                           nearestNode = node;
+                        }
+                     } else {
+                        nearestNode = node;
+                     }
+                  } else {
+                     if! let nearest = nearestNode {
+                        if nearest.$effectivePos.lineNo < node.$effectivePos.lineNo and
+                           node.$effectivePos.lineNo < analyzeFileInfo.$lineNo
+                        {
+                           nearestNode = node;
+                        }
+                     } else {
+                        nearestNode = node;
+                     }
+                  }
+                  _logNode( .Trace, node, "visit:" );
+                  return .Child;
+               }
+               return .Next;
+            }, 0, (@) );
+         if! let nearest = nearestNode {
+            pattern = self.getPatternFromNode( analyzeFileInfo, nearest );
+         }
+      }
+      return pattern;
+   }
+}
+
+pub fn getPatterAt( analyzeFileInfo:&Option.AnalyzeFileInfo ) : str! {
+
+   let mut pattern:str! = nil;
+   let useStdInMod:str!;
+   if analyzeFileInfo.$stdinFlag {
+      useStdInMod = front.scriptPath2Module( analyzeFileInfo.$path );
+   } else {
+      useStdInMod = nil;
+   }
+   
+   Ast.buildAst( .Err, analyzeFileInfo.$path, useStdInMod, false,
+             fn ( ast: TransUnit.ASTInfo ) {
+                if ast.$streamName == analyzeFileInfo.$path {
+                   let mut filter = new SyntaxFilter( ast );
+                   pattern = filter.getPattern( analyzeFileInfo );
+                   Log._log( .Log, "pattern -- %s" (pattern) );
+                }
+             });
+
+   return pattern;
+}

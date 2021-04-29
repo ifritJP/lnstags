@@ -13,3 +13,25 @@ macro _Macro() {
 }
 _Macro();
 print( Sub.Val );
+print( hoge.$val );
+{
+   let mut hoge2 = new Sub.Hoge();
+   hoge2.set_val( 0 );
+}
+{
+   macro _Macro2() {
+      {
+         let stmt = `{ Sub.func(); };
+      }
+      ,,stmt;
+   }
+   _Macro2();
+}
+{
+   let mut sub:Sub.Sub = new Sub.SubSub( 1 );
+   sub.set_val( sub.$val );
+}
+{
+   Sub._Hoge();
+   Sub._Hoge2( `{print("hoge");} );
+}

@@ -1,0 +1,46 @@
+// -*- coding: utf-8 -*-
+
+import go/github:com.ifritJP.LuneScript.src.lune.base.Option as LnsOpt;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Types;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Parser;
+import go/github:com.ifritJP.LuneScript.src.lune.base.front;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Nodes;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Ast as LnsAst;
+import go/github:com.ifritJP.LuneScript.src.lune.base.LuaVer;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Log as LnsLog;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Util as LnsUtil;
+
+pub fn getFullNameSym<T>( filter:&Nodes.Filter<T>, symbolInfo:&LnsAst.SymbolInfo ) : str {
+   if symbolInfo.$namespaceTypeInfo == LnsAst.headTypeInfo {
+      return symbolInfo.$name;
+   }
+   let name = "%s.%s"
+       ( filter.getFull( symbolInfo.$namespaceTypeInfo, false ), symbolInfo.$name );
+   return name;
+}
+
+pub fn buildAst( logLevel:LnsLog.Level, path:str, useStdInMod:str!, forceAll:bool,
+             astCallback:front.AstCallback )
+{
+   LnsLog.setLevel( logLevel );
+   LnsUtil.setDebugFlag( false );
+
+   when! useStdInMod {
+      Parser.StreamParser.setStdinStream( useStdInMod );
+   }
+   
+   //let mut lnsOpt = LnsOpt.createDefaultOption( path );
+   let mut lnsOpt = LnsOpt.analyze( [ path, "lua" ] );
+   // ver 51, 52 では構文エラーになるケースがあるので、
+   // ここでは 53 として処理する。
+   // 本来はオプション指定した方が良いかも。
+   lnsOpt.targetLuaVer = LuaVer.ver53;
+   // .meta があったときでも ast 解析するように .Force 設定
+   if forceAll {
+      lnsOpt.transCtrlInfo.uptodateMode = .ForceAll;
+   } else {
+      lnsOpt.transCtrlInfo.uptodateMode = .Force1( LnsUtil.scriptPath2Module( path ) );
+   }
+      
+   front.build( lnsOpt, astCallback );
+}

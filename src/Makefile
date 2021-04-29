@@ -7,7 +7,7 @@ SRCS += $(shell find lns -iname '*.lns')
 help:
 	@echo make build
 	@echo make buildDB
-	@echo make inq
+	@echo make check
 
 build: lnstags
 
@@ -18,10 +18,8 @@ lnstags: $(SRCS)
 	go build -tags gopherlua
 
 buildDB: build
-#	rm -f lnstags.sqlite3
 	./lnstags init
-	./lnstags build test/main.lns
-	$(MAKE) check
+	./lnstags build lns/tags/main.lns
 
 inq: build
 	./lnstags --simpleLog inq-at def test/main.lns 2 6 --log debug
@@ -37,6 +35,9 @@ inq: build
 	./lnstags --simpleLog inq-at ref test/main.lns 11 7 --log debug
 	./lnstags --simpleLog inq-at def test/main.lns 14 1 --log debug
 	./lnstags --simpleLog inq-at def test/main.lns 15 12 --log debug
+	./lnstags --simpleLog inq-at def test/main.lns 16 14 --log debug
+	./lnstags --simpleLog inq-at def test/main.lns 32 11 --log debug
+	./lnstags --simpleLog inq-at def test/main.lns 32 22 --log debug
 	./lnstags --simpleLog inq-at ref test/Sub.lns 1 10 --log debug
 	./lnstags --simpleLog inq-at ref test/Sub.lns 2 6 --log debug
 	./lnstags --simpleLog inq-at ref test/Sub.lns 4 11 --log debug
@@ -64,6 +65,8 @@ inq: build
 	./lnstags --simpleLog inq ref @test.@Sub.HogeHoge.__init
 
 check: build
+	./lnstags init
+	./lnstags build test/main.lns --log debug
 	$(MAKE) inq 2>&1 | grep -v -e '^make\[' > work/output.new.txt 
 	diff test/output.txt work/output.new.txt
 

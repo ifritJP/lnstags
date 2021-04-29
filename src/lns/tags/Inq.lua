@@ -5,19 +5,6 @@ local _lune = {}
 if _lune3 then
    _lune = _lune3
 end
-function _lune.unwrap( val )
-   if val == nil then
-      __luneScript:error( 'unwrap val is nil' )
-   end
-   return val
-end
-function _lune.unwrapDefault( val, defval )
-   if val == nil then
-      return defval
-   end
-   return val
-end
-
 function _lune.loadModule( mod )
    if __luneScript then
       return  __luneScript:loadModule( mod )
@@ -86,7 +73,13 @@ local function InqDef( db, pattern )
    local factory = Util.SourceCodeLineAccessorFactory.new()
    db:mapSymbolDecl( pattern, function ( item )
    
-      local path = _lune.unwrap( db:getFilePath( item:get_fileId() ))
+      local path = db:getFilePath( item:get_fileId() )
+      if  nil == path then
+         local _path = path
+      
+         error( string.format( "file id is illegal -- %d", item:get_fileId()) )
+      end
+      
       Util.outputLocate( io.stdout, pattern, path, factory:create( path ), item:get_line() )
       return true
    end )
@@ -98,7 +91,13 @@ local function InqRef( db, pattern )
    local factory = Util.SourceCodeLineAccessorFactory.new()
    db:mapSymbolRef( pattern, function ( item )
    
-      local path = _lune.unwrap( db:getFilePath( item:get_fileId() ))
+      local path = db:getFilePath( item:get_fileId() )
+      if  nil == path then
+         local _path = path
+      
+         error( string.format( "file id is illegal -- %d", item:get_fileId()) )
+      end
+      
       Util.outputLocate( io.stdout, pattern, path, factory:create( path ), item:get_line() )
       return true
    end )
