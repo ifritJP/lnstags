@@ -75,13 +75,26 @@ local function __main( args )
          inq( option:get_inqMode(), option:get_pattern() )
       elseif _switchExp == Option.Mode.InqAt then
          local analyzeFileInfo = option:get_analyzeFileInfo()
-         local pattern = Pattern.getPatterAt( analyzeFileInfo )
+         
+         local db = DBCtrl.open( dbPath, false )
+         if  nil == db then
+            local _db = db
+         
+            print( "error" )
+            return 1
+         end
+         
+         
+         local pattern = Pattern.getPatterAt( db, analyzeFileInfo )
          if  nil == pattern then
             local _pattern = pattern
          
+            db:close(  )
             print( string.format( "illegal pos -- %s:%d:%d", analyzeFileInfo:get_path(), analyzeFileInfo:get_lineNo(), analyzeFileInfo:get_column()) )
             return 1
          end
+         
+         db:close(  )
          
          inq( option:get_inqMode(), pattern )
       elseif _switchExp == Option.Mode.Dump then

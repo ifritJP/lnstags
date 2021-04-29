@@ -13,6 +13,10 @@ import LnsLog "github.com/ifritJP/LuneScript/src/lune/base"
 import LnsUtil "github.com/ifritJP/LuneScript/src/lune/base"
 var init_Pattern bool
 var Pattern__mod__ string
+// for 264
+func Pattern_convExp1763(arg1 []LnsAny) string {
+    return Lns_getFromMulti( arg1, 0 ).(string)
+}
 
 
 
@@ -22,25 +26,48 @@ var Pattern__mod__ string
 
 
 // 250: decl @lns.@tags.@Pattern.getPatterAt
-func Pattern_getPatterAt(analyzeFileInfo *Option_AnalyzeFileInfo) LnsAny {
+func Pattern_getPatterAt(db *DBCtrl_DBCtrl,analyzeFileInfo *Option_AnalyzeFileInfo) LnsAny {
+    var fileId LnsInt
+    fileId = db.FP.GetFileIdFromPath(analyzeFileInfo.FP.Get_path())
+    var path string
+    
+    {
+        _path := db.FP.GetMainFilePath(fileId)
+        if _path == nil{
+            path = analyzeFileInfo.FP.Get_path()
+            
+        } else {
+            path = _path.(string)
+        }
+    }
     var pattern LnsAny
     pattern = nil
     var useStdInMod LnsAny
+    var projDir LnsAny
+    projDir = nil
+    if Lns_isCondTrue( Lns_GetEnv().PopVal( Lns_GetEnv().IncStack() ||
+        Lns_GetEnv().SetStackVal( Lns_car(Lns_getVM().String_find(path,"^%.%.", nil, nil))) ||
+        Lns_GetEnv().SetStackVal( Lns_car(Lns_getVM().String_find(path,"^/", nil, nil))) )){
+        var dir string
+        dir = Pattern_convExp1763(Lns_2DDD(Lns_getVM().String_gsub(path,"/[^/]+$", "")))
+        projDir = LnsUtil.Util_searchProjDir(dir)
+        
+    }
     if analyzeFileInfo.FP.Get_stdinFlag(){
-        useStdInMod = front.Front_scriptPath2Module(analyzeFileInfo.FP.Get_path())
+        useStdInMod = LnsUtil.Util_scriptPath2ModuleFromProjDir(path, projDir)
         
     } else { 
         useStdInMod = nil
         
     }
-    Ast_buildAst(LnsLog.Log_Level__Err, analyzeFileInfo.FP.Get_path(), useStdInMod, false, front.Front_AstCallback(func(ast *TransUnit.TransUnit_ASTInfo) {
+    Ast_buildAst(LnsLog.Log_Level__Err, path, projDir, useStdInMod, false, front.Front_AstCallback(func(ast *TransUnit.TransUnit_ASTInfo) {
         __func__ := "@lns.@tags.@Pattern.getPatterAt.<anonymous>"
-        if ast.FP.Get_streamName() == analyzeFileInfo.FP.Get_path(){
+        if ast.FP.Get_streamName() == path{
             var filter *Pattern_SyntaxFilter
             filter = NewPattern_SyntaxFilter(ast)
-            pattern = filter.FP.GetPattern(analyzeFileInfo)
+            pattern = filter.FP.GetPattern(path, analyzeFileInfo)
             
-            Log_log(Log_Level__Log, __func__, 265, Log_CreateMessage(func() string {
+            Log_log(Log_Level__Log, __func__, 280, Log_CreateMessage(func() string {
                 return Lns_getVM().String_format("pattern -- %s", []LnsAny{pattern})
             }))
             
@@ -53,7 +80,7 @@ func Pattern_getPatterAt(analyzeFileInfo *Option_AnalyzeFileInfo) LnsAny {
 type Pattern_SyntaxFilterMtd interface {
     DefaultProcess(arg1 *Nodes.Nodes_Node, arg2 LnsAny)
     GetFull(arg1 *LnsAst.Ast_TypeInfo, arg2 bool) string
-    GetPattern(arg1 *Option_AnalyzeFileInfo) LnsAny
+    GetPattern(arg1 string, arg2 *Option_AnalyzeFileInfo) LnsAny
     getPatternFromNode(arg1 *Option_AnalyzeFileInfo, arg2 *Nodes.Nodes_Node) LnsAny
     Get_moduleInfoManager() LnsAst.Ast_ModuleInfoManager
     Get_optStack() *LnsList
@@ -463,7 +490,7 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
 }
 
 // 177: decl @lns.@tags.@Pattern.SyntaxFilter.getPattern
-func (self *Pattern_SyntaxFilter) GetPattern(analyzeFileInfo *Option_AnalyzeFileInfo) LnsAny {
+func (self *Pattern_SyntaxFilter) GetPattern(path string,analyzeFileInfo *Option_AnalyzeFileInfo) LnsAny {
     var isInner func(pos *Types.Types_Position,name string) bool
     isInner = func(pos *Types.Types_Position,name string) bool {
         if Lns_isCondTrue( Lns_GetEnv().PopVal( Lns_GetEnv().IncStack() ||
@@ -476,7 +503,7 @@ func (self *Pattern_SyntaxFilter) GetPattern(analyzeFileInfo *Option_AnalyzeFile
     }
     var pattern LnsAny
     pattern = nil
-    if self.ast.FP.Get_streamName() == analyzeFileInfo.FP.Get_path(){
+    if self.ast.FP.Get_streamName() == path{
         var nearestNode LnsAny
         nearestNode = nil
         self.ast.FP.Get_node().FP.Visit(Nodes.Nodes_NodeVisitor(func(node *Nodes.Nodes_Node,parent *Nodes.Nodes_Node,relation string,depth LnsInt) LnsInt {

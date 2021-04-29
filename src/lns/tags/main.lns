@@ -54,12 +54,21 @@ pub fn __main( args:&List<str> ) : int {
       }
       case .InqAt {
          let analyzeFileInfo = option.$analyzeFileInfo;
-         let! pattern = Pattern.getPatterAt( analyzeFileInfo ) {
+
+         let! mut db = DBCtrl.open( dbPath, false ) {
+            print( "error" );
+            return 1;
+         };
+         
+         let! pattern = Pattern.getPatterAt( db, analyzeFileInfo ) {
+            db.close();
             print( "illegal pos -- %s:%d:%d"
                    ( analyzeFileInfo.$path,
                      analyzeFileInfo.$lineNo, analyzeFileInfo.$column ) );
             return 1;
          };
+         db.close();
+         
          inq( option.$inqMode, pattern );
       }
       case .Dump {

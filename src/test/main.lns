@@ -1,3 +1,5 @@
+subfile use test.mainSub;
+
 import test.Sub;
 Sub.func();
 let hoge = new Sub.Hoge();

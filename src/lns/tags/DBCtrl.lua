@@ -256,6 +256,7 @@ function DBCtrl:__init(access, readonly)
    self.idMgrNamespace = IdMgr.new(DBCtrl.getMaxId( access, "namespace", userNsId ))
    self.idMgrSimpleName = IdMgr.new(DBCtrl.getMaxId( access, "simpleName", userNsId ))
    self.idMgrFilePath = IdMgr.new(DBCtrl.getMaxId( access, "filePath", userNsId ))
+   self.idMgrProjInfo = IdMgr.new(DBCtrl.getMaxId( access, "projInfo", userNsId ))
 end
 function DBCtrl:close(  )
 
@@ -429,7 +430,7 @@ end
 local function open( path, readonly )
    local __func__ = '@lns.@tags.@DBCtrl.open'
 
-   Log.log( Log.Level.Log, __func__, 179, function (  )
+   Log.log( Log.Level.Log, __func__, 182, function (  )
    
       return "open"
    end )
@@ -453,7 +454,7 @@ local function open( path, readonly )
    if  nil == item then
       local _item = item
    
-      Log.log( Log.Level.Err, __func__, 191, function (  )
+      Log.log( Log.Level.Err, __func__, 194, function (  )
       
          return "unknown version"
       end )
@@ -463,7 +464,7 @@ local function open( path, readonly )
    end
    
    if tonumber( item:get_val() ) ~= DB_VERSION then
-      Log.log( Log.Level.Err, __func__, 196, function (  )
+      Log.log( Log.Level.Err, __func__, 199, function (  )
       
          return string.format( "not support version. -- %s", item:get_val())
       end )
@@ -501,8 +502,11 @@ CREATE TABLE namespace ( id INTEGER PRIMARY KEY, snameId INTEGER, parentId INTEG
 INSERT INTO namespace VALUES( NULL, 1, 0, '', '', '', 0 );
 
 CREATE TABLE simpleName ( id INTEGER PRIMARY KEY, name VARCHAR UNIQUE COLLATE binary);
-CREATE TABLE filePath ( id INTEGER PRIMARY KEY, path VARCHAR UNIQUE COLLATE binary, incFlag INTEGER, digest CHAR(32), currentDir VARCHAR COLLATE binary, invalidSkip INTEGER);
-INSERT INTO filePath VALUES( NULL, '', 0, '', '', 1 );
+CREATE TABLE projInfo ( id INTEGER PRIMARY KEY, dir VARCHAR UNIQUE COLLATE binary);
+INSERT INTO projInfo VALUES( 1, '' );
+CREATE TABLE filePath ( id INTEGER PRIMARY KEY, path VARCHAR UNIQUE COLLATE binary, mod VARCHAR COLLATE binary, projId INTEGER );
+INSERT INTO filePath VALUES( 1, '', '', 1 );
+CREATE TABLE subfile ( mainId INTEGER, subId INTEGER PRIMARY KEY );
 
 CREATE TABLE override (nsId INTEGER, superNsId INTEGER, PRIMARY KEY (nsId, superNsId));
 CREATE TABLE symbolDecl ( nsId INTEGER, snameId INTEGER, parentId INTEGER, type INTEGER, fileId INTEGER, line INTEGER, column INTEGER, endLine INTEGER, endColumn INTEGER, charSize INTEGER, comment VARCHAR COLLATE binary, hasBodyFlag INTEGER, PRIMARY KEY( nsId, fileId, line ) );
@@ -517,7 +521,8 @@ CREATE TABLE incCache ( id INTEGER, baseFileId INTEGER, incFlag INTEGER, PRIMARY
 CREATE TABLE incBelong ( id INTEGER, baseFileId INTEGER, nsId INTEGER, PRIMARY KEY ( id, nsId ) );
 CREATE INDEX index_ns ON namespace ( id, snameId, parentId, name, otherName );
 CREATE INDEX index_sName ON simpleName ( id, name );
-CREATE INDEX index_filePath ON filePath ( id, path );
+CREATE INDEX index_filePath ON filePath ( id, path, mod );
+CREATE INDEX index_subfile ON subfile (subId );
 CREATE INDEX index_override ON override (nsId, superNsId);
 CREATE INDEX index_symDecl ON symbolDecl ( nsId, parentId, snameId, fileId );
 CREATE INDEX index_symRef ON symbolRef ( nsId, snameId, fileId, belongNsId );
@@ -529,33 +534,88 @@ COMMIT;
 end
 
 
-local ItemFilePath = {}
-setmetatable( ItemFilePath, { ifList = {Mapping,} } )
-function ItemFilePath.setmeta( obj )
-  setmetatable( obj, { __index = ItemFilePath  } )
+local ItemProjInfo = {}
+setmetatable( ItemProjInfo, { ifList = {Mapping,} } )
+function ItemProjInfo.setmeta( obj )
+  setmetatable( obj, { __index = ItemProjInfo  } )
 end
-function ItemFilePath.new( id, path, incFlag, digest, currentDir, invalidSkip )
+function ItemProjInfo.new( id, dir )
    local obj = {}
-   ItemFilePath.setmeta( obj )
+   ItemProjInfo.setmeta( obj )
    if obj.__init then
-      obj:__init( id, path, incFlag, digest, currentDir, invalidSkip )
+      obj:__init( id, dir )
    end
    return obj
 end
-function ItemFilePath:__init( id, path, incFlag, digest, currentDir, invalidSkip )
+function ItemProjInfo:__init( id, dir )
+
+   self.id = id
+   self.dir = dir
+end
+function ItemProjInfo:get_id()
+   return self.id
+end
+function ItemProjInfo:get_dir()
+   return self.dir
+end
+function ItemProjInfo:_toMap()
+  return self
+end
+function ItemProjInfo._fromMap( val )
+  local obj, mes = ItemProjInfo._fromMapSub( {}, val )
+  if obj then
+     ItemProjInfo.setmeta( obj )
+  end
+  return obj, mes
+end
+function ItemProjInfo._fromStem( val )
+  return ItemProjInfo._fromMap( val )
+end
+
+function ItemProjInfo._fromMapSub( obj, val )
+   local memInfo = {}
+   table.insert( memInfo, { name = "id", func = _lune._toInt, nilable = false, child = {} } )
+   table.insert( memInfo, { name = "dir", func = _lune._toStr, nilable = false, child = {} } )
+   local result, mess = _lune._fromMap( obj, val, memInfo )
+   if not result then
+      return nil, mess
+   end
+   return obj
+end
+
+
+local ItemFilePath = {}
+setmetatable( ItemFilePath, { ifList = {Mapping,} } )
+_moduleObj.ItemFilePath = ItemFilePath
+function ItemFilePath.setmeta( obj )
+  setmetatable( obj, { __index = ItemFilePath  } )
+end
+function ItemFilePath.new( id, path, mod, projId )
+   local obj = {}
+   ItemFilePath.setmeta( obj )
+   if obj.__init then
+      obj:__init( id, path, mod, projId )
+   end
+   return obj
+end
+function ItemFilePath:__init( id, path, mod, projId )
 
    self.id = id
    self.path = path
-   self.incFlag = incFlag
-   self.digest = digest
-   self.currentDir = currentDir
-   self.invalidSkip = invalidSkip
+   self.mod = mod
+   self.projId = projId
 end
 function ItemFilePath:get_id()
    return self.id
 end
 function ItemFilePath:get_path()
    return self.path
+end
+function ItemFilePath:get_mod()
+   return self.mod
+end
+function ItemFilePath:get_projId()
+   return self.projId
 end
 function ItemFilePath:_toMap()
   return self
@@ -575,10 +635,8 @@ function ItemFilePath._fromMapSub( obj, val )
    local memInfo = {}
    table.insert( memInfo, { name = "id", func = _lune._toInt, nilable = false, child = {} } )
    table.insert( memInfo, { name = "path", func = _lune._toStr, nilable = false, child = {} } )
-   table.insert( memInfo, { name = "incFlag", func = _lune._toInt, nilable = false, child = {} } )
-   table.insert( memInfo, { name = "digest", func = _lune._toStr, nilable = false, child = {} } )
-   table.insert( memInfo, { name = "currentDir", func = _lune._toStr, nilable = false, child = {} } )
-   table.insert( memInfo, { name = "invalidSkip", func = _lune._toInt, nilable = false, child = {} } )
+   table.insert( memInfo, { name = "mod", func = _lune._toStr, nilable = false, child = {} } )
+   table.insert( memInfo, { name = "projId", func = _lune._toInt, nilable = false, child = {} } )
    local result, mess = _lune._fromMap( obj, val, memInfo )
    if not result then
       return nil, mess
@@ -820,12 +878,50 @@ function ItemOverride._fromMapSub( obj, val )
 end
 
 
-function DBCtrl:addFile( path )
+function DBCtrl:addProj( path )
 
-   if path:find( self.projDir, 1, true ) == 1 then
-      path = string.format( "|%s", path:sub( #path + 1 ))
+   local projId = nil
+   self:mapRowList( "projInfo", string.format( "dir = '%s'", path), 1, nil, function ( items )
+   
+      do
+         local projInfo = ItemProjInfo._fromStem( items )
+         if projInfo ~= nil then
+            projId = projInfo:get_id()
+         end
+      end
+      
+      return false
+   end )
+   if projId ~= nil then
+      return projId, false
    end
    
+   local id = self.idMgrProjInfo:getIdNext(  )
+   self:insert( "projInfo", string.format( "%d,'%s'", id, path) )
+   
+   return id, true
+end
+
+
+local function getProjDir( path, mod )
+
+   local workPath = mod:gsub( "@", "" ):gsub( "%.", "/" ) .. ".lns"
+   local projDir = path:gsub( workPath .. "$", "" )
+   if #mod ~= 0 and #projDir == 0 then
+      projDir = "./"
+   end
+   
+   return projDir
+end
+_moduleObj.getProjDir = getProjDir
+
+local function normalizePath( path )
+
+   return (path:gsub( "^%./", "" ) )
+end
+function DBCtrl:addFile( path, mod )
+
+   path = normalizePath( path )
    
    local fileId = nil
    self:mapRowList( "filePath", string.format( "path = '%s'", path), 1, nil, function ( items )
@@ -843,10 +939,85 @@ function DBCtrl:addFile( path )
       return fileId, false
    end
    
-   local id = self.idMgrFilePath:getIdNext(  )
-   self:insert( "filePath", string.format( "%d,'%s',0,'','|',0", id, path) )
    
+   local projDir = getProjDir( path, mod )
+   local projId = self:addProj( projDir )
+   
+   local id = self.idMgrFilePath:getIdNext(  )
+   self:insert( "filePath", string.format( "%d,'%s','%s', %d", id, path, mod:gsub( "@", "" ), projId) )
    return id, true
+end
+
+
+function DBCtrl:getFileIdFromPath( path )
+   local __func__ = '@lns.@tags.@DBCtrl.DBCtrl.getFileIdFromPath'
+
+   path = normalizePath( path )
+   local fileId = nil
+   self:mapRowList( "filePath", string.format( "path = '%s'", path), 1, nil, function ( items )
+   
+      do
+         local filePath = ItemFilePath._fromStem( items )
+         if filePath ~= nil then
+            fileId = filePath:get_id()
+         end
+      end
+      
+      return false
+   end )
+   if fileId ~= nil then
+      return fileId
+   end
+   
+   Log.log( Log.Level.Err, __func__, 394, function (  )
+   
+      return string.format( "not found file -- %s", path)
+   end )
+   
+   return _moduleObj.rootNsId
+end
+
+
+function DBCtrl:getFilePath( fileId )
+
+   local path = nil
+   self:mapRowList( "filePath", string.format( "id = %d", fileId), 1, nil, function ( items )
+   
+      do
+         local obj = ItemFilePath._fromStem( items )
+         if obj ~= nil then
+            path = obj:get_path()
+         end
+      end
+      
+      return false
+   end )
+   return path
+end
+
+
+function DBCtrl:addSubfile( mainId, subId )
+
+   self:insert( "subfile", string.format( "%d, %d", mainId, subId) )
+end
+
+
+function DBCtrl:getMainFilePath( subId )
+
+   do
+      local map = self:getRow( "subfile", string.format( "subId = %d", subId), "mainId" )
+      if map ~= nil then
+         do
+            local mainId = map['mainId']
+            if mainId ~= nil then
+               return self:getFilePath( math.floor(mainId) )
+            end
+         end
+         
+      end
+   end
+   
+   return nil
 end
 
 
@@ -912,24 +1083,6 @@ function DBCtrl:addNamespace( fullName, parentId )
 end
 
 
-function DBCtrl:getFilePath( fileId )
-
-   local path = nil
-   self:mapRowList( "filePath", string.format( "id = %d", fileId), 1, nil, function ( items )
-   
-      do
-         local obj = ItemFilePath._fromStem( items )
-         if obj ~= nil then
-            path = obj:get_path()
-         end
-      end
-      
-      return false
-   end )
-   return path
-end
-
-
 function DBCtrl:addOverride( nsId, superNsId )
 
    self:insert( "override", string.format( "%d, %d", nsId, superNsId) )
@@ -972,7 +1125,7 @@ end
 local function create( dbPath )
    local __func__ = '@lns.@tags.@DBCtrl.create'
 
-   Log.log( Log.Level.Log, __func__, 447, function (  )
+   Log.log( Log.Level.Log, __func__, 530, function (  )
    
       return "create"
    end )
@@ -1090,10 +1243,24 @@ end
 
 function DBCtrl:dumpFile(  )
 
+   print( "projId" )
+   self:mapRowList( "projInfo", nil, nil, nil, function ( items )
+   
+      print( items['id'], items['dir'] )
+      return true
+   end )
+   
    print( "filePath" )
    self:mapRowList( "filePath", nil, nil, nil, function ( items )
    
-      print( items['id'], items['path'] )
+      print( items['id'], items['projId'], items['path'], items['mod'] )
+      return true
+   end )
+   
+   print( "subfile" )
+   self:mapRowList( "subfile", nil, nil, nil, function ( items )
+   
+      print( items['mainId'], items['subId'] )
       return true
    end )
 end
@@ -1158,7 +1325,7 @@ local function test(  )
    
    local fileId = _moduleObj.rootNsId
    for __index, path in pairs( {"aa.lns", "bb.lns", "cc.lns"} ) do
-      fileId = db:addFile( path )
+      fileId = db:addFile( path, (path:gsub( "%.lns", "" ) ) )
    end
    
    
@@ -1175,7 +1342,7 @@ local function test(  )
    
    do
       local _
-      local _543, added = db:addNamespace( "@hoge", _moduleObj.rootNsId )
+      local _617, added = db:addNamespace( "@hoge", _moduleObj.rootNsId )
       print( "added", added )
    end
    

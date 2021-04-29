@@ -261,6 +261,38 @@ end
 
 local tagFilter = {}
 setmetatable( tagFilter, { __index = Nodes.Filter } )
+function tagFilter:addFileId( path, mod )
+   local __func__ = '@lns.@tags.@Analyze.tagFilter.addFileId'
+
+   do
+      local _exp = self.file2id[path]
+      if _exp ~= nil then
+         return _exp
+      end
+   end
+   
+   local fileId = self.db:addFile( path, mod )
+   Log.log( Log.Level.Debug, __func__, 34, function (  )
+   
+      return string.format( "add file -- %d, %s", fileId, path)
+   end )
+   
+   self.file2id[path] = fileId
+   return fileId
+end
+function tagFilter:getFileId( path )
+
+   do
+      local _exp = self.file2id[path]
+      if _exp ~= nil then
+         return _exp
+      end
+   end
+   
+   local fileId = self.db:getFileIdFromPath( path )
+   self.file2id[path] = fileId
+   return fileId
+end
 function tagFilter.new( rootNode, option, db, streamName )
    local obj = {}
    tagFilter.setmeta( obj )
@@ -276,25 +308,8 @@ function tagFilter:__init(rootNode, option, db, streamName)
    self.streamName = streamName
    self.type2nsid = {}
    self.sym2nsid = {}
-end
-function tagFilter:getFileId( path )
-   local __func__ = '@lns.@tags.@Analyze.tagFilter.getFileId'
-
-   do
-      local _exp = self.file2id[path]
-      if _exp ~= nil then
-         return _exp
-      end
-   end
-   
-   local fileId = self.db:addFile( path )
-   Log.log( Log.Level.Debug, __func__, 46, function (  )
-   
-      return string.format( "add file -- %d, %s", fileId, path)
-   end )
-   
-   self.file2id[path] = fileId
-   return fileId
+   local mod = self:getFull( rootNode:get_moduleTypeInfo(), false )
+   self:addFileId( streamName, mod )
 end
 function tagFilter.setmeta( obj )
   setmetatable( obj, { __index = tagFilter  } )
@@ -315,7 +330,7 @@ function tagFilter:registerType( typeInfo )
    local parentNsId = self:registerType( typeInfo:get_parentInfo() )
    local name = self:getFull( typeInfo, false )
    local nsId, added = self.db:addNamespace( name, parentNsId )
-   Log.log( Log.Level.Debug, __func__, 61, function (  )
+   Log.log( Log.Level.Debug, __func__, 72, function (  )
    
       return string.format( "%s %s %d", name, added, nsId)
    end )
@@ -339,7 +354,7 @@ function tagFilter:registerSymbol( symbolInfo )
    local parentNsId = self:registerType( symbolInfo:get_namespaceTypeInfo() )
    local name = Ast.getFullNameSym( self, symbolInfo )
    local nsId, added = self.db:addNamespace( name, parentNsId )
-   Log.log( Log.Level.Debug, __func__, 75, function (  )
+   Log.log( Log.Level.Debug, __func__, 86, function (  )
    
       return string.format( "%s %s %d", name, added, nsId)
    end )
@@ -356,7 +371,7 @@ function tagFilter:registDeclSym( symbolInfo )
    local pos = _lune.unwrap( _lune.nilacc( symbolInfo:get_pos(), 'get_orgPos', 'callmtd' ))
    local fileId = self:getFileId( pos.streamName )
    self.db:addSymbolDecl( symNsId, fileId, pos.lineNo, pos.column )
-   Log.log( Log.Level.Debug, __func__, 85, function (  )
+   Log.log( Log.Level.Debug, __func__, 96, function (  )
    
       return symbolInfo:get_name()
    end )
@@ -478,7 +493,7 @@ function tagFilter:registerDecl( nodeManager, processInfo )
          end
          table.sort( __sorted )
          for __index, name in ipairs( __sorted ) do
-            local _6008 = __map[ name ]
+            local _6045 = __map[ name ]
             do
                do
                   local _exp = _lune.nilacc( workNode:get_algeType():get_scope(), 'getSymbolInfoChild', 'callmtd' , name )
@@ -544,7 +559,7 @@ function tagFilter:registerRefs( nodeManager )
       
       local nsId, added = self:registerSymbol( symbolInfo )
       if added and not LnsAst.isBuiltin( symbolInfo:get_namespaceTypeInfo():get_typeId() ) then
-         Log.log( Log.Level.Err, __func__, 225, function (  )
+         Log.log( Log.Level.Err, __func__, 236, function (  )
          
             return string.format( "no register sym -- %d:%d:%s", pos.lineNo, pos.column, Ast.getFullNameSym( self, symbolInfo ))
          end )
@@ -559,7 +574,7 @@ function tagFilter:registerRefs( nodeManager )
    
       local nsId, added = self:registerType( typeInfo )
       if added and not LnsAst.isBuiltin( typeInfo:get_typeId() ) then
-         Log.log( Log.Level.Err, __func__, 234, function (  )
+         Log.log( Log.Level.Err, __func__, 245, function (  )
          
             return string.format( "no register type -- %d:%d:%s", pos.lineNo, pos.column, self:getFull( typeInfo, false ))
          end )
@@ -622,7 +637,7 @@ function tagFilter:registerRefs( nodeManager )
          if _exp ~= nil then
             registerRefSym( _exp, workNode:get_pos() )
          else
-            Log.log( Log.Level.Warn, __func__, 287, function (  )
+            Log.log( Log.Level.Warn, __func__, 298, function (  )
             
                return string.format( "no symbolInfo -- %s", workNode:get_field().txt)
             end )
@@ -669,6 +684,20 @@ function tagFilter:processRoot( node, opt )
    self.type2nsid[LnsAst.headTypeInfo] = DBCtrl.rootNsId
    self:registerType( node:get_moduleTypeInfo() )
    
+   local projDir = DBCtrl.getProjDir( self.streamName, self:getFull( node:get_moduleTypeInfo(), false ) )
+   for __index, workNode in pairs( node:get_nodeManager():getSubfileNodeList(  ) ) do
+      do
+         local usePath = workNode:get_usePath()
+         if usePath ~= nil then
+            local subPath = LnsUtil.pathJoin( projDir, usePath:gsub( "%.", "/" ) .. ".lns" )
+            local subId = self:addFileId( subPath, usePath )
+            self.db:addSubfile( self:getFileId( self.streamName ), subId )
+         end
+      end
+      
+   end
+   
+   
    self:registerDecl( node:get_nodeManager(), node:get_processInfo() )
    self:registerRefs( node:get_nodeManager() )
 end
@@ -678,7 +707,7 @@ end
 local function dumpRoot( rootNode, db, option, streamName )
    local __func__ = '@lns.@tags.@Analyze.dumpRoot'
 
-   Log.log( Log.Level.Log, __func__, 323, function (  )
+   Log.log( Log.Level.Log, __func__, 345, function (  )
    
       return streamName
    end )
@@ -690,7 +719,7 @@ end
 local function start( db, option )
 
    for __index, path in pairs( option:get_pathList() ) do
-      Ast.buildAst( LnsLog.Level.Log, path, nil, true, function ( ast )
+      Ast.buildAst( LnsLog.Level.Log, path, nil, nil, true, function ( ast )
       
          do
             local rootNode = _lune.__Cast( ast:get_node(), 3, Nodes.RootNode )

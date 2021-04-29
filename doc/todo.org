@@ -7,25 +7,25 @@
 #+TITLE: TODO
 
 - 宣言登録抜け
-  - [x] ビルトイン
-  - [x] form 宣言
-  - [x] module 宣言
-  - [x] Mapping, accessor の自動生成
-  - [x] =__func__=, =__mod__= 系
+  - [X] ビルトイン
+  - [X] form 宣言
+  - [X] module 宣言
+  - [X] Mapping, accessor の自動生成
+  - [X] =__func__=, =__mod__= 系
   - [ ] alias
   - [ ] generic の型パラメータ
   - [X] accessor の継承関係が登録されていない。    
-  - [x] マクロ展開した token の位置情報を分かり易くする
+  - [ ] マクロ展開した token の位置情報を分かり易くする
 - pattern 取得    
-  - [x] $getter
-  - [x] accessor の定義から、参照位置にジャンプできるように対応する
-  - [x] getterの定義をメンバの参照に加える
-  - [x] setterの定義をメンバの設定に加える
-- [x] new 演算子の登録
-- [x] super() コール
-- [x] override 関数コール
+  - [X] $getter
+  - [X] accessor の定義から、参照位置にジャンプできるように対応する
+  - [X] getterの定義をメンバの参照に加える
+  - [X] setterの定義をメンバの設定に加える
+- [X] new 演算子の登録
+- [X] super() コール
+- [X] override 関数コール
 - [ ] belongns 対応
-- [x] emacs mode
+- [X] emacs mode
 - [ ] go の github モジュールのように、別ディレクトリのモジュールにジャンプすると、
       ジャンプ後の db が参照できない。
-- [ ] subfile からタグジャンプできない
+- [X] subfile からタグジャンプできない

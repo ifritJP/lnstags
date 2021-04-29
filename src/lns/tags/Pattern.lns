@@ -174,7 +174,7 @@ class SyntaxFilter extend Nodes.Filter<str> {
       return nil;
    }
 
-   pub fn getPattern( analyzeFileInfo:&Option.AnalyzeFileInfo ) : str! {
+   pub fn getPattern( path:str, analyzeFileInfo:&Option.AnalyzeFileInfo ) : str! {
       fn isInner( pos:&Types.Position, name:str ) : bool {
          if pos.lineNo == analyzeFileInfo.$lineNo and
             pos.column <= analyzeFileInfo.$column and
@@ -186,7 +186,7 @@ class SyntaxFilter extend Nodes.Filter<str> {
       }
       
       let mut pattern:str! = nil;
-      if self.ast.$streamName == analyzeFileInfo.$path {
+      if self.ast.$streamName == path {
          let mut nearestNode:&Nodes.Node! = nil;
          self.ast.$node.visit(
             fn ( node:&Nodes.Node, parent:&Nodes.Node,
@@ -247,21 +247,36 @@ class SyntaxFilter extend Nodes.Filter<str> {
    }
 }
 
-pub fn getPatterAt( analyzeFileInfo:&Option.AnalyzeFileInfo ) : str! {
+pub fn getPatterAt( db:DBCtrl.DBCtrl, analyzeFileInfo:&Option.AnalyzeFileInfo ) : str! {
+
+   let fileId = db.getFileIdFromPath( analyzeFileInfo.$path );
+   let! path = db.getMainFilePath( fileId ) {
+      path = analyzeFileInfo.$path;
+   };
 
    let mut pattern:str! = nil;
    let useStdInMod:str!;
+
+   let mut projDir:str! = nil;
+   if path.find( "^%.%." ## ) or
+      path.find( "^/" ## )
+   {
+      let dir = path.gsub( "/[^/]+$", "" );
+      projDir = LnsUtil.searchProjDir( dir );
+   }
+   
    if analyzeFileInfo.$stdinFlag {
-      useStdInMod = front.scriptPath2Module( analyzeFileInfo.$path );
+      useStdInMod = LnsUtil.scriptPath2ModuleFromProjDir(
+         path, projDir );
    } else {
       useStdInMod = nil;
    }
-   
-   Ast.buildAst( .Err, analyzeFileInfo.$path, useStdInMod, false,
+
+   Ast.buildAst( .Err, path, projDir, useStdInMod, false,
              fn ( ast: TransUnit.ASTInfo ) {
-                if ast.$streamName == analyzeFileInfo.$path {
+                if ast.$streamName == path {
                    let mut filter = new SyntaxFilter( ast );
-                   pattern = filter.getPattern( analyzeFileInfo );
+                   pattern = filter.getPattern( path, analyzeFileInfo );
                    Log._log( .Log, "pattern -- %s" (pattern) );
                 }
              });

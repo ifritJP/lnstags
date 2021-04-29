@@ -34,6 +34,7 @@ pub class DBCtrl {
    let mut idMgrNamespace:IdMgr;
    let mut idMgrSimpleName:IdMgr;
    let mut idMgrFilePath:IdMgr;
+   let mut idMgrProjInfo:IdMgr;
 
    static fn getMaxId( access:DBAccess.DBAccess, tableName:str, defId:int ):int {
       let mut id:stem! = nil;
@@ -65,6 +66,8 @@ pub class DBCtrl {
          DBCtrl.getMaxId( access, "simpleName", userNsId ) );
       self.idMgrFilePath = new IdMgr(
          DBCtrl.getMaxId( access, "filePath", userNsId ) );
+      self.idMgrProjInfo = new IdMgr(
+         DBCtrl.getMaxId( access, "projInfo", userNsId ) );
    }
 
    pub fn close() mut {
@@ -224,8 +227,11 @@ CREATE TABLE namespace ( id INTEGER PRIMARY KEY, snameId INTEGER, parentId INTEG
 INSERT INTO namespace VALUES( NULL, 1, 0, '', '', '', 0 );
 
 CREATE TABLE simpleName ( id INTEGER PRIMARY KEY, name VARCHAR UNIQUE COLLATE binary);
-CREATE TABLE filePath ( id INTEGER PRIMARY KEY, path VARCHAR UNIQUE COLLATE binary, incFlag INTEGER, digest CHAR(32), currentDir VARCHAR COLLATE binary, invalidSkip INTEGER);
-INSERT INTO filePath VALUES( NULL, '', 0, '', '', 1 );
+CREATE TABLE projInfo ( id INTEGER PRIMARY KEY, dir VARCHAR UNIQUE COLLATE binary);
+INSERT INTO projInfo VALUES( 1, '' );
+CREATE TABLE filePath ( id INTEGER PRIMARY KEY, path VARCHAR UNIQUE COLLATE binary, mod VARCHAR COLLATE binary, projId INTEGER );
+INSERT INTO filePath VALUES( 1, '', '', 1 );
+CREATE TABLE subfile ( mainId INTEGER, subId INTEGER PRIMARY KEY );
 
 CREATE TABLE override (nsId INTEGER, superNsId INTEGER, PRIMARY KEY (nsId, superNsId));
 CREATE TABLE symbolDecl ( nsId INTEGER, snameId INTEGER, parentId INTEGER, type INTEGER, fileId INTEGER, line INTEGER, column INTEGER, endLine INTEGER, endColumn INTEGER, charSize INTEGER, comment VARCHAR COLLATE binary, hasBodyFlag INTEGER, PRIMARY KEY( nsId, fileId, line ) );
@@ -240,7 +246,8 @@ CREATE TABLE incCache ( id INTEGER, baseFileId INTEGER, incFlag INTEGER, PRIMARY
 CREATE TABLE incBelong ( id INTEGER, baseFileId INTEGER, nsId INTEGER, PRIMARY KEY ( id, nsId ) );
 CREATE INDEX index_ns ON namespace ( id, snameId, parentId, name, otherName );
 CREATE INDEX index_sName ON simpleName ( id, name );
-CREATE INDEX index_filePath ON filePath ( id, path );
+CREATE INDEX index_filePath ON filePath ( id, path, mod );
+CREATE INDEX index_subfile ON subfile (subId );
 CREATE INDEX index_override ON override (nsId, superNsId);
 CREATE INDEX index_symDecl ON symbolDecl ( nsId, parentId, snameId, fileId );
 CREATE INDEX index_symRef ON symbolRef ( nsId, snameId, fileId, belongNsId );
@@ -251,17 +258,16 @@ COMMIT;
 ``` ( DB_VERSION@@int ) ## );
 }
 
-class ItemFilePath extend (Mapping) {
+class ItemProjInfo extend (Mapping) {
+   let id:int {pub};
+   let dir:str {pub};
+}
+
+pub class ItemFilePath extend (Mapping) {
    let id:int {pub};
    let path:str {pub};
-   // 不要: インクルードファイルかどうか
-   let incFlag:int;
-   // 不要: このファイルが更新されているかどうかを確認するための digest
-   let digest:str;
-   // 不要: このファイルをビルドする際のディレクトリ
-   let currentDir:str;
-   // 不要
-   let invalidSkip:int;
+   let mod:str {pub};
+   let projId:int {pub};
 }
 
 class ItemNamespace extend (Mapping) {
@@ -303,12 +309,52 @@ pub class ItemOverride extend (Mapping) {
 @return int 登録 ID
 @return bool 新規登録した場合 true
 */
-pub fn DBCtrl.addFile( mut path:str ) mut : int, bool
+pub fn DBCtrl.addProj( path:str ) mut : int, bool
 {
-   if path.find( self.projDir, 1, true ) == 1 {
-      path = "|%s" (path.sub( #path + 1 ## ));
+   let mut projId:int! = nil;
+   self.mapRowList(
+      "projInfo", "dir = '%s'" (path), 1, nil, fn( items: &Map<str,&stem> ) : bool
+      {
+         if! let projInfo = ItemProjInfo._fromStem( items ) {
+            projId = projInfo.$id;
+         }
+         return false;
+      }##);
+   when! projId {
+      return projId, false;
    }
+   let id = self.idMgrProjInfo.getIdNext();
+   self.insert( "projInfo", "%d,'%s'" ( id, path ) );
 
+   return id, true;
+}
+
+pub fn getProjDir( path:str, mod:str ) : str {
+   let mut workPath = mod.gsub( "@", "" ).gsub( "%.", "/" ) .. ".lns";
+   let mut projDir = path.gsub( workPath .. "$", "" );
+   if #mod ~= 0 and #projDir == 0 {
+      projDir = "./";
+   }
+   return projDir;
+}
+
+fn normalizePath( path:str ) : str {
+   return (path.gsub( "^%./", "" ));
+}
+
+/**
+ファイルパス path を登録する。
+
+登録済みの場合、登録済みの ID を返す。
+
+@param path ファイルパス
+@return int 登録 ID
+@return bool 新規登録した場合 true
+*/
+pub fn DBCtrl.addFile( mut path:str, mod:str ) mut : int, bool
+{
+   path = normalizePath( path );
+   
    let mut fileId:int! = nil;
    self.mapRowList(
       "filePath", "path = '%s'" (path), 1, nil, fn( items: &Map<str,&stem> ) : bool
@@ -321,11 +367,61 @@ pub fn DBCtrl.addFile( mut path:str ) mut : int, bool
    when! fileId {
       return fileId, false;
    }
-   let id = self.idMgrFilePath.getIdNext();
-   self.insert( "filePath", "%d,'%s',0,'','|',0" ( id, path ) );
 
+   let projDir = getProjDir( path, mod );
+   let projId = self.addProj( projDir );
+   
+   let id = self.idMgrFilePath.getIdNext();
+   self.insert( "filePath", "%d,'%s','%s', %d"
+                ( id, path, mod.gsub( "@", "" ), projId ) );
    return id, true;
 }
+
+pub fn DBCtrl.getFileIdFromPath( mut path:str ) mut : int {
+   path = normalizePath( path );
+   let mut fileId:int! = nil;
+   self.mapRowList(
+      "filePath", "path = '%s'" (path), 1, nil, fn( items: &Map<str,&stem> ) : bool
+      {
+         if! let filePath = ItemFilePath._fromStem( items ) {
+            fileId = filePath.$id;
+         }
+         return false;
+      }##);
+   when! fileId {
+      return fileId;
+   }
+   Log._log( .Err, "not found file -- %s" (path) );
+   return rootNsId;
+}
+
+pub fn DBCtrl.getFilePath( fileId:int ) : str! {
+   let mut path:str! = nil;
+   self.mapRowList(
+      "filePath", "id = %d" (fileId), 1, nil, fn( items: &Map<str,&stem> ) : bool
+      {
+         if! let obj = ItemFilePath._fromStem( items ) {
+            path = obj.$path;
+         }
+         return false;
+      }##);
+   return path;
+}
+
+pub fn DBCtrl.addSubfile( mainId:int, subId:int ) mut
+{
+   self.insert( "subfile", "%d, %d" (mainId, subId ) );
+}
+
+pub fn DBCtrl.getMainFilePath( subId: int ) : str! {
+   if! let map = self.getRow( "subfile", "subId = %d" (subId), "mainId" ## ) {
+      if! let mainId = map.mainId {
+         return self.getFilePath( mainId@@int );
+      }
+   }
+   return nil;
+}
+
 
 fn DBCtrl.getName( nsId:int ) : str! {
    let mut name:str! = nil;
@@ -382,19 +478,6 @@ pub fn DBCtrl.addNamespace( fullName:str, parentId:int ) mut : int, bool
                 "%d, %d, %d, '', '%s', '', 1" (newId, snid, parentId, fullName ) );
 
    return newId, true;
-}
-
-pub fn DBCtrl.getFilePath( fileId:int ) : str! {
-   let mut path:str! = nil;
-   self.mapRowList(
-      "filePath", "id = %d" (fileId), 1, nil, fn( items: &Map<str,&stem> ) : bool
-      {
-         if! let obj = ItemFilePath._fromStem( items ) {
-            path = obj.$path;
-         }
-         return false;
-      }##);
-   return path;
 }
 
 pub fn DBCtrl.addOverride( nsId:int, superNsId:int ) mut
@@ -532,12 +615,30 @@ pub fn DBCtrl.mapSymbolRef( name:str, callback:callbackSymbolRef ) {
 }
 
 pub fn DBCtrl.dumpFile() {
+   print( "projId" );
+   self.mapRowList(
+      "projInfo", nil, nil, nil,
+      fn (items:&Map<str,&stem>): bool
+      {
+         print( items.id, items.dir );
+         return true;
+      }##);
+
    print( "filePath" );
    self.mapRowList(
       "filePath", nil, nil, nil,
       fn (items:&Map<str,&stem>): bool
       {
-         print( items.id, items.path );
+         print( items.id, items.projId, items.path, items.mod );
+         return true;
+      }##);
+
+   print( "subfile" );
+   self.mapRowList(
+      "subfile", nil, nil, nil,
+      fn (items:&Map<str,&stem>): bool
+      {
+         print( items.mainId, items.subId );
          return true;
       }##);
 }
@@ -604,7 +705,7 @@ pub fn test() : bool {
 
    let mut fileId = rootNsId;
    foreach path in [ "aa.lns", "bb.lns", "cc.lns" ] {
-      fileId = db.addFile( path );
+      fileId = db.addFile( path, (path.gsub( "%.lns", "" )) );
    }
 
 

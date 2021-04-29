@@ -23,15 +23,15 @@ func Ast_getFullNameSym(filter *Nodes.Nodes_Filter,symbolInfo *LnsAst.Ast_Symbol
 }
 
 // 22: decl @lns.@tags.@Ast.buildAst
-func Ast_buildAst(logLevel LnsInt,path string,useStdInMod LnsAny,forceAll bool,astCallback front.Front_AstCallback) {
+func Ast_buildAst(logLevel LnsInt,path string,projDir LnsAny,useStdInMod LnsAny,forceAll bool,astCallback front.Front_AstCallback) {
     LnsLog.Log_setLevel(logLevel)
     LnsUtil.Util_setDebugFlag(false)
     if useStdInMod != nil{
-        useStdInMod_5698 := useStdInMod.(string)
-        Parser.Parser_StreamParser_setStdinStream(useStdInMod_5698)
+        useStdInMod_5702 := useStdInMod.(string)
+        Parser.Parser_StreamParser_setStdinStream(useStdInMod_5702)
     }
     var lnsOpt *LnsOpt.Option_Option
-    lnsOpt = LnsOpt.Option_analyze(NewLnsList([]LnsAny{path, "lua"}))
+    lnsOpt = LnsOpt.Option_createDefaultOption(path, projDir)
     lnsOpt.TargetLuaVer = LuaVer.LuaVer_ver53
     
     if forceAll{

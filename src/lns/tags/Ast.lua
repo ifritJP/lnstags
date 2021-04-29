@@ -143,7 +143,7 @@ local function getFullNameSym( filter, symbolInfo )
 end
 _moduleObj.getFullNameSym = getFullNameSym
 
-local function buildAst( logLevel, path, useStdInMod, forceAll, astCallback )
+local function buildAst( logLevel, path, projDir, useStdInMod, forceAll, astCallback )
 
    LnsLog.setLevel( logLevel )
    LnsUtil.setDebugFlag( false )
@@ -152,7 +152,8 @@ local function buildAst( logLevel, path, useStdInMod, forceAll, astCallback )
       Parser.StreamParser.setStdinStream( useStdInMod )
    end
    
-   local lnsOpt = LnsOpt.analyze( {path, "lua"} )
+   
+   local lnsOpt = LnsOpt.createDefaultOption( path, projDir )
    lnsOpt.targetLuaVer = LuaVer.ver53
    if forceAll then
       lnsOpt.transCtrlInfo.uptodateMode = _lune.newAlge( Types.CheckingUptodateMode.ForceAll)

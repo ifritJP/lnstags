@@ -22,22 +22,23 @@ buildDB: build
 	./lnstags build lns/tags/main.lns
 
 inq: build
-	./lnstags --simpleLog inq-at def test/main.lns 2 6 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 3 12 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 3 21 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 4 15 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 5 7 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 5 13 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 6 7 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 6 22 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 7 10 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 7 16 --log debug
-	./lnstags --simpleLog inq-at ref test/main.lns 11 7 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 14 1 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 15 12 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 16 14 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 32 11 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 32 22 --log debug
+	./lnstags --simpleLog inq-at def test/main.lns 4 6 --log debug
+	./lnstags --simpleLog inq-at def test/main.lns 5 12 --log debug
+	./lnstags --simpleLog inq-at def test/main.lns 5 21 --log debug
+	./lnstags --simpleLog inq-at def test/main.lns 6 15 --log debug
+	./lnstags --simpleLog inq-at def test/main.lns 7 7 --log debug
+	./lnstags --simpleLog inq-at def test/main.lns 7 13 --log debug
+	./lnstags --simpleLog inq-at def test/main.lns 8 7 --log debug
+	./lnstags --simpleLog inq-at def test/main.lns 8 22 --log debug
+	./lnstags --simpleLog inq-at def test/main.lns 9 10 --log debug
+	./lnstags --simpleLog inq-at def test/main.lns 9 16 --log debug
+	./lnstags --simpleLog inq-at ref test/main.lns 13 7 --log debug
+	./lnstags --simpleLog inq-at def test/main.lns 16 1 --log debug
+	./lnstags --simpleLog inq-at def test/main.lns 17 12 --log debug
+	./lnstags --simpleLog inq-at def test/main.lns 18 14 --log debug
+	./lnstags --simpleLog inq-at def test/main.lns 34 11 --log debug
+	./lnstags --simpleLog inq-at def test/main.lns 34 22 --log debug
+	./lnstags --simpleLog inq-at def test/mainSub.lns 3 6 --log debug
 	./lnstags --simpleLog inq-at ref test/Sub.lns 1 10 --log debug
 	./lnstags --simpleLog inq-at ref test/Sub.lns 2 6 --log debug
 	./lnstags --simpleLog inq-at ref test/Sub.lns 4 11 --log debug
@@ -72,4 +73,4 @@ check: build
 
 
 clean:
-	rm -f lnstags.sqlite3 lnstags
+	rm -f lnstags

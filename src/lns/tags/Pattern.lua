@@ -511,7 +511,7 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, nearest )
    
    return nil
 end
-function SyntaxFilter:getPattern( analyzeFileInfo )
+function SyntaxFilter:getPattern( path, analyzeFileInfo )
 
    local function isInner( pos, name )
    
@@ -523,7 +523,7 @@ function SyntaxFilter:getPattern( analyzeFileInfo )
    end
    
    local pattern = nil
-   if self.ast:get_streamName() == analyzeFileInfo:get_path() then
+   if self.ast:get_streamName() == path then
       local nearestNode = nil
       self.ast:get_node():visit( function ( node, parent, relation, depth )
          local __func__ = '@lns.@tags.@Pattern.SyntaxFilter.getPattern.<anonymous>'
@@ -621,27 +621,44 @@ function SyntaxFilter.setmeta( obj )
 end
 
 
-local function getPatterAt( analyzeFileInfo )
+local function getPatterAt( db, analyzeFileInfo )
 
+   
+   local fileId = db:getFileIdFromPath( analyzeFileInfo:get_path() )
+   local path = db:getMainFilePath( fileId )
+   if  nil == path then
+      local _path = path
+   
+      path = analyzeFileInfo:get_path()
+   end
+   
    
    local pattern = nil
    local useStdInMod
    
+   
+   local projDir = nil
+   if path:find( "^%.%." ) or path:find( "^/" ) then
+      local dir = path:gsub( "/[^/]+$", "" )
+      projDir = LnsUtil.searchProjDir( dir )
+   end
+   
+   
    if analyzeFileInfo:get_stdinFlag() then
-      useStdInMod = front.scriptPath2Module( analyzeFileInfo:get_path() )
+      useStdInMod = LnsUtil.scriptPath2ModuleFromProjDir( path, projDir )
    else
     
       useStdInMod = nil
    end
    
    
-   Ast.buildAst( LnsLog.Level.Err, analyzeFileInfo:get_path(), useStdInMod, false, function ( ast )
+   Ast.buildAst( LnsLog.Level.Err, path, projDir, useStdInMod, false, function ( ast )
       local __func__ = '@lns.@tags.@Pattern.getPatterAt.<anonymous>'
    
-      if ast:get_streamName() == analyzeFileInfo:get_path() then
+      if ast:get_streamName() == path then
          local filter = SyntaxFilter.new(ast)
-         pattern = filter:getPattern( analyzeFileInfo )
-         Log.log( Log.Level.Log, __func__, 265, function (  )
+         pattern = filter:getPattern( path, analyzeFileInfo )
+         Log.log( Log.Level.Log, __func__, 280, function (  )
          
             return string.format( "pattern -- %s", pattern)
          end )

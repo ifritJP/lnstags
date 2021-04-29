@@ -1,0 +1,6 @@
+subfile owner test.main;
+
+Sub.func();
+
+
+

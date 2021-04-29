@@ -19,8 +19,8 @@ pub fn getFullNameSym<T>( filter:&Nodes.Filter<T>, symbolInfo:&LnsAst.SymbolInfo
    return name;
 }
 
-pub fn buildAst( logLevel:LnsLog.Level, path:str, useStdInMod:str!, forceAll:bool,
-             astCallback:front.AstCallback )
+pub fn buildAst( logLevel:LnsLog.Level, path:str, projDir:str!, useStdInMod:str!,
+                 forceAll:bool, astCallback:front.AstCallback )
 {
    LnsLog.setLevel( logLevel );
    LnsUtil.setDebugFlag( false );
@@ -28,9 +28,10 @@ pub fn buildAst( logLevel:LnsLog.Level, path:str, useStdInMod:str!, forceAll:boo
    when! useStdInMod {
       Parser.StreamParser.setStdinStream( useStdInMod );
    }
+
    
-   //let mut lnsOpt = LnsOpt.createDefaultOption( path );
-   let mut lnsOpt = LnsOpt.analyze( [ path, "lua" ] );
+   
+   let mut lnsOpt = LnsOpt.createDefaultOption( path, projDir );
    // ver 51, 52 では構文エラーになるケースがあるので、
    // ここでは 53 として処理する。
    // 本来はオプション指定した方が良いかも。

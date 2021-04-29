@@ -26,8 +26,28 @@ class tagFilter extend Nodes.Filter<Opt> {
    let mut sym2nsid:Map<&LnsAst.SymbolInfo,int>;
    let mut file2id:Map<str,int>;
 
+   fn addFileId( path:str, mod:str ) mut : int {
+      if! self.file2id[ path ] {
+         return _exp;
+      }
+      let fileId = self.db.addFile( path, mod );
+      Log._log( .Debug, "add file -- %d, %s" (fileId, path) );
+      self.file2id[ path ] = fileId;
+      return fileId;
+   }
+   
+   fn getFileId( path:str ) mut : int {
+      if! self.file2id[ path ] {
+         return _exp;
+      }
+      let fileId = self.db.getFileIdFromPath( path );
+      self.file2id[ path ] = fileId;
+      return fileId;
+   }
+
+   
    local fn __init( rootNode:&Nodes.RootNode,
-                  option:&Option.Option, db:DBCtrl.DBCtrl, streamName:str )
+                    option:&Option.Option, db:DBCtrl.DBCtrl, streamName:str )
    {
       super( true, rootNode.$moduleTypeInfo, rootNode.$moduleTypeInfo.$scope );
       self.file2id = {};
@@ -36,18 +56,9 @@ class tagFilter extend Nodes.Filter<Opt> {
       self.streamName = streamName;
       self.type2nsid = {};
       self.sym2nsid = {};
+      let mod = self.getFull( rootNode.$moduleTypeInfo, false );
+      self.addFileId( streamName, mod );
    }
-
-   fn getFileId( path:str ) mut : int {
-      if! self.file2id[ path ] {
-         return _exp;
-      }
-      let fileId = self.db.addFile( path );
-      Log._log( .Debug, "add file -- %d, %s" (fileId, path) );
-      self.file2id[ path ] = fileId;
-      return fileId;
-   }
-   
 }
 
 fn tagFilter.registerType( mut typeInfo:&LnsAst.TypeInfo ) mut : int, bool {
@@ -116,7 +127,7 @@ fn tagFilter.registerDecl(
          }
       }
    }
-   
+
    // ======== 型の定義系 ======
    foreach workNode in nodeManager.getDeclFormNodeList() {
       registDeclType( workNode );
@@ -312,6 +323,17 @@ pub override fn tagFilter.processRoot(
    self.type2nsid[ LnsAst.headTypeInfo ] = DBCtrl.rootNsId;
    self.registerType( node.$moduleTypeInfo );
 
+   let projDir = DBCtrl.getProjDir(
+      self.streamName, self.getFull( node.$moduleTypeInfo, false ) );
+   foreach workNode in node.$nodeManager.getSubfileNodeList() {
+      if! let usePath = workNode.$usePath {
+         let subPath = LnsUtil.pathJoin( projDir, usePath.gsub( "%.", "/" ) .. ".lns" );
+         let subId = self.addFileId( subPath, usePath );
+         self.db.addSubfile( self.getFileId( self.streamName ), subId );
+      }
+   }
+   
+
    self.registerDecl( node.$nodeManager, node.$processInfo );
    self.registerRefs( node.$nodeManager );
 };
@@ -328,7 +350,7 @@ fn dumpRoot( rootNode:&Nodes.RootNode, db:DBCtrl.DBCtrl,
 pub fn start( db:DBCtrl.DBCtrl, option:&Option.Option ) {
    // lns のログレベル設定
    foreach path in option.$pathList {
-      Ast.buildAst( .Log, path, nil, true, fn ( ast: TransUnit.ASTInfo ) {
+      Ast.buildAst( .Log, path, nil, nil, true, fn ( ast: TransUnit.ASTInfo ) {
          if! let rootNode = ast.$node@@@Nodes.RootNode {
             db.begin();
             dumpRoot( rootNode, db, option, ast.$streamName );
