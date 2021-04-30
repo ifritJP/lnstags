@@ -673,8 +673,10 @@ pub fn DBCtrl.dumpFile() {
 }
 
 
-pub fn DBCtrl.dumpAll() {
-
+pub fn DBCtrl.dumpAll()
+{
+   self.dumpFile();
+   
    print( "namespace" );
    self.mapRowList(
       "namespace", nil, nil, nil,

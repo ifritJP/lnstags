@@ -393,6 +393,7 @@ function tagFilter:registerDecl( nodeManager, processInfo )
    local function registDeclTypeOp( typeInfo, pos )
    
       local nsId = self:registerType( typeInfo )
+      pos = pos:get_orgPos()
       self.db:addSymbolDecl( nsId, self:getFileId( pos.streamName ), pos.lineNo, pos.column )
       return nsId
    end
@@ -494,7 +495,7 @@ function tagFilter:registerDecl( nodeManager, processInfo )
          end
          table.sort( __sorted )
          for __index, name in ipairs( __sorted ) do
-            local _6087 = __map[ name ]
+            local _6086 = __map[ name ]
             do
                do
                   local _exp = _lune.nilacc( workNode:get_algeType():get_scope(), 'getSymbolInfoChild', 'callmtd' , name )
@@ -570,7 +571,7 @@ function tagFilter:registerRefs( nodeManager )
       
       local nsId, added = self:registerSymbol( symbolInfo )
       if added and not LnsAst.isBuiltin( symbolInfo:get_namespaceTypeInfo():get_typeId() ) then
-         Log.log( Log.Level.Err, __func__, 247, function (  )
+         Log.log( Log.Level.Err, __func__, 248, function (  )
          
             return string.format( "no register sym -- %d:%d:%s", pos.lineNo, pos.column, Ast.getFullNameSym( self, symbolInfo ))
          end )
@@ -585,7 +586,7 @@ function tagFilter:registerRefs( nodeManager )
    
       local nsId, added = self:registerType( typeInfo )
       if added and not LnsAst.isBuiltin( typeInfo:get_typeId() ) then
-         Log.log( Log.Level.Err, __func__, 256, function (  )
+         Log.log( Log.Level.Err, __func__, 257, function (  )
          
             return string.format( "no register type -- %d:%d:%s", pos.lineNo, pos.column, self:getFull( typeInfo, false ))
          end )
@@ -673,7 +674,7 @@ function tagFilter:registerRefs( nodeManager )
          if _exp ~= nil then
             registerRefSym( _exp, workNode:get_pos(), false )
          else
-            Log.log( Log.Level.Warn, __func__, 340, function (  )
+            Log.log( Log.Level.Warn, __func__, 341, function (  )
             
                return string.format( "no symbolInfo -- %s", workNode:get_field().txt)
             end )
@@ -746,7 +747,7 @@ end
 local function dumpRoot( rootNode, db, option, streamName )
    local __func__ = '@lns.@tags.@Analyze.dumpRoot'
 
-   Log.log( Log.Level.Log, __func__, 390, function (  )
+   Log.log( Log.Level.Log, __func__, 391, function (  )
    
       return streamName
    end )

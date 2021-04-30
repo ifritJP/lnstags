@@ -56,3 +56,22 @@ print( hoge.$val );
    let hoge2 = new Sub.Hoge();
    print( hoge2.val );
 }
+{
+   macro _Stat() {
+      {
+         let mut list:List<stat> = [];
+         let mut subcaseList:List<stat> = [];
+         subcaseList.insert( `{
+            print( "hoge:" );
+         });
+         let className = "AAA";
+         list.insert( `{ 
+            fn ,,,"process_%s" (className) ~~ () {
+               ,,subcaseList
+            }} );
+         
+      }
+      ,,list;
+   }
+   _Stat();
+}

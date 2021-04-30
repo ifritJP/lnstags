@@ -1,13 +1,20 @@
 ;; lnstags-projs
 (defvar lnstags-projs nil)
 (defun lnstags-projs-add (projDir relative-path)
-  (add-to-list 'lnstags-projs (list :projDir projDir :relative relative-path))
+  (add-to-list 'lnstags-projs
+	       (list :projDir projDir
+		     :relative relative-path
+		     :modDir (file-name-as-directory
+			      (expand-file-name relative-path projDir))))
   )
 (defun lnstags-projs-get-from-projDir (projDir)
-  (car (delq nil (mapcar (lambda (X)
-			   (when (equal (plist-get X :projDir) projDir)
-			     X))
-			 lnstags-projs))))
+  (setq projDir (file-name-as-directory projDir))
+  (car (delq nil
+	     (mapcar
+	      (lambda (X)
+		(when (equal (plist-get X :modDir) projDir)
+		  X))
+	      lnstags-projs))))
 
 ;; lnstags-proj
 (defun lnstags-proj-get-projDir (proj)

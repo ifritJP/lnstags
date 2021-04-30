@@ -1,6 +1,7 @@
 (cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 3 9)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+main.lns:1:4: warning: 'process_AAA' var isn't accessed
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   3:  1 -- Import
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub
 Level.Log:@lns.@tags.@DBCtrl.open:open
@@ -9,6 +10,7 @@ Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 (cd test; ../lnstags --simpleLog --log debug inq-at ref main.lns 3 9)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+main.lns:1:4: warning: 'process_AAA' var isn't accessed
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   3:  1 -- Import
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @main.Sub
 Level.Log:@lns.@tags.@DBCtrl.open:open
@@ -36,6 +38,7 @@ Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 (cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 4 1)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+main.lns:1:4: warning: 'process_AAA' var isn't accessed
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   4:  1 -- ExpRef
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @main.Sub
 Level.Log:@lns.@tags.@DBCtrl.open:open
@@ -44,6 +47,7 @@ Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 (cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 4 6)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+main.lns:1:4: warning: 'process_AAA' var isn't accessed
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   4:  5 -- RefField
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.func
 Level.Log:@lns.@tags.@DBCtrl.open:open
@@ -52,6 +56,7 @@ Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 (cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 5 12)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+main.lns:1:4: warning: 'process_AAA' var isn't accessed
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   5: 12 -- ExpNew
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Hoge.__init
 Level.Log:@lns.@tags.@DBCtrl.open:open
@@ -60,6 +65,7 @@ Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 (cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 5 21)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+main.lns:1:4: warning: 'process_AAA' var isn't accessed
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   5: 20 -- RefField
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Hoge
 Level.Log:@lns.@tags.@DBCtrl.open:open
@@ -69,6 +75,7 @@ Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 (cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 6 15)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+main.lns:1:4: warning: 'process_AAA' var isn't accessed
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   6: 15 -- RefField
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.IF
 Level.Log:@lns.@tags.@DBCtrl.open:open
@@ -77,6 +84,7 @@ Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 (cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 7 7)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+main.lns:1:4: warning: 'process_AAA' var isn't accessed
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   7:  6 -- RefField
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Hoge.func
 Level.Log:@lns.@tags.@DBCtrl.open:open
@@ -88,6 +96,7 @@ Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 (cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 7 13)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+main.lns:1:4: warning: 'process_AAA' var isn't accessed
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   7: 12 -- ExpOmitEnum
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Foo.Val1
 Level.Log:@lns.@tags.@DBCtrl.open:open
@@ -96,6 +105,7 @@ Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 (cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 8 7)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+main.lns:1:4: warning: 'process_AAA' var isn't accessed
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   8:  7 -- RefField
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.IF.func
 Level.Log:@lns.@tags.@DBCtrl.open:open
@@ -108,6 +118,7 @@ Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 (cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 8 22)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+main.lns:1:4: warning: 'process_AAA' var isn't accessed
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   8: 21 -- RefField
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Foo.Val1
 Level.Log:@lns.@tags.@DBCtrl.open:open
@@ -116,6 +127,7 @@ Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 (cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 9 10)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+main.lns:1:4: warning: 'process_AAA' var isn't accessed
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   9: 10 -- RefField
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Hoge.sub
 Level.Log:@lns.@tags.@DBCtrl.open:open
@@ -124,6 +136,7 @@ Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 (cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 9 16)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+main.lns:1:4: warning: 'process_AAA' var isn't accessed
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   9: 15 -- NewAlgeVal
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Bar.Val2
 Level.Log:@lns.@tags.@DBCtrl.open:open
@@ -132,6 +145,7 @@ Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 (cd test; ../lnstags --simpleLog --log debug inq-at ref main.lns 13 7)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+main.lns:1:4: warning: 'process_AAA' var isn't accessed
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:  13:  1 -- DeclMacro
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @main._Macro
 Level.Log:@lns.@tags.@DBCtrl.open:open
@@ -140,6 +154,7 @@ Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 (cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 16 1)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+main.lns:1:4: warning: 'process_AAA' var isn't accessed
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:  16:  1 -- ExpMacroExp
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @main._Macro
 Level.Log:@lns.@tags.@DBCtrl.open:open
@@ -148,6 +163,7 @@ Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 (cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 17 12)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+main.lns:1:4: warning: 'process_AAA' var isn't accessed
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:  17: 12 -- RefField
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Val
 Level.Log:@lns.@tags.@DBCtrl.open:open
@@ -156,6 +172,7 @@ Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 (cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 18 14)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+main.lns:1:4: warning: 'process_AAA' var isn't accessed
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:  18: 14 -- GetField
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Hoge.get_val
 Level.Log:@lns.@tags.@DBCtrl.open:open
@@ -164,6 +181,7 @@ Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 (cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 34 11)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+main.lns:1:4: warning: 'process_AAA' var isn't accessed
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:  34:  8 -- RefField
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Sub.set_val
 Level.Log:@lns.@tags.@DBCtrl.open:open
@@ -173,6 +191,7 @@ Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 (cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 34 22)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+main.lns:1:4: warning: 'process_AAA' var isn't accessed
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:  34: 22 -- GetField
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Sub.get_val
 Level.Log:@lns.@tags.@DBCtrl.open:open
@@ -182,6 +201,7 @@ Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 (cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 41 23)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+main.lns:1:4: warning: 'process_AAA' var isn't accessed
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:  41: 22 -- RefField
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.FooBar
 Level.Log:@lns.@tags.@DBCtrl.open:open
@@ -190,6 +210,7 @@ Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 (cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 52 15)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+main.lns:1:4: warning: 'process_AAA' var isn't accessed
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:  52: 15 -- RefField
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Bar
 Level.Log:@lns.@tags.@DBCtrl.open:open
@@ -198,6 +219,7 @@ Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 (cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 52 28)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+main.lns:1:4: warning: 'process_AAA' var isn't accessed
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:  52: 28 -- RefField
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Foo
 Level.Log:@lns.@tags.@DBCtrl.open:open
@@ -206,6 +228,7 @@ Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 (cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 57 17)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+main.lns:1:4: warning: 'process_AAA' var isn't accessed
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:  57: 17 -- RefField
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Hoge.val
 Level.Log:@lns.@tags.@DBCtrl.open:open
@@ -214,6 +237,7 @@ Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 (cd test; ../lnstags --simpleLog --log debug inq-at def mainSub.lns 3 6)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+main.lns:1:4: warning: 'process_AAA' var isn't accessed
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  mainSub.lns:   3:  5 -- RefField
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.func
 Level.Log:@lns.@tags.@DBCtrl.open:open
@@ -222,6 +246,7 @@ Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 (cd test; cat mainSub.lns | ../lnstags --simpleLog inq-at def -i mainSub.lns 3 5 --log debug)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+main.lns:1:4: warning: 'process_AAA' var isn't accessed
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  mainSub.lns:   3:  5 -- RefField
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.func
 Level.Log:@lns.@tags.@DBCtrl.open:open
@@ -247,11 +272,12 @@ Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 print               2 Sub.lns             print( "hoge" );
 print              65 Sub.lns          pub macro _Hoge() {
+print              71 Sub.lns          pub macro _Hoge2( test:stat ) {
 print              17 main.lns         print( Sub.Val );
 print              18 main.lns         print( hoge.$val );
-print              38 main.lns            Sub._Hoge2( `{print("hoge");} );
 print              42 main.lns            print( val.$val );
 print              57 main.lns            print( hoge2.val );
+print              74 main.lns               ,,list;
 (cd test; ../lnstags --simpleLog --log debug inq-at ref Sub.lns 4 11)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
@@ -487,8 +513,8 @@ Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 @Sub.HogeHoge.__init   46 Sub.lns                super();
 @Sub.HogeHoge.__init   10 main.lns         let hogehoge = new Sub.HogeHoge();
-(cd test/; ../lnstags suffix val --log debug)
-     4:Level.Log:@lns.@tags.@DBCtrl.open:182:open
-     5:Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:50:start
+(cd test/; ../lnstags --simpleLog suffix val --log debug)
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 @Sub.Hoge.val
 @Sub.SubSub.val

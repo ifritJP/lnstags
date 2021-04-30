@@ -125,6 +125,7 @@
 (defun lnstags-helm-history-select (item)
   (setq lnstags-helm-history-cur (plist-get item :time))
   (helm :sources (plist-get item :helm)
+	:keymap lnstags-heml-map
 	:buffer lnstags-helm-buffer-name)
   )
 (defun lnstags-helm-history-show ()

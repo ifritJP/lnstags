@@ -82,7 +82,7 @@ inq: build
 	$(call inq-test,inq ref @Sub.Hoge.func)
 	$(call inq-test,inq ref @Sub.HogeHoge.__init)
 
-	(cd test/; ../lnstags suffix val --log debug)
+	(cd test/; ../lnstags --simpleLog suffix val --log debug)
 
 check: build
 	(cd test;../lnstags init)

@@ -63,8 +63,8 @@ func DBCtrl_convExp3110(arg1 []LnsAny) LnsAny {
 func DBCtrl_convExp3196(arg1 []LnsAny) LnsAny {
     return Lns_getFromMulti( arg1, 0 )
 }
-// for 737
-func DBCtrl_convExp3792(arg1 []LnsAny) LnsInt {
+// for 739
+func DBCtrl_convExp3797(arg1 []LnsAny) LnsInt {
     return Lns_getFromMulti( arg1, 0 ).(LnsInt)
 }
 // for 195
@@ -79,8 +79,8 @@ func DBCtrl_convExp1476(arg1 []LnsAny) string {
 func DBCtrl_convExp1653(arg1 []LnsAny) LnsInt {
     return Lns_getFromMulti( arg1, 0 ).(LnsInt)
 }
-// for 743
-func DBCtrl_convExp3822(arg1 []LnsAny) LnsInt {
+// for 745
+func DBCtrl_convExp3827(arg1 []LnsAny) LnsInt {
     return Lns_getFromMulti( arg1, 0 ).(LnsInt)
 }
 
@@ -260,7 +260,7 @@ func DBCtrl_dumpAll___anonymous_1584_(items *LnsMap) bool {
     Lns_print([]LnsAny{items.Items["nsId"], items.Items["fileId"], items.Items["line"], items.Items["column"]})
     return true
 }
-// 724: decl @lns.@tags.@DBCtrl.test
+// 726: decl @lns.@tags.@DBCtrl.test
 func DBCtrl_test() bool {
     var dbPath string
     dbPath = "lnstags.sqlite3"
@@ -282,7 +282,7 @@ func DBCtrl_test() bool {
     fileId = DBCtrl_rootNsId
     for _, _path := range( NewLnsList([]LnsAny{"aa.lns", "bb.lns", "cc.lns"}).Items ) {
         path := _path.(string)
-        fileId = DBCtrl_convExp3792(Lns_2DDD(db.FP.AddFile(path, Lns_car(Lns_getVM().String_gsub(path,"%.lns", "")).(string))))
+        fileId = DBCtrl_convExp3797(Lns_2DDD(db.FP.AddFile(path, Lns_car(Lns_getVM().String_gsub(path,"%.lns", "")).(string))))
         
     }
     var parentId LnsInt
@@ -291,7 +291,7 @@ func DBCtrl_test() bool {
         index := _index + 1
         name := _name.(string)
         var newid LnsInt
-        newid = DBCtrl_convExp3822(Lns_2DDD(db.FP.AddNamespace(name, parentId)))
+        newid = DBCtrl_convExp3827(Lns_2DDD(db.FP.AddNamespace(name, parentId)))
         db.FP.AddSymbolDecl(newid, fileId, 100 + index, index * 10)
         db.FP.AddSymbolRef(newid, fileId, 200 + index, index * 20, true)
         db.FP.AddSymbolSet(newid, fileId, 300 + index, index * 30)
@@ -949,6 +949,7 @@ func (self *DBCtrl_DBCtrl) DumpFile() {
 
 // 676: decl @lns.@tags.@DBCtrl.DBCtrl.dumpAll
 func (self *DBCtrl_DBCtrl) DumpAll() {
+    self.FP.DumpFile()
     Lns_print([]LnsAny{"namespace"})
     self.FP.MapRowList("namespace", nil, nil, nil, base.Base_queryMapForm(DBCtrl_dumpAll___anonymous_1556_), nil)
     Lns_print([]LnsAny{"override"})

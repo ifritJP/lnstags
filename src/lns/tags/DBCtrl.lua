@@ -1309,6 +1309,7 @@ end
 
 function DBCtrl:dumpAll(  )
 
+   self:dumpFile(  )
    
    print( "namespace" )
    self:mapRowList( "namespace", nil, nil, nil, function ( items )

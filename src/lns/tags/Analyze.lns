@@ -111,9 +111,10 @@ fn tagFilter.addSymbolRef( mbrNsId:int, mut pos:&Types.Position, setOp:bool ) mu
 fn tagFilter.registerDecl(
    nodeManager:&Nodes.NodeManager, processInfo: LnsAst.ProcessInfo ) mut
 {
-   fn registDeclTypeOp( typeInfo:&LnsAst.TypeInfo, pos:&Types.Position ) : int {
+   fn registDeclTypeOp( typeInfo:&LnsAst.TypeInfo, mut pos:&Types.Position ) : int {
       let nsId = self.registerType( typeInfo );
-      self.db.addSymbolDecl( nsId, self.getFileId( pos.streamName ),
+      pos = pos.$orgPos;
+      self.db.addSymbolDecl( nsId, self.getFileId( pos.$streamName ),
                              pos.lineNo, pos.column );   
       return nsId;
    }

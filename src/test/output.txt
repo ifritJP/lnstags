@@ -487,8 +487,8 @@ Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 @Sub.HogeHoge.__init   46 Sub.lns                super();
 @Sub.HogeHoge.__init   10 main.lns         let hogehoge = new Sub.HogeHoge();
-(cd test/; ../lnstags suffix val --log debug)
-     4:Level.Log:@lns.@tags.@DBCtrl.open:182:open
-     5:Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:50:start
+(cd test/; ../lnstags --simpleLog suffix val --log debug)
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 @Sub.Hoge.val
 @Sub.SubSub.val
