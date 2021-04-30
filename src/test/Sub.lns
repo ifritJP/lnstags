@@ -14,7 +14,7 @@ pub interface IF {
 }
 pub proto class Hoge extend (Mapping, IF);
 pub class Hoge extend (Mapping, IF) {
-   let mut val:int{pub,pub};
+   pub let mut val:int{pub,pub};
    pub fn __init() {
       self.val = 0;
    }

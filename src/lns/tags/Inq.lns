@@ -15,10 +15,10 @@ pub fn InqDef( db:DBCtrl.DBCtrl, pattern:str ) {
       });
 }
 
-pub fn InqRef( db:DBCtrl.DBCtrl, pattern:str ) {
+pub fn InqRef( db:DBCtrl.DBCtrl, pattern:str, onlySet:bool ) {
    let mut factory = new Util.SourceCodeLineAccessorFactory();
    db.mapSymbolRef(
-      pattern, fn (item:&DBCtrl.ItemSymbolRef):bool {
+      pattern, onlySet, fn (item:&DBCtrl.ItemSymbolRef):bool {
          let! path = db.getFilePath( item.$fileId ) {
             error( "file id is illegal -- %d" (item.$fileId) );
          };

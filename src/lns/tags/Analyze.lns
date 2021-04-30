@@ -99,11 +99,11 @@ fn tagFilter.registDeclSym( symbolInfo:&LnsAst.SymbolInfo ) mut : int {
    return symNsId;
 }
 
-fn tagFilter.addSymbolRef( mbrNsId:int, mut pos:&Types.Position ) mut
+fn tagFilter.addSymbolRef( mbrNsId:int, mut pos:&Types.Position, setOp:bool ) mut
 {
    pos = pos.$orgPos;
    self.db.addSymbolRef(
-      mbrNsId, self.getFileId( pos.streamName ), pos.lineNo, pos.column );
+      mbrNsId, self.getFileId( pos.streamName ), pos.lineNo, pos.column, setOp );
 }
 
 
@@ -221,7 +221,7 @@ fn tagFilter.registerDecl(
          addMethod(
             unwrap workNode.$classType.$scope$.getTypeInfoChild$( name ), pos );      
          // getter に、メンバー参照を追加
-         self.addSymbolRef( mbrNsId, pos );
+         self.addSymbolRef( mbrNsId, pos, true );
       }
       if workNode.$setterMode ~= .None {
          let name = "set_%s" (workNode.$name.txt);
@@ -229,14 +229,14 @@ fn tagFilter.registerDecl(
          addMethod(
             unwrap workNode.$classType.$scope$.getTypeInfoChild$( name ), pos );
          // setter に、メンバー参照を追加
-         self.addSymbolRef( mbrNsId, pos );
+         self.addSymbolRef( mbrNsId, pos, false );
       }
    }
 }
 
 fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
 
-   fn addSymbolRef( symbolInfo:&LnsAst.SymbolInfo, pos:&Types.Position ) {
+   fn addSymbolRef( symbolInfo:&LnsAst.SymbolInfo, pos:&Types.Position, setOp:bool ) {
       switch symbolInfo.$name {
          case "__func__", "__mod__", "__line__" {
             return;
@@ -247,7 +247,7 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
          Log._log( .Err, "no register sym -- %d:%d:%s"
                    ( pos.lineNo, pos.column, Ast.getFullNameSym( self, symbolInfo ) ) );
       }
-      self.addSymbolRef( nsId, pos );
+      self.addSymbolRef( nsId, pos, setOp );
    }
 
    fn registerRefType( typeInfo:&LnsAst.TypeInfo, pos:&Types.Position ) {
@@ -256,14 +256,16 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
          Log._log( .Err, "no register type -- %d:%d:%s"
                    ( pos.lineNo, pos.column, self.getFull( typeInfo, false ) ) );
       }
-      self.addSymbolRef( nsId, pos );
+      self.addSymbolRef( nsId, pos, true );
    }
 
    
-   fn registerRefSym( symbolInfo:&LnsAst.SymbolInfo, pos:&Types.Position ) {
+   fn registerRefSym(
+      symbolInfo:&LnsAst.SymbolInfo, pos:&Types.Position, setOp:bool )
+   {
       switch symbolInfo.$namespaceTypeInfo.$kind {
          case .Enum, .Alge {
-            addSymbolRef( symbolInfo, pos );
+            addSymbolRef( symbolInfo, pos, true );
          }
          default {
             _switch symbolInfo.$kind {
@@ -272,18 +274,18 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
                }
                case .Typ{
                   if symbolInfo.$typeInfo.$kind == .Module {
-                     addSymbolRef( symbolInfo, pos );
+                     addSymbolRef( symbolInfo, pos, true );
                   }
                   registerRefType( symbolInfo.$typeInfo, pos );
                }
                case .Mbr {
-                  addSymbolRef( symbolInfo, pos );
+                  addSymbolRef( symbolInfo, pos, setOp );
                }
                case .Var {
                   if LnsAst.isPubToExternal( symbolInfo.$accessMode ) or
                      symbolInfo.$scope == self.moduleTypeInfo.$scope
                   {
-                     addSymbolRef( symbolInfo, pos );
+                     addSymbolRef( symbolInfo, pos, setOp );
                   }
                }
                case .Arg {
@@ -293,6 +295,27 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
          }
       }
    }
+
+   // ======== 代入系 ========
+   // 代入系を先に設定して、 setOp フラグが更新されないようにする。
+   foreach workNode in nodeManager.getExpSetValNodeList() {
+      foreach leftSym in workNode.$LeftSymList {
+         switch leftSym.$kind {
+            case .Mbr {
+               registerRefSym( leftSym, workNode.$pos, true );
+            }
+            case .Var {
+               if LnsAst.isPubToExternal( leftSym.$accessMode ) or
+                  leftSym.$scope == self.moduleTypeInfo.$scope
+               {
+                  registerRefSym( leftSym, workNode.$pos, true );
+               }
+            }
+         }
+      }
+   }
+
+
    
    // ======== 参照系 ========
    foreach workNode in nodeManager.getExpNewNodeList() {
@@ -308,11 +331,11 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
    }
 
    foreach workNode in nodeManager.getExpRefNodeList() {
-      registerRefSym( workNode.$symbolInfo, workNode.$pos );
+      registerRefSym( workNode.$symbolInfo, workNode.$pos, false );
    }
    foreach workNode in nodeManager.getRefFieldNodeList() {
       if! workNode.$symbolInfo {
-         registerRefSym( _exp, workNode.$pos );
+         registerRefSym( _exp, workNode.$pos, false );
       } else {
          Log._log( .Warn, "no symbolInfo -- %s" (workNode.$field.txt ) );
       }
@@ -322,7 +345,7 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
    }
    foreach workNode in nodeManager.getExpOmitEnumNodeList() {
       if! workNode.$enumTypeInfo.$scope$.getSymbolInfoChild$( workNode.$valInfo.$name ) {
-         registerRefSym( _exp, workNode.$pos );
+         registerRefSym( _exp, workNode.$pos, false );
       }
    }
 
@@ -330,7 +353,7 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
       foreach matchCase in workNode.$caseList {
          let valInfo = matchCase.$valInfo;
          if! valInfo.$algeTpye.$scope$.getSymbolInfoChild$( valInfo.$name ) {
-            registerRefSym( _exp, matchCase.$block.$pos );
+            registerRefSym( _exp, matchCase.$block.$pos, false );
          }
       }
    }

@@ -11,6 +11,7 @@ pub enum Mode {
    Build = "build",
    Inq = "inq",
    InqAt = "inq-at",
+   Suffix = "suffix",
    Dump = "dump",
    Test = "test",
 }
@@ -142,6 +143,9 @@ pub fn analyzeArgs( argList:&List<str> ) : &Option {
                   option.analyzeFileInfo.path = getNextOpNonNil( "none path" );
                   option.analyzeFileInfo.lineNo = getNextOpInt( "none lineno" );
                   option.analyzeFileInfo.column = getNextOpInt( "none column" );
+               }
+               case .Suffix {
+                  option.pattern = getNextOpNonNil( "none pattern" );
                }
             }
          } else {

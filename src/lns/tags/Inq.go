@@ -26,10 +26,10 @@ func Inq_InqDef(db *DBCtrl_DBCtrl,pattern string) {
 
 
 // 18: decl @lns.@tags.@Inq.InqRef
-func Inq_InqRef(db *DBCtrl_DBCtrl,pattern string) {
+func Inq_InqRef(db *DBCtrl_DBCtrl,pattern string,onlySet bool) {
     var factory *Util_SourceCodeLineAccessorFactory
     factory = NewUtil_SourceCodeLineAccessorFactory()
-    db.FP.MapSymbolRef(pattern, DBCtrl_callbackSymbolRef(func(item *DBCtrl_ItemSymbolRef) bool {
+    db.FP.MapSymbolRef(pattern, onlySet, DBCtrl_callbackSymbolRef(func(item *DBCtrl_ItemSymbolRef) bool {
         var path string
         
         {

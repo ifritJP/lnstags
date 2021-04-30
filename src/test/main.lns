@@ -52,3 +52,7 @@ print( hoge.$val );
       Val(Sub.Bar, aaa:Sub.Foo),
    }
 }
+{
+   let hoge2 = new Sub.Hoge();
+   print( hoge2.val );
+}

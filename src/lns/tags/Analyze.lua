@@ -381,10 +381,10 @@ function tagFilter:registDeclSym( symbolInfo )
 end
 
 
-function tagFilter:addSymbolRef( mbrNsId, pos )
+function tagFilter:addSymbolRef( mbrNsId, pos, setOp )
 
    pos = pos:get_orgPos()
-   self.db:addSymbolRef( mbrNsId, self:getFileId( pos.streamName ), pos.lineNo, pos.column )
+   self.db:addSymbolRef( mbrNsId, self:getFileId( pos.streamName ), pos.lineNo, pos.column, setOp )
 end
 
 
@@ -494,7 +494,7 @@ function tagFilter:registerDecl( nodeManager, processInfo )
          end
          table.sort( __sorted )
          for __index, name in ipairs( __sorted ) do
-            local _6065 = __map[ name ]
+            local _6087 = __map[ name ]
             do
                do
                   local _exp = _lune.nilacc( workNode:get_algeType():get_scope(), 'getSymbolInfoChild', 'callmtd' , name )
@@ -539,14 +539,14 @@ function tagFilter:registerDecl( nodeManager, processInfo )
          local name = string.format( "get_%s", workNode:get_name().txt)
          local pos = _lune.unwrap( _lune.nilacc( workNode:get_getterToken(), "pos" ))
          addMethod( _lune.unwrap( _lune.nilacc( workNode:get_classType():get_scope(), 'getTypeInfoChild', 'callmtd' , name )), pos )
-         self:addSymbolRef( mbrNsId, pos )
+         self:addSymbolRef( mbrNsId, pos, true )
       end
       
       if workNode:get_setterMode() ~= LnsAst.AccessMode.None then
          local name = string.format( "set_%s", workNode:get_name().txt)
          local pos = _lune.unwrap( _lune.nilacc( workNode:get_setterToken(), "pos" ))
          addMethod( _lune.unwrap( _lune.nilacc( workNode:get_classType():get_scope(), 'getTypeInfoChild', 'callmtd' , name )), pos )
-         self:addSymbolRef( mbrNsId, pos )
+         self:addSymbolRef( mbrNsId, pos, false )
       end
       
    end
@@ -558,7 +558,7 @@ function tagFilter:registerRefs( nodeManager )
    local __func__ = '@lns.@tags.@Analyze.tagFilter.registerRefs'
 
    
-   local function addSymbolRef( symbolInfo, pos )
+   local function addSymbolRef( symbolInfo, pos, setOp )
       local __func__ = '@lns.@tags.@Analyze.tagFilter.registerRefs.addSymbolRef'
    
       do
@@ -577,7 +577,7 @@ function tagFilter:registerRefs( nodeManager )
          
       end
       
-      self:addSymbolRef( nsId, pos )
+      self:addSymbolRef( nsId, pos, setOp )
    end
    
    local function registerRefType( typeInfo, pos )
@@ -592,15 +592,15 @@ function tagFilter:registerRefs( nodeManager )
          
       end
       
-      self:addSymbolRef( nsId, pos )
+      self:addSymbolRef( nsId, pos, true )
    end
    
-   local function registerRefSym( symbolInfo, pos )
+   local function registerRefSym( symbolInfo, pos, setOp )
    
       do
          local _switchExp = symbolInfo:get_namespaceTypeInfo():get_kind()
          if _switchExp == LnsAst.TypeInfoKind.Enum or _switchExp == LnsAst.TypeInfoKind.Alge then
-            addSymbolRef( symbolInfo, pos )
+            addSymbolRef( symbolInfo, pos, true )
          else 
             
                do
@@ -609,15 +609,15 @@ function tagFilter:registerRefs( nodeManager )
                      registerRefType( symbolInfo:get_typeInfo(), pos )
                   elseif _switchExp == LnsAst.SymbolKind.Typ then
                      if symbolInfo:get_typeInfo():get_kind() == LnsAst.TypeInfoKind.Module then
-                        addSymbolRef( symbolInfo, pos )
+                        addSymbolRef( symbolInfo, pos, true )
                      end
                      
                      registerRefType( symbolInfo:get_typeInfo(), pos )
                   elseif _switchExp == LnsAst.SymbolKind.Mbr then
-                     addSymbolRef( symbolInfo, pos )
+                     addSymbolRef( symbolInfo, pos, setOp )
                   elseif _switchExp == LnsAst.SymbolKind.Var then
                      if LnsAst.isPubToExternal( symbolInfo:get_accessMode() ) or symbolInfo:get_scope() == self.moduleTypeInfo:get_scope() then
-                        addSymbolRef( symbolInfo, pos )
+                        addSymbolRef( symbolInfo, pos, setOp )
                      end
                      
                   elseif _switchExp == LnsAst.SymbolKind.Arg then
@@ -629,6 +629,25 @@ function tagFilter:registerRefs( nodeManager )
       end
       
    end
+   for __index, workNode in pairs( nodeManager:getExpSetValNodeList(  ) ) do
+      for __index, leftSym in pairs( workNode:get_LeftSymList() ) do
+         do
+            local _switchExp = leftSym:get_kind()
+            if _switchExp == LnsAst.SymbolKind.Mbr then
+               registerRefSym( leftSym, workNode:get_pos(), true )
+            elseif _switchExp == LnsAst.SymbolKind.Var then
+               if LnsAst.isPubToExternal( leftSym:get_accessMode() ) or leftSym:get_scope() == self.moduleTypeInfo:get_scope() then
+                  registerRefSym( leftSym, workNode:get_pos(), true )
+               end
+               
+            end
+         end
+         
+      end
+      
+   end
+   
+   
    for __index, workNode in pairs( nodeManager:getExpNewNodeList(  ) ) do
       registerRefType( workNode:get_ctorTypeInfo(), workNode:get_pos() )
    end
@@ -645,16 +664,16 @@ function tagFilter:registerRefs( nodeManager )
    
    
    for __index, workNode in pairs( nodeManager:getExpRefNodeList(  ) ) do
-      registerRefSym( workNode:get_symbolInfo(), workNode:get_pos() )
+      registerRefSym( workNode:get_symbolInfo(), workNode:get_pos(), false )
    end
    
    for __index, workNode in pairs( nodeManager:getRefFieldNodeList(  ) ) do
       do
          local _exp = workNode:get_symbolInfo()
          if _exp ~= nil then
-            registerRefSym( _exp, workNode:get_pos() )
+            registerRefSym( _exp, workNode:get_pos(), false )
          else
-            Log.log( Log.Level.Warn, __func__, 317, function (  )
+            Log.log( Log.Level.Warn, __func__, 340, function (  )
             
                return string.format( "no symbolInfo -- %s", workNode:get_field().txt)
             end )
@@ -672,7 +691,7 @@ function tagFilter:registerRefs( nodeManager )
       do
          local _exp = _lune.nilacc( workNode:get_enumTypeInfo():get_scope(), 'getSymbolInfoChild', 'callmtd' , workNode:get_valInfo():get_name() )
          if _exp ~= nil then
-            registerRefSym( _exp, workNode:get_pos() )
+            registerRefSym( _exp, workNode:get_pos(), false )
          end
       end
       
@@ -685,7 +704,7 @@ function tagFilter:registerRefs( nodeManager )
          do
             local _exp = _lune.nilacc( valInfo:get_algeTpye():get_scope(), 'getSymbolInfoChild', 'callmtd' , valInfo:get_name() )
             if _exp ~= nil then
-               registerRefSym( _exp, matchCase:get_block():get_pos() )
+               registerRefSym( _exp, matchCase:get_block():get_pos(), false )
             end
          end
          
@@ -727,7 +746,7 @@ end
 local function dumpRoot( rootNode, db, option, streamName )
    local __func__ = '@lns.@tags.@Analyze.dumpRoot'
 
-   Log.log( Log.Level.Log, __func__, 367, function (  )
+   Log.log( Log.Level.Log, __func__, 390, function (  )
    
       return streamName
    end )

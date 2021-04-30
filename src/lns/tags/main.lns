@@ -21,7 +21,10 @@ fn inq( inqMode:Option.InqMode, pattern:str ) : int {
          Inq.InqDef( db, pattern );
       }
       case .Ref {
-         Inq.InqRef( db, pattern );
+         Inq.InqRef( db, pattern, false );
+      }
+      case .Set {
+         Inq.InqRef( db, pattern, true );
       }
    }
    db.close();
@@ -47,6 +50,21 @@ pub fn __main( args:&List<str> ) : int {
          db.commit();
          
          Analyze.start( db, option );
+         db.close();
+      }
+      case .Suffix {
+         let! mut db = DBCtrl.open( dbPath, false ) {
+            print( "error" );
+            return 1;
+         };
+
+         db.mapNamespaceSuffix(
+            option.$pattern,
+            fn ( item:&DBCtrl.ItemNamespace ) : bool {
+               print( item.$name );
+               return true;
+            });
+         
          db.close();
       }
       case .Inq {

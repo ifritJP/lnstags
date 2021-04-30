@@ -86,10 +86,10 @@ local function InqDef( db, pattern )
 end
 _moduleObj.InqDef = InqDef
 
-local function InqRef( db, pattern )
+local function InqRef( db, pattern, onlySet )
 
    local factory = Util.SourceCodeLineAccessorFactory.new()
-   db:mapSymbolRef( pattern, function ( item )
+   db:mapSymbolRef( pattern, onlySet, function ( item )
    
       local path = db:getFilePath( item:get_fileId() )
       if  nil == path then

@@ -443,6 +443,8 @@ local function open( path, readonly )
    end
    
    
+   db:exec( "PRAGMA case_sensitive_like=ON;", nil )
+   
    local dbCtrl = DBCtrl.new(db, readonly)
    
    if not readonly then
@@ -454,7 +456,7 @@ local function open( path, readonly )
    if  nil == item then
       local _item = item
    
-      Log.log( Log.Level.Err, __func__, 194, function (  )
+      Log.log( Log.Level.Err, __func__, 196, function (  )
       
          return "unknown version"
       end )
@@ -464,7 +466,7 @@ local function open( path, readonly )
    end
    
    if tonumber( item:get_val() ) ~= DB_VERSION then
-      Log.log( Log.Level.Err, __func__, 199, function (  )
+      Log.log( Log.Level.Err, __func__, 201, function (  )
       
          return string.format( "not support version. -- %s", item:get_val())
       end )
@@ -512,7 +514,7 @@ CREATE TABLE override (nsId INTEGER, superNsId INTEGER, PRIMARY KEY (nsId, super
 CREATE TABLE symbolDecl ( nsId INTEGER, snameId INTEGER, parentId INTEGER, type INTEGER, fileId INTEGER, line INTEGER, column INTEGER, endLine INTEGER, endColumn INTEGER, charSize INTEGER, comment VARCHAR COLLATE binary, hasBodyFlag INTEGER, PRIMARY KEY( nsId, fileId, line ) );
 INSERT INTO symbolDecl VALUES( 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, '', 0 );
 
-CREATE TABLE symbolRef ( nsId INTEGER, snameId INTEGER, fileId INTEGER, line INTEGER, column INTEGER, endLine INTEGER, endColumn INTEGER, charSize INTEGER, belongNsId INTEGER, PRIMARY KEY( nsId, fileId, line, column ) );
+CREATE TABLE symbolRef ( nsId INTEGER, snameId INTEGER, fileId INTEGER, line INTEGER, column INTEGER, setOp INTEGER, belongNsId INTEGER, PRIMARY KEY( nsId, fileId, line, column ) );
 CREATE TABLE symbolSet ( nsId INTEGER, snameId INTEGER, fileId INTEGER, line INTEGER, column INTEGER, belongNsId INTEGER, PRIMARY KEY( nsId, fileId, line, column ) );
 
 CREATE TABLE funcCall ( nsId INTEGER, snameId INTEGER, belongNsId INTEGER, fileId INTEGER, line INTEGER, column INTEGER, endLine INTEGER, endColumn INTEGER, charSize INTEGER, PRIMARY KEY( nsId, belongNsId ) );
@@ -647,6 +649,7 @@ end
 
 local ItemNamespace = {}
 setmetatable( ItemNamespace, { ifList = {Mapping,} } )
+_moduleObj.ItemNamespace = ItemNamespace
 function ItemNamespace.setmeta( obj )
   setmetatable( obj, { __index = ItemNamespace  } )
 end
@@ -772,20 +775,21 @@ _moduleObj.ItemSymbolRef = ItemSymbolRef
 function ItemSymbolRef.setmeta( obj )
   setmetatable( obj, { __index = ItemSymbolRef  } )
 end
-function ItemSymbolRef.new( nsId, fileId, line, column )
+function ItemSymbolRef.new( nsId, fileId, line, column, setOp )
    local obj = {}
    ItemSymbolRef.setmeta( obj )
    if obj.__init then
-      obj:__init( nsId, fileId, line, column )
+      obj:__init( nsId, fileId, line, column, setOp )
    end
    return obj
 end
-function ItemSymbolRef:__init( nsId, fileId, line, column )
+function ItemSymbolRef:__init( nsId, fileId, line, column, setOp )
 
    self.nsId = nsId
    self.fileId = fileId
    self.line = line
    self.column = column
+   self.setOp = setOp
 end
 function ItemSymbolRef:get_nsId()
    return self.nsId
@@ -798,6 +802,9 @@ function ItemSymbolRef:get_line()
 end
 function ItemSymbolRef:get_column()
    return self.column
+end
+function ItemSymbolRef:get_setOp()
+   return self.setOp
 end
 function ItemSymbolRef:_toMap()
   return self
@@ -819,6 +826,7 @@ function ItemSymbolRef._fromMapSub( obj, val )
    table.insert( memInfo, { name = "fileId", func = _lune._toInt, nilable = false, child = {} } )
    table.insert( memInfo, { name = "line", func = _lune._toInt, nilable = false, child = {} } )
    table.insert( memInfo, { name = "column", func = _lune._toInt, nilable = false, child = {} } )
+   table.insert( memInfo, { name = "setOp", func = _lune._toInt, nilable = false, child = {} } )
    local result, mess = _lune._fromMap( obj, val, memInfo )
    if not result then
       return nil, mess
@@ -969,7 +977,7 @@ function DBCtrl:getFileIdFromPath( path )
       return fileId
    end
    
-   Log.log( Log.Level.Err, __func__, 394, function (  )
+   Log.log( Log.Level.Err, __func__, 397, function (  )
    
       return string.format( "not found file -- %s", path)
    end )
@@ -1057,6 +1065,34 @@ function DBCtrl:getNsId( name )
 end
 
 
+
+function DBCtrl:mapNamespaceSuffix( suffix, callback )
+
+   self:mapRowList( "namespace", string.format( "name like '%%.%s' escape '$'", suffix), nil, nil, function ( items )
+   
+      do
+         local item = ItemNamespace._fromStem( items )
+         if item ~= nil then
+            return callback( item )
+         end
+      end
+      
+      return true
+   end )
+   self:mapRowList( "namespace", string.format( "name = '%s'", suffix), nil, nil, function ( items )
+   
+      do
+         local item = ItemNamespace._fromStem( items )
+         if item ~= nil then
+            return callback( item )
+         end
+      end
+      
+      return true
+   end )
+end
+
+
 function DBCtrl:addNamespace( fullName, parentId )
 
    local id = nil
@@ -1106,11 +1142,11 @@ function DBCtrl:addSymbolDecl( nsId, fileId, lineNo, column )
 end
 
 
-function DBCtrl:addSymbolRef( nsId, fileId, lineNo, column )
+function DBCtrl:addSymbolRef( nsId, fileId, lineNo, column, setOp )
 
    local snid = _moduleObj.rootNsId
    local belongNsId = _moduleObj.rootNsId
-   self:insert( "symbolRef", string.format( "%d, %d, %d, %d, %d, %d, %d, 0, %d", nsId, snid, fileId, lineNo, column, lineNo, column, belongNsId) )
+   self:insert( "symbolRef", string.format( "%d, %d, %d, %d, %d, %d, %d", nsId, snid, fileId, lineNo, column, setOp and 1 or 0, belongNsId) )
 end
 
 
@@ -1125,7 +1161,7 @@ end
 local function create( dbPath )
    local __func__ = '@lns.@tags.@DBCtrl.create'
 
-   Log.log( Log.Level.Log, __func__, 530, function (  )
+   Log.log( Log.Level.Log, __func__, 555, function (  )
    
       return "create"
    end )
@@ -1205,7 +1241,7 @@ end
 
 
 
-function DBCtrl:mapSymbolRef( name, callback )
+function DBCtrl:mapSymbolRef( name, onlySet, callback )
 
    local nsId = self:getNsId( name )
    if  nil == nsId then
@@ -1227,7 +1263,12 @@ function DBCtrl:mapSymbolRef( name, callback )
       return true
    end )
    
-   self:mapRowListSort( "symbolRef", string.format( "nsId IN (%s)", overrideStr), nil, nil, "fileId, line", function ( items )
+   local cond = string.format( "nsId IN (%s)", overrideStr)
+   if onlySet then
+      cond = string.format( "(%s) AND setOp = 1", cond)
+   end
+   
+   self:mapRowListSort( "symbolRef", cond, nil, nil, "fileId, line", function ( items )
    
       do
          local item = ItemSymbolRef._fromStem( items )
@@ -1333,7 +1374,7 @@ local function test(  )
    for index, name in pairs( {"@hoge", "@hoge.@foo", "@hoge.@foo.bar"} ) do
       local newid = db:addNamespace( name, parentId )
       db:addSymbolDecl( newid, fileId, 100 + index, index * 10 )
-      db:addSymbolRef( newid, fileId, 200 + index, index * 20 )
+      db:addSymbolRef( newid, fileId, 200 + index, index * 20, true )
       db:addSymbolSet( newid, fileId, 300 + index, index * 30 )
       
       parentId = newid
@@ -1342,7 +1383,7 @@ local function test(  )
    
    do
       local _
-      local _617, added = db:addNamespace( "@hoge", _moduleObj.rootNsId )
+      local _641, added = db:addNamespace( "@hoge", _moduleObj.rootNsId )
       print( "added", added )
    end
    

@@ -184,6 +184,8 @@ pub fn open( path:str, readonly:bool ) : DBCtrl!
       return nil;
    };
 
+   db.exec( "PRAGMA case_sensitive_like=ON;", nil );
+   
    let mut dbCtrl = new DBCtrl( db, readonly );
    
    if not readonly {
@@ -237,7 +239,7 @@ CREATE TABLE override (nsId INTEGER, superNsId INTEGER, PRIMARY KEY (nsId, super
 CREATE TABLE symbolDecl ( nsId INTEGER, snameId INTEGER, parentId INTEGER, type INTEGER, fileId INTEGER, line INTEGER, column INTEGER, endLine INTEGER, endColumn INTEGER, charSize INTEGER, comment VARCHAR COLLATE binary, hasBodyFlag INTEGER, PRIMARY KEY( nsId, fileId, line ) );
 INSERT INTO symbolDecl VALUES( 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, '', 0 );
 
-CREATE TABLE symbolRef ( nsId INTEGER, snameId INTEGER, fileId INTEGER, line INTEGER, column INTEGER, endLine INTEGER, endColumn INTEGER, charSize INTEGER, belongNsId INTEGER, PRIMARY KEY( nsId, fileId, line, column ) );
+CREATE TABLE symbolRef ( nsId INTEGER, snameId INTEGER, fileId INTEGER, line INTEGER, column INTEGER, setOp INTEGER, belongNsId INTEGER, PRIMARY KEY( nsId, fileId, line, column ) );
 CREATE TABLE symbolSet ( nsId INTEGER, snameId INTEGER, fileId INTEGER, line INTEGER, column INTEGER, belongNsId INTEGER, PRIMARY KEY( nsId, fileId, line, column ) );
 
 CREATE TABLE funcCall ( nsId INTEGER, snameId INTEGER, belongNsId INTEGER, fileId INTEGER, line INTEGER, column INTEGER, endLine INTEGER, endColumn INTEGER, charSize INTEGER, PRIMARY KEY( nsId, belongNsId ) );
@@ -270,7 +272,7 @@ pub class ItemFilePath extend (Mapping) {
    let projId:int {pub};
 }
 
-class ItemNamespace extend (Mapping) {
+pub class ItemNamespace extend (Mapping) {
    let id:int {pub};
    // simpleName の id
    let snameId:int {pub};
@@ -292,6 +294,7 @@ pub class ItemSymbolRef extend (Mapping) {
    let fileId:int {pub};
    let line:int {pub};
    let column:int {pub};
+   let setOp:int {pub};
 }
 
 pub class ItemOverride extend (Mapping) {
@@ -450,6 +453,28 @@ fn DBCtrl.getNsId( name:str ) : int! {
    return nsId;
 }
 
+pub form NameSpaceCallback( item:&ItemNamespace ): bool;
+pub fn DBCtrl.mapNamespaceSuffix( suffix:str, callback:NameSpaceCallback )
+{
+   self.mapRowList(
+      "namespace", "name like '%%.%s' escape '$'" (suffix), nil, nil,
+      fn ( items: &Map<str,&stem> ) : bool {
+         if! let item = ItemNamespace._fromStem( items ) {
+            return callback( item );
+         }
+         return true;
+      }## );         
+   self.mapRowList(
+      "namespace", "name = '%s'" (suffix), nil, nil,
+      fn ( items: &Map<str,&stem> ) : bool {
+         if! let item = ItemNamespace._fromStem( items ) {
+            return callback( item );
+         }
+         return true;
+      }## );         
+}
+
+
 
 /**
 名前空間を登録する。
@@ -504,13 +529,13 @@ pub fn DBCtrl.addSymbolDecl(
 }
 
 pub fn DBCtrl.addSymbolRef(
-   nsId:int, fileId:int, lineNo:int, column:int ) mut
+   nsId:int, fileId:int, lineNo:int, column:int, setOp:bool ) mut
 {
    let snid = rootNsId;
    let belongNsId = rootNsId;
    self.insert( "symbolRef",
-                "%d, %d, %d, %d, %d, %d, %d, 0, %d"
-                ( nsId, snid, fileId, lineNo, column, lineNo, column, belongNsId ) );
+                "%d, %d, %d, %d, %d, %d, %d"
+                ( nsId, snid, fileId, lineNo, column, setOp and 1 or 0, belongNsId ) );
 }
 
 pub fn DBCtrl.addSymbolSet(
@@ -586,7 +611,7 @@ pub fn DBCtrl.mapSymbolDecl( name:str, callback:callbackSymbolDecl ) {
 
 
 pub form callbackSymbolRef( item:&ItemSymbolRef ):bool;
-pub fn DBCtrl.mapSymbolRef( name:str, callback:callbackSymbolRef ) {
+pub fn DBCtrl.mapSymbolRef( name:str, onlySet:bool, callback:callbackSymbolRef ) {
    let! nsId = self.getNsId( name ) {
       return;
    };
@@ -603,8 +628,12 @@ pub fn DBCtrl.mapSymbolRef( name:str, callback:callbackSymbolRef ) {
          return true;
       }##);
 
+   let mut cond = "nsId IN (%s)" (overrideStr);
+   if onlySet {
+      cond = "(%s) AND setOp = 1" (cond);
+   }
    self.mapRowListSort(
-      "symbolRef", "nsId IN (%s)" (overrideStr), nil, nil, "fileId, line",
+      "symbolRef", cond, nil, nil, "fileId, line",
       fn (items:&Map<str,&stem>): bool
       {
          if! let item = ItemSymbolRef._fromStem( items ) {
@@ -714,7 +743,7 @@ pub fn test() : bool {
       let newid = db.addNamespace( name, parentId );
       db.addSymbolDecl( newid, fileId, 100 + index, index * 10 );
       db.addSymbolRef(
-         newid, fileId, 200 + index, index * 20 );
+         newid, fileId, 200 + index, index * 20, true );
       db.addSymbolSet(
          newid, fileId, 300 + index, index * 30 );
 

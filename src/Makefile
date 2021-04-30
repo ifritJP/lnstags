@@ -48,6 +48,7 @@ inq: build
 	$(call inq-test,inq-at def main.lns 41 23)
 	$(call inq-test,inq-at def main.lns 52 15)
 	$(call inq-test,inq-at def main.lns 52 28)
+	$(call inq-test,inq-at def main.lns 57 17)
 
 	$(call inq-test,inq-at def mainSub.lns 3 6)
 	(cd test; cat mainSub.lns | ../lnstags --simpleLog inq-at def -i mainSub.lns 3 5 --log debug)
@@ -64,8 +65,9 @@ inq: build
 	$(call inq-test,inq-at ref Sub.lns 15 31)
 	$(call inq-test,inq-at ref Sub.lns 16 12)
 	$(call inq-test,inq-at ref Sub.lns 16 33)
-	$(call inq-test,inq-at ref Sub.lns 17 12)
-	$(call inq-test,inq-at ref Sub.lns 18 12)
+	$(call inq-test,inq-at ref Sub.lns 17 16)
+	$(call inq-test,inq-at set Sub.lns 17 16)
+	$(call inq-test,inq-at ref Sub.lns 18 16)
 	$(call inq-test,inq-at def Sub.lns 21 21)
 	$(call inq-test,inq-at def Sub.lns 24 16)
 	$(call inq-test,inq-at def Sub.lns 33 14)
@@ -79,6 +81,8 @@ inq: build
 	$(call inq-test,inq def @Sub.Hoge.func)
 	$(call inq-test,inq ref @Sub.Hoge.func)
 	$(call inq-test,inq ref @Sub.HogeHoge.__init)
+
+	(cd test/; ../lnstags suffix val --log debug)
 
 check: build
 	(cd test;../lnstags init)

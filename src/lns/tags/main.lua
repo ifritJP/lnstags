@@ -12,6 +12,56 @@ function _lune.loadModule( mod )
    return require( mod )
 end
 
+function _lune.__isInstanceOf( obj, class )
+   while obj do
+      local meta = getmetatable( obj )
+      if not meta then
+	 return false
+      end
+      local indexTbl = meta.__index
+      if indexTbl == class then
+	 return true
+      end
+      if meta.ifList then
+         for index, ifType in ipairs( meta.ifList ) do
+            if ifType == class then
+               return true
+            end
+            if _lune.__isInstanceOf( ifType, class ) then
+               return true
+            end
+         end
+      end
+      obj = indexTbl
+   end
+   return false
+end
+
+function _lune.__Cast( obj, kind, class )
+   if kind == 0 then -- int
+      if type( obj ) ~= "number" then
+         return nil
+      end
+      if math.floor( obj ) ~= obj then
+         return nil
+      end
+      return obj
+   elseif kind == 1 then -- real
+      if type( obj ) ~= "number" then
+         return nil
+      end
+      return obj
+   elseif kind == 2 then -- str
+      if type( obj ) ~= "string" then
+         return nil
+      end
+      return obj
+   elseif kind == 3 then -- class
+      return _lune.__isInstanceOf( obj, class ) and obj or nil
+   end
+   return nil
+end
+
 if not _lune3 then
    _lune3 = _lune
 end
@@ -40,7 +90,9 @@ local function inq( inqMode, pattern )
       if _switchExp == Option.InqMode.Def then
          Inq.InqDef( db, pattern )
       elseif _switchExp == Option.InqMode.Ref then
-         Inq.InqRef( db, pattern )
+         Inq.InqRef( db, pattern, false )
+      elseif _switchExp == Option.InqMode.Set then
+         Inq.InqRef( db, pattern, true )
       end
    end
    
@@ -70,6 +122,23 @@ local function __main( args )
          db:commit(  )
          
          Analyze.start( db, option )
+         db:close(  )
+      elseif _switchExp == Option.Mode.Suffix then
+         local db = DBCtrl.open( dbPath, false )
+         if  nil == db then
+            local _db = db
+         
+            print( "error" )
+            return 1
+         end
+         
+         
+         db:mapNamespaceSuffix( option:get_pattern(), function ( item )
+         
+            print( item:get_name() )
+            return true
+         end )
+         
          db:close(  )
       elseif _switchExp == Option.Mode.Inq then
          inq( option:get_inqMode(), option:get_pattern() )

@@ -164,59 +164,138 @@
 	 )))
     ))
 
-(defun lnstags-pos-at ( mode &optional tag &rest lnstags-opt-list)
+(defun lnstags-pos-at ( mode select-func decide-func
+			     &optional tag &rest lnstags-opt-list)
   (let ((save (current-buffer))
 	(line (lnstags-get-line))
 	(column (lnstags-get-column)) 
 	(projdir (lnstags-get-projDir (current-buffer)))
-	path buffer select-name lnstags-opt lnstags-opt2 opt-list input )
+	path buffer select-name
+	lnstags-mode lnstags-opt lnstags-opt2 opt-list input )
     (setq path (lnstags-get-path-from-projDir (current-buffer) projdir))
     (cond
      ((or (equal mode "def-at")
-	  (equal mode "ref-at"))
+	  (equal mode "ref-at")
+	  (equal mode "set-at"))
+      (setq lnstags-mode "inq-at")
       (setq lnstags-opt
 	    (cond ((string= mode "def-at")
 		   "def")
 		  ((string= mode "ref-at")
-		   "ref")))
+		   "ref")
+		  ((string= mode "set-at")
+		   "set")))
       (setq input (buffer-string))
-      (setq lnstags-opt2 '( "-i" ))
+      (setq lnstags-opt2 (list "-i" path (number-to-string line)
+			       (number-to-string column)))
       (setq select-name
 	    (format "(%s)%s<%s:%d:%d>"
 		    (cond ((equal mode "def-at") "D")
-			  ((equal mode "ref-at") "R"))
+			  ((equal mode "ref-at") "R")
+			  ((equal mode "set-at") "S"))
 		    (lnstags-get-current-token)
 		    (file-name-nondirectory buffer-file-name) line column)))
+     ((or (equal mode "def")
+	  (equal mode "ref")
+	  (equal mode "set"))
+      (setq lnstags-mode "inq")
+      (setq lnstags-opt2 (list mode tag))
+      (setq select-name tag))
+     ((equal mode "suffix")
+      (setq lnstags-mode "suffix")
+      (setq lnstags-opt2 (list tag))
+      (setq select-name tag))
      )
     (setq buffer (generate-new-buffer lnstags-helm-buffer-name))
     ;;(setq default-directory projdir)
     (setq opt-list
-	  (append (list save buffer input "inq-at" lnstags-opt
-			path
-			(number-to-string line)
-			(number-to-string column)
-			)
+	  (append (list save buffer input lnstags-mode lnstags-opt)
 		  lnstags-opt2
 		  lnstags-opt-list
 		  ))
     (cond ((eq (apply 'lnstags-execute opt-list) 0)
 	   (lnstags-select-tags buffer select-name projdir
-				'lnstags-tags-select-mode 'lnstags-tags-select))
+				select-func decide-func))
 	  (t
 	   (when (not lnstags-skip-error)
 	     (switch-to-buffer buffer)))
 	  )
     ))
 
+
+(defun lnstags-namespace-select-mode (select-func create-candidate-list-func
+						  header-name projDir)
+  (let (candidate-list lnstags-params)
+    (while (not (eobp))
+      (beginning-of-line)
+      (when (looking-at "^\\(.*\\)$")
+	(setq candidate-list (cons (lnstags-match-token 1) candidate-list)))
+      (next-line))
+    (if (eq (length candidate-list) 1)
+	(funcall select-func (car candidate-list))
+      (setq lnstags-params
+	    `((name . ,(concat lnstags-helm-buffer-name header-name))
+	      (candidates . ,candidate-list)
+	      (action . ,select-func)))
+      (let ((helm-candidate-number-limit 9999))
+	(helm :sources lnstags-params
+	      :buffer lnstags-helm-buffer-name)
+	))))
+
+(defun lnstags-namespace-helm (buf token select-mode lns-inq-opt)
+  (with-current-buffer buf
+    (lnstags-pos-at
+     select-mode
+     'lnstags-namespace-select-mode
+     (lambda (X)
+       (with-current-buffer buf
+	 (lnstags-history-push)
+	 (lnstags-pos-at lns-inq-opt
+			 'lnstags-tags-select-mode 'lnstags-tags-select X )))
+     token)))
+
+
+(defun lnstags-ref (&optional mode)
+  (interactive "P")
+  (cond
+   ((equal mode '(4))
+    (lnstags-ref-at))
+   (t
+    (lnstags-namespace-helm (current-buffer) (lnstags-get-current-token)
+			    "suffix" "ref"))))
+
+(defun lnstags-def (&optional mode)
+  (interactive "P")
+  (cond
+   ((equal mode '(4))
+    (lnstags-def-at))
+   (t
+    (lnstags-namespace-helm (current-buffer) (lnstags-get-current-token)
+			    "suffix" "def"))))
+
+(defun lnstags-set (&optional mode)
+  (interactive "P")
+  (cond
+   ((equal mode '(4))
+    (lnstags-set-at))
+   (t
+    (lnstags-namespace-helm (current-buffer) (lnstags-get-current-token)
+			    "suffix" "set"))))
+
 (defun lnstags-ref-at ()
   (interactive)
   (lnstags-history-push)
-  (lnstags-pos-at "ref-at"))
+  (lnstags-pos-at "ref-at" 'lnstags-tags-select-mode 'lnstags-tags-select))
 
 (defun lnstags-def-at ()
   (interactive)
   (lnstags-history-push)
-  (lnstags-pos-at "def-at"))
+  (lnstags-pos-at "def-at" 'lnstags-tags-select-mode 'lnstags-tags-select))
+
+(defun lnstags-set-at ()
+  (interactive)
+  (lnstags-history-push)
+  (lnstags-pos-at "set-at" 'lnstags-tags-select-mode 'lnstags-tags-select))
 
 (defvar lnstags-history nil)
 (defun lnstags-history-push ()

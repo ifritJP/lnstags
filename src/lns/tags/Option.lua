@@ -134,12 +134,15 @@ Mode.__allList[3] = Mode.Inq
 Mode.InqAt = 'inq-at'
 Mode._val2NameMap['inq-at'] = 'InqAt'
 Mode.__allList[4] = Mode.InqAt
+Mode.Suffix = 'suffix'
+Mode._val2NameMap['suffix'] = 'Suffix'
+Mode.__allList[5] = Mode.Suffix
 Mode.Dump = 'dump'
 Mode._val2NameMap['dump'] = 'Dump'
-Mode.__allList[5] = Mode.Dump
+Mode.__allList[6] = Mode.Dump
 Mode.Test = 'test'
 Mode._val2NameMap['test'] = 'Test'
-Mode.__allList[6] = Mode.Test
+Mode.__allList[7] = Mode.Test
 
 
 local AnalyzeFileInfo = {}
@@ -345,6 +348,8 @@ local function analyzeArgs( argList )
                      option.analyzeFileInfo.path = getNextOpNonNil( "none path" )
                      option.analyzeFileInfo.lineNo = getNextOpInt( "none lineno" )
                      option.analyzeFileInfo.column = getNextOpInt( "none column" )
+                  elseif _switchExp == Mode.Suffix then
+                     option.pattern = getNextOpNonNil( "none pattern" )
                   end
                end
                
