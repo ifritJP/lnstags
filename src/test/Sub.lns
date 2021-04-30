@@ -71,3 +71,5 @@ pub macro _Hoge() {
 pub macro _Hoge2( test:stat ) {
    ,,test;
 }
+pub alias FooBar = Hoge;
+pub form Form();

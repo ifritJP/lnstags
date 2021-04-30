@@ -1,6 +1,7 @@
 ;;-*- coding:utf-8; mode:emacs-lisp-*-
 
 
+(require 'lnstags-data)
 (require 'lnstags-helm)
 
 (defvar lnstags-command
@@ -60,24 +61,40 @@
   )
 
 (defun lnstags-get-parentDir (path)
-  (directory-file-name (file-name-directory path)))
+  (cond ((file-name-directory path)
+	 (directory-file-name (file-name-directory path)))
+	(t
+	 "./")))
 
-(defun lnstags-get-path-from-projDir (path projdir)
-  (file-relative-name path projdir))
+(defun lnstags-get-path-from-projDir (buffer projdir)
+  (with-current-buffer buffer
+    (let (projInfo)
+      (cond ((boundp 'lnstags-file-info)
+	     (lnstags-file-info-get-path lnstags-file-info))
+	    ((setq projInfo (lnstags-projs-get-from-projDir default-directory))
+	     (lnstags-proj-get-relative-path projInfo buffer-file-name))
+	    (t
+	     (file-relative-name buffer-file-name projdir))))))
 
 (defun lnstags-get-projDir (buffer)
   (with-current-buffer buffer
     (let ((dir default-directory)
+	  projInfo
 	  projdir)
-      (while (and (not (string= dir "/"))
-		  (not projdir))
-	(if (or (file-exists-p (expand-file-name "lune.js" dir))
-		(file-exists-p (expand-file-name "lnstags.sqlite3" dir)))
-	    (setq projdir dir)
-	  (setq dir (lnstags-get-parentDir dir))))
-      (when (not projdir)
-	(setq projdir default-directory))
-      projdir)))
+      (cond ((boundp 'lnstags-file-info)
+	     (setq projdir (lnstags-file-info-get-projDir lnstags-file-info)))
+	    ((setq projInfo (lnstags-projs-get-from-projDir default-directory))
+	     (setq projdir (lnstags-proj-get-projDir projInfo)))
+	    (t
+	     (while (and (not (string= dir "/"))
+			 (not projdir))
+	       (if (or (file-exists-p (expand-file-name "lune.js" dir))
+		       (file-exists-p (expand-file-name "lnstags.sqlite3" dir)))
+		   (setq projdir dir)
+		 (setq dir (lnstags-get-parentDir dir))))
+	     (when (not projdir)
+	       (setq projdir default-directory))
+	     projdir)))))
 
 (defun lnstags-execute-op (src-buf lnstags-buf input async lnstags-opts)
   (let* (command dir exit-code)
@@ -121,7 +138,8 @@
       (recenter))
     ))
 
-(defun lnstags-select-tags (buffer header-name select-func decide-func
+(defun lnstags-select-tags (buffer header-name projdir
+				   select-func decide-func
 				   &optional create-candidate-list)
   (with-current-buffer buffer
     ;;(message (buffer-string))
@@ -141,7 +159,7 @@
 		   (if create-candidate-list
 		       create-candidate-list
 		     'lnstags-tags-create-candidate-list)
-		   header-name)
+		   header-name projdir)
 	  t)
 	 )))
     ))
@@ -152,7 +170,7 @@
 	(column (lnstags-get-column)) 
 	(projdir (lnstags-get-projDir (current-buffer)))
 	path buffer select-name lnstags-opt lnstags-opt2 opt-list input )
-    (setq path (lnstags-get-path-from-projDir buffer-file-name projdir))
+    (setq path (lnstags-get-path-from-projDir (current-buffer) projdir))
     (cond
      ((or (equal mode "def-at")
 	  (equal mode "ref-at"))
@@ -182,7 +200,7 @@
 		  lnstags-opt-list
 		  ))
     (cond ((eq (apply 'lnstags-execute opt-list) 0)
-	   (lnstags-select-tags buffer select-name
+	   (lnstags-select-tags buffer select-name projdir
 				'lnstags-tags-select-mode 'lnstags-tags-select))
 	  (t
 	   (when (not lnstags-skip-error)

@@ -85,7 +85,7 @@ local function __main( args )
          end
          
          
-         local pattern = Pattern.getPatterAt( db, analyzeFileInfo )
+         local pattern = Pattern.getPatterAt( db, analyzeFileInfo, option:get_inqMode() )
          if  nil == pattern then
             local _pattern = pattern
          
@@ -106,8 +106,7 @@ local function __main( args )
             return 1
          end
          
-         db:dumpFile(  )
-         
+         db:dumpAll(  )
          db:close(  )
       elseif _switchExp == Option.Mode.Test then
          DBCtrl.test(  )

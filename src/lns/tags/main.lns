@@ -60,7 +60,7 @@ pub fn __main( args:&List<str> ) : int {
             return 1;
          };
          
-         let! pattern = Pattern.getPatterAt( db, analyzeFileInfo ) {
+         let! pattern = Pattern.getPatterAt( db, analyzeFileInfo, option.$inqMode ) {
             db.close();
             print( "illegal pos -- %s:%d:%d"
                    ( analyzeFileInfo.$path,
@@ -76,8 +76,8 @@ pub fn __main( args:&List<str> ) : int {
             print( "error" );
             return 1;
          };
-         // db.dumpAll();
-         db.dumpFile();
+         db.dumpAll();
+         //db.dumpFile();
 
          db.close();
       }

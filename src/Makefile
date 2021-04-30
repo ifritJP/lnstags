@@ -21,53 +21,68 @@ buildDB: build
 	./lnstags init
 	./lnstags build lns/tags/main.lns
 
+define inq-test
+	(cd test; ../lnstags --simpleLog --log debug $1)
+endef
+
 inq: build
-	./lnstags --simpleLog inq-at def test/main.lns 4 6 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 5 12 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 5 21 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 6 15 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 7 7 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 7 13 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 8 7 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 8 22 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 9 10 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 9 16 --log debug
-	./lnstags --simpleLog inq-at ref test/main.lns 13 7 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 16 1 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 17 12 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 18 14 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 34 11 --log debug
-	./lnstags --simpleLog inq-at def test/main.lns 34 22 --log debug
-	./lnstags --simpleLog inq-at def test/mainSub.lns 3 6 --log debug
-	./lnstags --simpleLog inq-at ref test/Sub.lns 1 10 --log debug
-	./lnstags --simpleLog inq-at ref test/Sub.lns 2 6 --log debug
-	./lnstags --simpleLog inq-at ref test/Sub.lns 4 11 --log debug
-	./lnstags --simpleLog inq-at ref test/Sub.lns 5 5 --log debug
-	./lnstags --simpleLog inq-at ref test/Sub.lns 8 10 --log debug
-	./lnstags --simpleLog inq-at ref test/Sub.lns 9 5 --log debug
-	./lnstags --simpleLog inq-at ref test/Sub.lns 12 15 --log debug
-	./lnstags --simpleLog inq-at ref test/Sub.lns 13 12 --log debug
-	./lnstags --simpleLog inq-at ref test/Sub.lns 15 17 --log debug
-	./lnstags --simpleLog inq-at ref test/Sub.lns 15 31 --log debug
-	./lnstags --simpleLog inq-at ref test/Sub.lns 16 12 --log debug
-	./lnstags --simpleLog inq-at ref test/Sub.lns 16 33 --log debug
-	./lnstags --simpleLog inq-at ref test/Sub.lns 17 12 --log debug
-	./lnstags --simpleLog inq-at ref test/Sub.lns 18 12 --log debug
-	./lnstags --simpleLog inq-at def test/Sub.lns 21 21 --log debug
-	./lnstags --simpleLog inq-at def test/Sub.lns 24 16 --log debug
-	./lnstags --simpleLog inq-at def test/Sub.lns 33 14 --log debug
-	./lnstags --simpleLog inq-at def test/Sub.lns 41 9 --log debug
-	./lnstags --simpleLog inq-at def test/Sub.lns 46 9 --log debug
-	./lnstags --simpleLog inq-at def test/Sub.lns 54 9 --log debug
-	cat test/Sub2.lns | ./lnstags --simpleLog inq-at ref -i test/Sub.lns 2 5 --log debug
-	./lnstags --simpleLog inq def @test.@Sub.Bar.Val1
-	./lnstags --simpleLog inq def @test.@Sub.Hoge.func
-	./lnstags --simpleLog inq ref @test.@Sub.Hoge.func
-	./lnstags --simpleLog inq ref @test.@Sub.HogeHoge.__init
+	$(call inq-test,inq-at def main.lns 3 9)
+	$(call inq-test,inq-at ref main.lns 3 9)
+	$(call inq-test,inq-at def main.lns 4 1)
+	$(call inq-test,inq-at def main.lns 4 6)
+	$(call inq-test,inq-at def main.lns 5 12)
+	$(call inq-test,inq-at def main.lns 5 21)
+	$(call inq-test,inq-at def main.lns 6 15)
+	$(call inq-test,inq-at def main.lns 7 7)
+	$(call inq-test,inq-at def main.lns 7 13)
+	$(call inq-test,inq-at def main.lns 8 7)
+	$(call inq-test,inq-at def main.lns 8 22)
+	$(call inq-test,inq-at def main.lns 9 10)
+	$(call inq-test,inq-at def main.lns 9 16)
+	$(call inq-test,inq-at ref main.lns 13 7)
+	$(call inq-test,inq-at def main.lns 16 1)
+	$(call inq-test,inq-at def main.lns 17 12)
+	$(call inq-test,inq-at def main.lns 18 14)
+	$(call inq-test,inq-at def main.lns 34 11)
+	$(call inq-test,inq-at def main.lns 34 22)
+	$(call inq-test,inq-at def main.lns 41 23)
+	$(call inq-test,inq-at def main.lns 52 15)
+	$(call inq-test,inq-at def main.lns 52 28)
+
+	$(call inq-test,inq-at def mainSub.lns 3 6)
+	(cd test; cat mainSub.lns | ../lnstags --simpleLog inq-at def -i mainSub.lns 3 5 --log debug)
+
+	$(call inq-test,inq-at ref Sub.lns 1 10)
+	$(call inq-test,inq-at ref Sub.lns 2 6)
+	$(call inq-test,inq-at ref Sub.lns 4 11)
+	$(call inq-test,inq-at ref Sub.lns 5 5)
+	$(call inq-test,inq-at ref Sub.lns 8 10)
+	$(call inq-test,inq-at ref Sub.lns 9 5)
+	$(call inq-test,inq-at ref Sub.lns 12 15)
+	$(call inq-test,inq-at ref Sub.lns 13 12)
+	$(call inq-test,inq-at ref Sub.lns 15 17)
+	$(call inq-test,inq-at ref Sub.lns 15 31)
+	$(call inq-test,inq-at ref Sub.lns 16 12)
+	$(call inq-test,inq-at ref Sub.lns 16 33)
+	$(call inq-test,inq-at ref Sub.lns 17 12)
+	$(call inq-test,inq-at ref Sub.lns 18 12)
+	$(call inq-test,inq-at def Sub.lns 21 21)
+	$(call inq-test,inq-at def Sub.lns 24 16)
+	$(call inq-test,inq-at def Sub.lns 33 14)
+	$(call inq-test,inq-at def Sub.lns 41 9)
+	$(call inq-test,inq-at def Sub.lns 46 9)
+	$(call inq-test,inq-at def Sub.lns 54 9)
+	$(call inq-test,inq-at ref Sub.lns 74 13)
+	$(call inq-test,inq-at ref Sub.lns 75 12)
+	(cd test; cat Sub2.lns | ../lnstags --simpleLog inq-at ref -i Sub.lns 2 5 --log debug)
+	$(call inq-test,inq def @Sub.Bar.Val1)
+	$(call inq-test,inq def @Sub.Hoge.func)
+	$(call inq-test,inq ref @Sub.Hoge.func)
+	$(call inq-test,inq ref @Sub.HogeHoge.__init)
 
 check: build
-	./lnstags init
-	./lnstags build test/main.lns --log debug
+	(cd test;../lnstags init)
+	(cd test;../lnstags build main.lns --log debug)
 	$(MAKE) inq 2>&1 | grep -v -e '^make\[' > work/output.new.txt 
 	diff test/output.txt work/output.new.txt
 

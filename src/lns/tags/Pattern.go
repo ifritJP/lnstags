@@ -13,8 +13,8 @@ import LnsLog "github.com/ifritJP/LuneScript/src/lune/base"
 import LnsUtil "github.com/ifritJP/LuneScript/src/lune/base"
 var init_Pattern bool
 var Pattern__mod__ string
-// for 264
-func Pattern_convExp1763(arg1 []LnsAny) string {
+// for 287
+func Pattern_convExp1979(arg1 []LnsAny) string {
     return Lns_getFromMulti( arg1, 0 ).(string)
 }
 
@@ -25,8 +25,8 @@ func Pattern_convExp1763(arg1 []LnsAny) string {
 
 
 
-// 250: decl @lns.@tags.@Pattern.getPatterAt
-func Pattern_getPatterAt(db *DBCtrl_DBCtrl,analyzeFileInfo *Option_AnalyzeFileInfo) LnsAny {
+// 270: decl @lns.@tags.@Pattern.getPatterAt
+func Pattern_getPatterAt(db *DBCtrl_DBCtrl,analyzeFileInfo *Option_AnalyzeFileInfo,inqMod string) LnsAny {
     var fileId LnsInt
     fileId = db.FP.GetFileIdFromPath(analyzeFileInfo.FP.Get_path())
     var path string
@@ -49,12 +49,12 @@ func Pattern_getPatterAt(db *DBCtrl_DBCtrl,analyzeFileInfo *Option_AnalyzeFileIn
         Lns_GetEnv().SetStackVal( Lns_car(Lns_getVM().String_find(path,"^%.%.", nil, nil))) ||
         Lns_GetEnv().SetStackVal( Lns_car(Lns_getVM().String_find(path,"^/", nil, nil))) )){
         var dir string
-        dir = Pattern_convExp1763(Lns_2DDD(Lns_getVM().String_gsub(path,"/[^/]+$", "")))
+        dir = Pattern_convExp1979(Lns_2DDD(Lns_getVM().String_gsub(path,"/[^/]+$", "")))
         projDir = LnsUtil.Util_searchProjDir(dir)
         
     }
     if analyzeFileInfo.FP.Get_stdinFlag(){
-        useStdInMod = LnsUtil.Util_scriptPath2ModuleFromProjDir(path, projDir)
+        useStdInMod = LnsUtil.Util_scriptPath2ModuleFromProjDir(analyzeFileInfo.FP.Get_path(), projDir)
         
     } else { 
         useStdInMod = nil
@@ -65,9 +65,9 @@ func Pattern_getPatterAt(db *DBCtrl_DBCtrl,analyzeFileInfo *Option_AnalyzeFileIn
         if ast.FP.Get_streamName() == path{
             var filter *Pattern_SyntaxFilter
             filter = NewPattern_SyntaxFilter(ast)
-            pattern = filter.FP.GetPattern(path, analyzeFileInfo)
+            pattern = filter.FP.GetPattern(path, analyzeFileInfo, inqMod)
             
-            Log_log(Log_Level__Log, __func__, 280, Log_CreateMessage(func() string {
+            Log_log(Log_Level__Log, __func__, 303, Log_CreateMessage(func() string {
                 return Lns_getVM().String_format("pattern -- %s", []LnsAny{pattern})
             }))
             
@@ -80,8 +80,8 @@ func Pattern_getPatterAt(db *DBCtrl_DBCtrl,analyzeFileInfo *Option_AnalyzeFileIn
 type Pattern_SyntaxFilterMtd interface {
     DefaultProcess(arg1 *Nodes.Nodes_Node, arg2 LnsAny)
     GetFull(arg1 *LnsAst.Ast_TypeInfo, arg2 bool) string
-    GetPattern(arg1 string, arg2 *Option_AnalyzeFileInfo) LnsAny
-    getPatternFromNode(arg1 *Option_AnalyzeFileInfo, arg2 *Nodes.Nodes_Node) LnsAny
+    GetPattern(arg1 string, arg2 *Option_AnalyzeFileInfo, arg3 string) LnsAny
+    getPatternFromNode(arg1 *Option_AnalyzeFileInfo, arg2 string, arg3 *Nodes.Nodes_Node) LnsAny
     Get_moduleInfoManager() LnsAst.Ast_ModuleInfoManager
     Get_optStack() *LnsList
     Get_typeNameCtrl() *LnsAst.Ast_TypeNameCtrl
@@ -216,7 +216,7 @@ func (self *Pattern_SyntaxFilter) InitPattern_SyntaxFilter(ast *TransUnit.TransU
 }
 
 // 33: decl @lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode
-func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_AnalyzeFileInfo,nearest *Nodes.Nodes_Node) LnsAny {
+func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_AnalyzeFileInfo,inqMod string,nearest *Nodes.Nodes_Node) LnsAny {
     __func__ := "@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode"
     var isInner func(pos *Types.Types_Position,name string) bool
     isInner = func(pos *Types.Types_Position,name string) bool {
@@ -233,6 +233,19 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
     }))
     
     
+    {
+        _workNode := Nodes.Nodes_ImportNodeDownCastF(nearest.FP)
+        if _workNode != nil {
+            workNode := _workNode.(*Nodes.Nodes_ImportNode)
+            if _switch297 := inqMod; _switch297 == Option_InqMode__Def {
+                return self.FP.GetFull(workNode.FP.Get_expType(), false)
+            } else if _switch297 == Option_InqMode__Ref {
+                return Ast_getFullNameSym(&self.Nodes_Filter, workNode.FP.Get_symbolInfo())
+            } else if _switch297 == Option_InqMode__Set {
+            }
+            return nil
+        }
+    }
     {
         _workNode := Nodes.Nodes_ExpRefNodeDownCastF(nearest.FP)
         if _workNode != nil {
@@ -308,6 +321,7 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
                     }
                 }
             }
+            
         }
     }
     {
@@ -368,6 +382,7 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
                     }
                 }
             }
+            
         }
     }
     {
@@ -424,6 +439,7 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
                     }
                 }
             }
+            
         }
     }
     {
@@ -453,7 +469,9 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
         _workNode := Nodes.Nodes_DeclMacroNodeDownCastF(nearest.FP)
         if _workNode != nil {
             workNode := _workNode.(*Nodes.Nodes_DeclMacroNode)
-            if isInner(workNode.FP.Get_declInfo().FP.Get_name().Pos, workNode.FP.Get_declInfo().FP.Get_name().Txt){
+            var name *Types.Types_Token
+            name = workNode.FP.Get_declInfo().FP.Get_name()
+            if isInner(name.Pos, name.Txt){
                 return self.FP.GetFull(workNode.FP.Get_expType(), false)
             }
         }
@@ -482,15 +500,41 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
             }
         }
     }
-    Log_log(Log_Level__Err, __func__, 173, Log_CreateMessage(func() string {
+    {
+        _workNode := Nodes.Nodes_AliasNodeDownCastF(nearest.FP)
+        if _workNode != nil {
+            workNode := _workNode.(*Nodes.Nodes_AliasNode)
+            if isInner(Lns_unwrap( workNode.FP.Get_newSymbol().FP.Get_pos()).(*Types.Types_Position), workNode.FP.Get_newSymbol().FP.Get_name()){
+                return Ast_getFullNameSym(&self.Nodes_Filter, workNode.FP.Get_newSymbol())
+            }
+            
+        }
+    }
+    {
+        _workNode := Nodes.Nodes_DeclFormNodeDownCastF(nearest.FP)
+        if _workNode != nil {
+            workNode := _workNode.(*Nodes.Nodes_DeclFormNode)
+            {
+                _name := workNode.FP.Get_declInfo().FP.Get_name()
+                if _name != nil {
+                    name := _name.(*Types.Types_Token)
+                    if isInner(name.Pos, name.Txt){
+                        return self.FP.GetFull(workNode.FP.Get_expType(), false)
+                    }
+                }
+            }
+            
+        }
+    }
+    Log_log(Log_Level__Err, __func__, 191, Log_CreateMessage(func() string {
         return Lns_getVM().String_format("unknown pattern -- %s", []LnsAny{Nodes.Nodes_getNodeKindName(nearest.FP.Get_kind())})
     }))
     
     return nil
 }
 
-// 177: decl @lns.@tags.@Pattern.SyntaxFilter.getPattern
-func (self *Pattern_SyntaxFilter) GetPattern(path string,analyzeFileInfo *Option_AnalyzeFileInfo) LnsAny {
+// 195: decl @lns.@tags.@Pattern.SyntaxFilter.getPattern
+func (self *Pattern_SyntaxFilter) GetPattern(path string,analyzeFileInfo *Option_AnalyzeFileInfo,inqMod string) LnsAny {
     var isInner func(pos *Types.Types_Position,name string) bool
     isInner = func(pos *Types.Types_Position,name string) bool {
         if Lns_isCondTrue( Lns_GetEnv().PopVal( Lns_GetEnv().IncStack() ||
@@ -590,7 +634,7 @@ func (self *Pattern_SyntaxFilter) GetPattern(path string,analyzeFileInfo *Option
             _nearest := nearestNode
             if _nearest != nil {
                 nearest := _nearest.(*Nodes.Nodes_Node)
-                pattern = self.FP.getPatternFromNode(analyzeFileInfo, nearest)
+                pattern = self.FP.getPatternFromNode(analyzeFileInfo, inqMod, nearest)
                 
             }
         }

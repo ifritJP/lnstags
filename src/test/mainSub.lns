@@ -1,4 +1,4 @@
-subfile owner test.main;
+subfile owner main;
 
 Sub.func();
 

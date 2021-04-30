@@ -25,7 +25,8 @@ class tagFilter extend Nodes.Filter<Opt> {
    let mut type2nsid:Map<&LnsAst.TypeInfo,int>;
    let mut sym2nsid:Map<&LnsAst.SymbolInfo,int>;
    let mut file2id:Map<str,int>;
-
+   let moduleTypeInfo:&LnsAst.TypeInfo;
+   
    fn addFileId( path:str, mod:str ) mut : int {
       if! self.file2id[ path ] {
          return _exp;
@@ -50,6 +51,7 @@ class tagFilter extend Nodes.Filter<Opt> {
                     option:&Option.Option, db:DBCtrl.DBCtrl, streamName:str )
    {
       super( true, rootNode.$moduleTypeInfo, rootNode.$moduleTypeInfo.$scope );
+      self.moduleTypeInfo = rootNode.$moduleTypeInfo;
       self.file2id = {};
       self.option = option;
       self.db = db;
@@ -194,10 +196,19 @@ fn tagFilter.registerDecl(
       registDeclType( workNode );
    }
 
+   foreach workNode in nodeManager.getAliasNodeList() {
+      registDeclTypeOp( workNode.$expType, unwrap workNode.$newSymbol.$pos );
+   }
+
    // ======== シンボルの定義系 ======
+   foreach workNode in nodeManager.getImportNodeList() {
+      self.registDeclSym( workNode.$symbolInfo );
+   }
+   
    foreach workNode in nodeManager.getDeclVarNodeList() {
-      if LnsAst.isPubToExternal( workNode.$accessMode ) {
-         foreach symbolInfo in workNode.$symbolInfoList {
+      foreach symbolInfo in workNode.$symbolInfoList {
+         if symbolInfo.$scope == self.moduleTypeInfo.$scope {
+            // 最上位スコープの変数を登録する
             self.registDeclSym( symbolInfo );
          }
       }
@@ -256,14 +267,22 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
          }
          default {
             _switch symbolInfo.$kind {
-               case .Fun, .Mac, .Mtd, .Typ {
+               case .Fun, .Mac, .Mtd {
+                  registerRefType( symbolInfo.$typeInfo, pos );
+               }
+               case .Typ{
+                  if symbolInfo.$typeInfo.$kind == .Module {
+                     addSymbolRef( symbolInfo, pos );
+                  }
                   registerRefType( symbolInfo.$typeInfo, pos );
                }
                case .Mbr {
                   addSymbolRef( symbolInfo, pos );
                }
                case .Var {
-                  if LnsAst.isPubToExternal( symbolInfo.$accessMode ) {
+                  if LnsAst.isPubToExternal( symbolInfo.$accessMode ) or
+                     symbolInfo.$scope == self.moduleTypeInfo.$scope
+                  {
                      addSymbolRef( symbolInfo, pos );
                   }
                }
@@ -321,7 +340,10 @@ pub override fn tagFilter.processRoot(
    node: Nodes.RootNode, opt:Opt ) mut
 {
    self.type2nsid[ LnsAst.headTypeInfo ] = DBCtrl.rootNsId;
-   self.registerType( node.$moduleTypeInfo );
+   let modNsId = self.registerType( node.$moduleTypeInfo );
+
+   let fileId = self.getFileId( self.streamName );
+   self.db.addSymbolDecl( modNsId, fileId, 1, 1);
 
    let projDir = DBCtrl.getProjDir(
       self.streamName, self.getFull( node.$moduleTypeInfo, false ) );
@@ -329,7 +351,7 @@ pub override fn tagFilter.processRoot(
       if! let usePath = workNode.$usePath {
          let subPath = LnsUtil.pathJoin( projDir, usePath.gsub( "%.", "/" ) .. ".lns" );
          let subId = self.addFileId( subPath, usePath );
-         self.db.addSubfile( self.getFileId( self.streamName ), subId );
+         self.db.addSubfile( fileId, subId );
       }
    }
    

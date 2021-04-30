@@ -1,6 +1,6 @@
-subfile use test.mainSub;
+subfile use mainSub;
 
-import test.Sub;
+import Sub;
 Sub.func();
 let hoge = new Sub.Hoge();
 let ifObj:Sub.IF = hoge;
@@ -36,4 +36,19 @@ print( hoge.$val );
 {
    Sub._Hoge();
    Sub._Hoge2( `{print("hoge");} );
+}
+{
+   let val = new Sub.FooBar();
+   print( val.$val );
+}
+{
+   fn getForm() : Sub.Form {
+      return fn() {};
+   }
+   getForm();
+}
+{
+   alge Al {
+      Val(Sub.Bar, aaa:Sub.Foo),
+   }
 }

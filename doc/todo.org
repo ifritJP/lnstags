@@ -12,15 +12,20 @@
   - [X] module 宣言
   - [X] Mapping, accessor の自動生成
   - [X] =__func__=, =__mod__= 系
-  - [ ] alias
+  - [X] alias
   - [ ] generic の型パラメータ
   - [X] accessor の継承関係が登録されていない。    
   - [ ] マクロ展開した token の位置情報を分かり易くする
+  - [ ] 代入場所
 - pattern 取得    
   - [X] $getter
   - [X] accessor の定義から、参照位置にジャンプできるように対応する
   - [X] getterの定義をメンバの参照に加える
   - [X] setterの定義をメンバの設定に加える
+  - [X] form 宣言
+  - [X] expCall  lune/base/Depend.lns:116:28
+  - [X] alge 宣言のパラメータの型
+  - [X] import 
 - [X] new 演算子の登録
 - [X] super() コール
 - [X] override 関数コール
@@ -29,3 +34,4 @@
 - [ ] go の github モジュールのように、別ディレクトリのモジュールにジャンプすると、
       ジャンプ後の db が参照できない。
 - [X] subfile からタグジャンプできない
+- [ ] 問い合わせの際に、 ast 解析せずにシンボル名から辿れるモードを追加する

@@ -31,9 +31,9 @@ func Main___main(args *LnsList) LnsInt {
     Lns_main_init()
     var option *Option_Option
     option = Option_analyzeArgs(args)
-    if _switch346 := option.FP.Get_mode(); _switch346 == Option_Mode__Init {
+    if _switch348 := option.FP.Get_mode(); _switch348 == Option_Mode__Init {
         DBCtrl_initDB(main_dbPath)
-    } else if _switch346 == Option_Mode__Build {
+    } else if _switch348 == Option_Mode__Build {
         DBCtrl_initDB(main_dbPath)
         var db *DBCtrl_DBCtrl
         
@@ -49,9 +49,9 @@ func Main___main(args *LnsList) LnsInt {
         db.FP.Commit()
         Analyze_start(db, option)
         db.FP.Close()
-    } else if _switch346 == Option_Mode__Inq {
+    } else if _switch348 == Option_Mode__Inq {
         main_inq_1007_(option.FP.Get_inqMode(), option.FP.Get_pattern())
-    } else if _switch346 == Option_Mode__InqAt {
+    } else if _switch348 == Option_Mode__InqAt {
         var analyzeFileInfo *Option_AnalyzeFileInfo
         analyzeFileInfo = option.FP.Get_analyzeFileInfo()
         var db *DBCtrl_DBCtrl
@@ -68,7 +68,7 @@ func Main___main(args *LnsList) LnsInt {
         var pattern string
         
         {
-            _pattern := Pattern_getPatterAt(db, analyzeFileInfo)
+            _pattern := Pattern_getPatterAt(db, analyzeFileInfo, option.FP.Get_inqMode())
             if _pattern == nil{
                 db.FP.Close()
                 Lns_print([]LnsAny{Lns_getVM().String_format("illegal pos -- %s:%d:%d", []LnsAny{analyzeFileInfo.FP.Get_path(), analyzeFileInfo.FP.Get_lineNo(), analyzeFileInfo.FP.Get_column()})})
@@ -79,7 +79,7 @@ func Main___main(args *LnsList) LnsInt {
         }
         db.FP.Close()
         main_inq_1007_(option.FP.Get_inqMode(), pattern)
-    } else if _switch346 == Option_Mode__Dump {
+    } else if _switch348 == Option_Mode__Dump {
         var db *DBCtrl_DBCtrl
         
         {
@@ -91,9 +91,9 @@ func Main___main(args *LnsList) LnsInt {
                 db = _db.(*DBCtrl_DBCtrl)
             }
         }
-        db.FP.DumpFile()
+        db.FP.DumpAll()
         db.FP.Close()
-    } else if _switch346 == Option_Mode__Test {
+    } else if _switch348 == Option_Mode__Test {
         DBCtrl_test()
     }
     return 0

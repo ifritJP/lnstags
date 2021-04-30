@@ -31,7 +31,7 @@ class SyntaxFilter extend Nodes.Filter<str> {
    }
 
    fn getPatternFromNode( analyzeFileInfo:&Option.AnalyzeFileInfo,
-                          mut nearest:&Nodes.Node ) : str!
+                          inqMod:Option.InqMode, mut nearest:&Nodes.Node ) : str!
    {
       fn isInner( pos:&Types.Position, name:str ) : bool {
          if pos.lineNo == analyzeFileInfo.$lineNo and
@@ -42,6 +42,14 @@ class SyntaxFilter extend Nodes.Filter<str> {
          }
          return false;
       }
+      macro _patternDeclFunc( declInfo:__exp ) {
+         if! let name = ,,declInfo.$name {
+            if isInner( name.pos, name.txt ) {
+               return self.getFull( workNode.$expType, false );
+            }
+         }
+      }
+      
       macro _patternDeclSym(symbolInfo:__exp) {
          if isInner( unwrap ,,symbolInfo.$pos, ,,symbolInfo.$name ) {
             return Ast.getFullNameSym( self, ,,symbolInfo );
@@ -49,6 +57,20 @@ class SyntaxFilter extend Nodes.Filter<str> {
       }
       
       _logNode( .Log, nearest, "nearestNode -- " );
+
+      if! let workNode = nearest@@@Nodes.ImportNode {
+         _switch inqMod {
+            case .Def {  
+               return self.getFull( workNode.$expType, false );
+            }
+            case .Ref {
+               return Ast.getFullNameSym( self, workNode.$symbolInfo );
+            }
+            case .Set {
+            }
+         }
+         return nil;
+      }
       if! let workNode = nearest@@@Nodes.ExpRefNode {
          return Ast.getFullNameSym( self, workNode.$symbolInfo );
       }
@@ -80,11 +102,7 @@ class SyntaxFilter extend Nodes.Filter<str> {
          }
       }
       if! let workNode = nearest@@@Nodes.DeclFuncNode {
-         if! let name = workNode.$declInfo.$name {
-            if isInner( name.pos, name.txt ) {
-               return self.getFull( workNode.$expType, false );
-            }
-         }
+         _patternDeclFunc( workNode.$declInfo );
       }
       if! let workNode = nearest@@@Nodes.DeclEnumNode {
          let name = workNode.$name;
@@ -110,11 +128,7 @@ class SyntaxFilter extend Nodes.Filter<str> {
          }
       }
       if! let workNode = nearest@@@Nodes.DeclMethodNode {
-         if! let name = workNode.$declInfo.$name {
-            if isInner( name.pos, name.txt ) {
-               return self.getFull( workNode.$expType, false );
-            }
-         }
+         _patternDeclFunc( workNode.$declInfo );
       }
       if! let workNode = nearest@@@Nodes.ProtoClassNode {
          let name = workNode.$name;
@@ -136,11 +150,7 @@ class SyntaxFilter extend Nodes.Filter<str> {
          }
       }
       if! let workNode = nearest@@@Nodes.DeclConstrNode {
-         if! let name = workNode.$declInfo.$name {
-            if isInner( name.pos, name.txt ) {
-               return self.getFull( workNode.$expType, false );
-            }
-         }
+         _patternDeclFunc( workNode.$declInfo );
       }
       if! let workNode = nearest@@@Nodes.ExpCallSuperCtorNode {
          return self.getFull( workNode.$methodType, false );
@@ -154,7 +164,8 @@ class SyntaxFilter extend Nodes.Filter<str> {
          }
       }
       if! let workNode = nearest@@@Nodes.DeclMacroNode {
-         if isInner( workNode.$declInfo.$name.pos, workNode.$declInfo.$name.txt ) {
+         let name = workNode.$declInfo.$name;
+         if isInner( name.pos, name.txt ) {
             return self.getFull( workNode.$expType, false );
          }
       }
@@ -170,11 +181,20 @@ class SyntaxFilter extend Nodes.Filter<str> {
             }
          }
       }
+      if! let workNode = nearest@@@Nodes.AliasNode {
+         _patternDeclSym( workNode.$newSymbol );
+      }
+      if! let workNode = nearest@@@Nodes.DeclFormNode {
+         _patternDeclFunc( workNode.$declInfo );
+      }
+      
       Log._log( .Err, "unknown pattern -- %s" (Nodes.getNodeKindName( nearest.$kind )) );
       return nil;
    }
 
-   pub fn getPattern( path:str, analyzeFileInfo:&Option.AnalyzeFileInfo ) : str! {
+   pub fn getPattern(
+      path:str, analyzeFileInfo:&Option.AnalyzeFileInfo, inqMod:Option.InqMode ) : str!
+   {
       fn isInner( pos:&Types.Position, name:str ) : bool {
          if pos.lineNo == analyzeFileInfo.$lineNo and
             pos.column <= analyzeFileInfo.$column and
@@ -240,14 +260,17 @@ class SyntaxFilter extend Nodes.Filter<str> {
                return .Next;
             }, 0, (@) );
          if! let nearest = nearestNode {
-            pattern = self.getPatternFromNode( analyzeFileInfo, nearest );
+            pattern = self.getPatternFromNode( analyzeFileInfo, inqMod, nearest );
          }
       }
       return pattern;
    }
 }
 
-pub fn getPatterAt( db:DBCtrl.DBCtrl, analyzeFileInfo:&Option.AnalyzeFileInfo ) : str! {
+pub fn getPatterAt(
+   db:DBCtrl.DBCtrl,
+   analyzeFileInfo:&Option.AnalyzeFileInfo, inqMod:Option.InqMode ) : str!
+{
 
    let fileId = db.getFileIdFromPath( analyzeFileInfo.$path );
    let! path = db.getMainFilePath( fileId ) {
@@ -267,7 +290,7 @@ pub fn getPatterAt( db:DBCtrl.DBCtrl, analyzeFileInfo:&Option.AnalyzeFileInfo ) 
    
    if analyzeFileInfo.$stdinFlag {
       useStdInMod = LnsUtil.scriptPath2ModuleFromProjDir(
-         path, projDir );
+         analyzeFileInfo.$path, projDir );
    } else {
       useStdInMod = nil;
    }
@@ -276,7 +299,7 @@ pub fn getPatterAt( db:DBCtrl.DBCtrl, analyzeFileInfo:&Option.AnalyzeFileInfo ) 
              fn ( ast: TransUnit.ASTInfo ) {
                 if ast.$streamName == path {
                    let mut filter = new SyntaxFilter( ast );
-                   pattern = filter.getPattern( path, analyzeFileInfo );
+                   pattern = filter.getPattern( path, analyzeFileInfo, inqMod );
                    Log._log( .Log, "pattern -- %s" (pattern) );
                 }
              });

@@ -3,8 +3,9 @@
 
 (require 'cl)
 (require 'helm)
+(require 'lnstags-data)
 
-(defvar lnstags-helm-buffer-name "*lnstags* ")
+(defvar lnstags-helm-buffer-name "*lnstags SEL*")
 
 ;; [C-return]
 (defvar lnstags-heml-map
@@ -15,6 +16,7 @@
   "Keymap")
 
 (defun lnstags-helm-execute-persistent-action (&optional attr onewindow)
+  (interactive)
   (helm-execute-persistent-action attr onewindow))
 
 
@@ -35,8 +37,13 @@
 (defun lnstags-tags-select (item)
   (setq line (plist-get item :line))
   (setq file (plist-get item :path))
+  (setq relative (plist-get item :relative))
+  (setq projDir (plist-get item :projDir))
   (let ((prev-buffer (current-buffer)))
     (find-file file)
+    (set (make-local-variable 'lnstags-file-info)
+	 `(:path ,relative :projDir ,projDir))
+    (lnstags-projs-add projDir (lnstags-get-parentDir relative))
     (goto-line line)
     (recenter)
     ))
@@ -58,9 +65,8 @@
 	      (substring disp-path
 			 (+ (* -1 lnstags-path-length) 3))))))
 
-(defun lnstags-tags-create-candidate-list (&optional output-symbol-flag)
-  (let (projDir candidate-list)
-    (setq projDir (lnstags-get-projDir (current-buffer)))
+(defun lnstags-tags-create-candidate-list (projDir &optional output-symbol-flag)
+  (let (candidate-list)
     (while (not (eobp))
       (beginning-of-line)
       (cond ((or (looking-at "^lnstags:	1")
@@ -84,7 +90,10 @@
 					   'face lnstags-candidate-path-face)
 					  line txt))
 				 (list :line line
-				       :path (expand-file-name path projDir)))
+ 				       :path (expand-file-name path projDir)
+				       :relative path
+				       :projDir projDir
+				       ))
 			   candidate-list)))))
       (next-line))
     candidate-list
@@ -107,11 +116,16 @@
     item))
 (defun lnstags-helm-history-clear ()
   (interactive)
+  (dolist (buf (buffer-list))
+    (when (string-match (regexp-quote lnstags-helm-buffer-name)
+			(buffer-name buf))
+      (kill-buffer buf)))
   (setq lnstags-helm-history nil)
   )
 (defun lnstags-helm-history-select (item)
   (setq lnstags-helm-history-cur (plist-get item :time))
   (helm :sources (plist-get item :helm)
+	:keymap lnstags-heml-map
 	:buffer lnstags-helm-buffer-name)
   )
 (defun lnstags-helm-history-show ()
@@ -119,6 +133,7 @@
   (helm :sources `((name . "lnstags-history")
 		   (candidates . ,(reverse lnstags-helm-history))
 		   (action . lnstags-helm-history-select))
+	:keymap lnstags-heml-map
 	:buffer lnstags-helm-buffer-name
 	:preselect lnstags-helm-history-cur
 	)
@@ -126,9 +141,9 @@
   
 
 (defun lnstags-tags-select-mode (select-func create-candidate-list-func
-					     header-name)
+					     header-name projDir)
   (let (candidate-list lnstags-params)
-    (setq candidate-list (funcall create-candidate-list-func))
+    (setq candidate-list (funcall create-candidate-list-func projDir))
     (if (eq (length candidate-list) 1)
 	(funcall select-func (cdr (car candidate-list)))
       (setq candidate-list
@@ -151,6 +166,7 @@
       (lnstags-helm-history-add-tail lnstags-params)
       (let ((helm-candidate-number-limit 9999))
 	(helm :sources lnstags-params
+	      :keymap lnstags-heml-map
 	      :buffer lnstags-helm-buffer-name)
 	))))
 

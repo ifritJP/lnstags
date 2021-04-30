@@ -1,362 +1,466 @@
-./lnstags --simpleLog inq-at def test/main.lns 4 6 --log debug
+(cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 3 9)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/main.lns:   4:  5 -- RefField
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.func
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   3:  1 -- Import
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.func     1 test/Sub.lns     pub fn func() {
-./lnstags --simpleLog inq-at def test/main.lns 5 12 --log debug
+@Sub                1 Sub.lns          pub fn func() {
+(cd test; ../lnstags --simpleLog --log debug inq-at ref main.lns 3 9)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/main.lns:   5: 12 -- ExpNew
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.Hoge.__init
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   3:  1 -- Import
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @main.Sub
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.Hoge.__init   18 test/Sub.lns        pub fn __init() {
-./lnstags --simpleLog inq-at def test/main.lns 5 21 --log debug
+@main.Sub           4 main.lns         Sub.func();
+@main.Sub           5 main.lns         let hoge = new Sub.Hoge();
+@main.Sub           6 main.lns         let ifObj:Sub.IF = hoge;
+@main.Sub           8 main.lns         ifObj.func( Sub.Foo.Val1 );
+@main.Sub           9 main.lns         Sub.Hoge.sub( .Val2 );
+@main.Sub          10 main.lns         let hogehoge = new Sub.HogeHoge();
+@main.Sub          14 main.lns            Sub.func();
+@main.Sub          17 main.lns         print( Sub.Val );
+@main.Sub          20 main.lns            let mut hoge2 = new Sub.Hoge();
+@main.Sub          28 main.lns               ,,stmt;
+@main.Sub          33 main.lns            let mut sub:Sub.Sub = new Sub.SubSub( 1 );
+@main.Sub          33 main.lns            let mut sub:Sub.Sub = new Sub.SubSub( 1 );
+@main.Sub          37 main.lns            Sub._Hoge();
+@main.Sub          38 main.lns            Sub._Hoge2( `{print("hoge");} );
+@main.Sub          41 main.lns            let val = new Sub.FooBar();
+@main.Sub          45 main.lns            fn getForm() : Sub.Form {
+@main.Sub          52 main.lns               Val(Sub.Bar, aaa:Sub.Foo),
+@main.Sub          52 main.lns               Val(Sub.Bar, aaa:Sub.Foo),
+@main.Sub           3 mainSub.lns      Sub.func();
+(cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 4 1)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/main.lns:   5: 20 -- RefField
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.Hoge
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   4:  1 -- ExpRef
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @main.Sub
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.Hoge    15 test/Sub.lns     pub proto class Hoge extend (Mapping, IF);
-@test.@Sub.Hoge    16 test/Sub.lns     pub class Hoge extend (Mapping, IF) {
-./lnstags --simpleLog inq-at def test/main.lns 6 15 --log debug
+@main.Sub           3 main.lns         import Sub;
+(cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 4 6)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/main.lns:   6: 15 -- RefField
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.IF
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   4:  5 -- RefField
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.func
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.IF      12 test/Sub.lns     pub interface IF {
-./lnstags --simpleLog inq-at def test/main.lns 7 7 --log debug
+@Sub.func           1 Sub.lns          pub fn func() {
+(cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 5 12)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/main.lns:   7:  6 -- RefField
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.Hoge.func
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   5: 12 -- ExpNew
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Hoge.__init
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.Hoge.func   21 test/Sub.lns        pub fn func(val:Foo);
-@test.@Sub.Hoge.func   31 test/Sub.lns     pub fn Hoge.func(val:Foo) {
-@test.@Sub.Hoge.func   40 test/Sub.lns        pub override fn func( val:Foo ) {
-@test.@Sub.Hoge.func   48 test/Sub.lns        pub override fn func( val:Foo ) {
-./lnstags --simpleLog inq-at def test/main.lns 7 13 --log debug
+@Sub.Hoge.__init   18 Sub.lns             pub fn __init() {
+(cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 5 21)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/main.lns:   7: 12 -- ExpOmitEnum
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.Foo.Val1
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   5: 20 -- RefField
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Hoge
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.Foo.Val1    5 test/Sub.lns        Val1,
-./lnstags --simpleLog inq-at def test/main.lns 8 7 --log debug
+@Sub.Hoge          15 Sub.lns          pub proto class Hoge extend (Mapping, IF);
+@Sub.Hoge          16 Sub.lns          pub class Hoge extend (Mapping, IF) {
+(cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 6 15)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/main.lns:   8:  7 -- RefField
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.IF.func
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   6: 15 -- RefField
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.IF
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.IF.func   13 test/Sub.lns        pub fn func(val:Foo);
-@test.@Sub.IF.func   21 test/Sub.lns        pub fn func(val:Foo);
-@test.@Sub.IF.func   31 test/Sub.lns     pub fn Hoge.func(val:Foo) {
-@test.@Sub.IF.func   40 test/Sub.lns        pub override fn func( val:Foo ) {
-@test.@Sub.IF.func   48 test/Sub.lns        pub override fn func( val:Foo ) {
-./lnstags --simpleLog inq-at def test/main.lns 8 22 --log debug
+@Sub.IF            12 Sub.lns          pub interface IF {
+(cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 7 7)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/main.lns:   8: 21 -- RefField
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.Foo.Val1
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   7:  6 -- RefField
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Hoge.func
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.Foo.Val1    5 test/Sub.lns        Val1,
-./lnstags --simpleLog inq-at def test/main.lns 9 10 --log debug
+@Sub.Hoge.func     21 Sub.lns             pub fn func(val:Foo);
+@Sub.Hoge.func     31 Sub.lns          pub fn Hoge.func(val:Foo) {
+@Sub.Hoge.func     40 Sub.lns             pub override fn func( val:Foo ) {
+@Sub.Hoge.func     48 Sub.lns             pub override fn func( val:Foo ) {
+(cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 7 13)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/main.lns:   9: 10 -- RefField
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.Hoge.sub
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   7: 12 -- ExpOmitEnum
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Foo.Val1
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.Hoge.sub   22 test/Sub.lns        pub static fn sub(val:Bar) {
-./lnstags --simpleLog inq-at def test/main.lns 9 16 --log debug
+@Sub.Foo.Val1       5 Sub.lns             Val1,
+(cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 8 7)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/main.lns:   9: 15 -- NewAlgeVal
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.Bar.Val2
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   8:  7 -- RefField
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.IF.func
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.Bar.Val2   10 test/Sub.lns        Val2,
-./lnstags --simpleLog inq-at ref test/main.lns 13 7 --log debug
+@Sub.IF.func       13 Sub.lns             pub fn func(val:Foo);
+@Sub.IF.func       21 Sub.lns             pub fn func(val:Foo);
+@Sub.IF.func       31 Sub.lns          pub fn Hoge.func(val:Foo) {
+@Sub.IF.func       40 Sub.lns             pub override fn func( val:Foo ) {
+@Sub.IF.func       48 Sub.lns             pub override fn func( val:Foo ) {
+(cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 8 22)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/main.lns:  13:  1 -- DeclMacro
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@main._Macro
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   8: 21 -- RefField
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Foo.Val1
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@main._Macro   16 test/main.lns    _Macro();
-./lnstags --simpleLog inq-at def test/main.lns 16 1 --log debug
+@Sub.Foo.Val1       5 Sub.lns             Val1,
+(cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 9 10)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/main.lns:  16:  1 -- ExpMacroExp
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@main._Macro
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   9: 10 -- RefField
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Hoge.sub
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@main._Macro   13 test/main.lns    macro _Macro() {
-./lnstags --simpleLog inq-at def test/main.lns 17 12 --log debug
+@Sub.Hoge.sub      22 Sub.lns             pub static fn sub(val:Bar) {
+(cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 9 16)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/main.lns:  17: 12 -- RefField
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.Val
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   9: 15 -- NewAlgeVal
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Bar.Val2
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.Val     57 test/Sub.lns     pub let Val = 1;
-./lnstags --simpleLog inq-at def test/main.lns 18 14 --log debug
+@Sub.Bar.Val2      10 Sub.lns             Val2,
+(cd test; ../lnstags --simpleLog --log debug inq-at ref main.lns 13 7)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/main.lns:  18: 14 -- GetField
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.Hoge.get_val
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:  13:  1 -- DeclMacro
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @main._Macro
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.Hoge.get_val   17 test/Sub.lns        let mut val:int{pub,pub};
-./lnstags --simpleLog inq-at def test/main.lns 34 11 --log debug
+@main._Macro       16 main.lns         _Macro();
+(cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 16 1)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/main.lns:  34:  8 -- RefField
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.Sub.set_val
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:  16:  1 -- ExpMacroExp
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @main._Macro
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.Sub.set_val   60 test/Sub.lns        pub abstract fn set_val(val:int) mut;
-@test.@Sub.Sub.set_val   63 test/Sub.lns        let mut val:int{pub,pub};
-./lnstags --simpleLog inq-at def test/main.lns 34 22 --log debug
+@main._Macro       13 main.lns         macro _Macro() {
+(cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 17 12)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/main.lns:  34: 22 -- GetField
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.Sub.get_val
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:  17: 12 -- RefField
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Val
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.Sub.get_val   59 test/Sub.lns        pub abstract fn get_val() : int;
-@test.@Sub.Sub.get_val   63 test/Sub.lns        let mut val:int{pub,pub};
-./lnstags --simpleLog inq-at def test/mainSub.lns 3 6 --log debug
+@Sub.Val           57 Sub.lns          pub let Val = 1;
+(cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 18 14)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/mainSub.lns:   3:  5 -- RefField
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.func
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:  18: 14 -- GetField
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Hoge.get_val
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.func     1 test/Sub.lns     pub fn func() {
-./lnstags --simpleLog inq-at ref test/Sub.lns 1 10 --log debug
+@Sub.Hoge.get_val   17 Sub.lns             let mut val:int{pub,pub};
+(cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 34 11)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/Sub.lns:   1:  1 -- DeclFunc
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.func
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:  34:  8 -- RefField
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Sub.set_val
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.func     4 test/main.lns    Sub.func();
-@test.@Sub.func    14 test/main.lns       Sub.func();
-@test.@Sub.func    28 test/main.lns          ,,stmt;
-@test.@Sub.func     3 test/mainSub.lns Sub.func();
-./lnstags --simpleLog inq-at ref test/Sub.lns 2 6 --log debug
+@Sub.Sub.set_val   60 Sub.lns             pub abstract fn set_val(val:int) mut;
+@Sub.Sub.set_val   63 Sub.lns             let mut val:int{pub,pub};
+(cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 34 22)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/Sub.lns:   2:  4 -- ExpRef
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:  34: 22 -- GetField
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Sub.get_val
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+@Sub.Sub.get_val   59 Sub.lns             pub abstract fn get_val() : int;
+@Sub.Sub.get_val   63 Sub.lns             let mut val:int{pub,pub};
+(cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 41 23)
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:  41: 22 -- RefField
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.FooBar
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+@Sub.FooBar        74 Sub.lns          pub alias FooBar = Hoge;
+(cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 52 15)
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:  52: 15 -- RefField
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Bar
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+@Sub.Bar            8 Sub.lns          pub alge Bar {
+(cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 52 28)
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:  52: 28 -- RefField
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Foo
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+@Sub.Foo            4 Sub.lns          pub enum Foo {
+(cd test; ../lnstags --simpleLog --log debug inq-at def mainSub.lns 3 6)
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  mainSub.lns:   3:  5 -- RefField
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.func
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+@Sub.func           1 Sub.lns          pub fn func() {
+(cd test; cat mainSub.lns | ../lnstags --simpleLog inq-at def -i mainSub.lns 3 5 --log debug)
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  mainSub.lns:   3:  5 -- RefField
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.func
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+@Sub.func           1 Sub.lns          pub fn func() {
+(cd test; ../lnstags --simpleLog --log debug inq-at ref Sub.lns 1 10)
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  Sub.lns:   1:  1 -- DeclFunc
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.func
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+@Sub.func           4 main.lns         Sub.func();
+@Sub.func          14 main.lns            Sub.func();
+@Sub.func          28 main.lns               ,,stmt;
+@Sub.func           3 mainSub.lns      Sub.func();
+(cd test; ../lnstags --simpleLog --log debug inq-at ref Sub.lns 2 6)
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  Sub.lns:   2:  4 -- ExpRef
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- print
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-print               2 test/Sub.lns        print( "hoge" );
-print              65 test/Sub.lns     pub macro _Hoge() {
-print              17 test/main.lns    print( Sub.Val );
-print              18 test/main.lns    print( hoge.$val );
-print              38 test/main.lns       Sub._Hoge2( `{print("hoge");} );
-./lnstags --simpleLog inq-at ref test/Sub.lns 4 11 --log debug
+print               2 Sub.lns             print( "hoge" );
+print              65 Sub.lns          pub macro _Hoge() {
+print              17 main.lns         print( Sub.Val );
+print              18 main.lns         print( hoge.$val );
+print              38 main.lns            Sub._Hoge2( `{print("hoge");} );
+print              42 main.lns            print( val.$val );
+(cd test; ../lnstags --simpleLog --log debug inq-at ref Sub.lns 4 11)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/Sub.lns:   4:  1 -- DeclEnum
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.Foo
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  Sub.lns:   4:  1 -- DeclEnum
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Foo
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.Foo     13 test/Sub.lns        pub fn func(val:Foo);
-@test.@Sub.Foo     21 test/Sub.lns        pub fn func(val:Foo);
-@test.@Sub.Foo     31 test/Sub.lns     pub fn Hoge.func(val:Foo) {
-@test.@Sub.Foo     40 test/Sub.lns        pub override fn func( val:Foo ) {
-@test.@Sub.Foo     48 test/Sub.lns        pub override fn func( val:Foo ) {
-@test.@Sub.Foo      8 test/main.lns    ifObj.func( Sub.Foo.Val1 );
-./lnstags --simpleLog inq-at ref test/Sub.lns 5 5 --log debug
+@Sub.Foo           13 Sub.lns             pub fn func(val:Foo);
+@Sub.Foo           21 Sub.lns             pub fn func(val:Foo);
+@Sub.Foo           31 Sub.lns          pub fn Hoge.func(val:Foo) {
+@Sub.Foo           40 Sub.lns             pub override fn func( val:Foo ) {
+@Sub.Foo           48 Sub.lns             pub override fn func( val:Foo ) {
+@Sub.Foo            8 main.lns         ifObj.func( Sub.Foo.Val1 );
+@Sub.Foo           52 main.lns               Val(Sub.Bar, aaa:Sub.Foo),
+(cd test; ../lnstags --simpleLog --log debug inq-at ref Sub.lns 5 5)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/Sub.lns:   4:  1 -- DeclEnum
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.Foo.Val1
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  Sub.lns:   4:  1 -- DeclEnum
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Foo.Val1
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.Foo.Val1   33 test/Sub.lns           case .Val1 {
-@test.@Sub.Foo.Val1    7 test/main.lns    hoge.func( .Val1 );
-@test.@Sub.Foo.Val1    8 test/main.lns    ifObj.func( Sub.Foo.Val1 );
-./lnstags --simpleLog inq-at ref test/Sub.lns 8 10 --log debug
+@Sub.Foo.Val1      33 Sub.lns                case .Val1 {
+@Sub.Foo.Val1       7 main.lns         hoge.func( .Val1 );
+@Sub.Foo.Val1       8 main.lns         ifObj.func( Sub.Foo.Val1 );
+(cd test; ../lnstags --simpleLog --log debug inq-at ref Sub.lns 8 10)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/Sub.lns:   8:  1 -- DeclAlge
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.Bar
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  Sub.lns:   8:  1 -- DeclAlge
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Bar
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.Bar     22 test/Sub.lns        pub static fn sub(val:Bar) {
-./lnstags --simpleLog inq-at ref test/Sub.lns 9 5 --log debug
+@Sub.Bar           22 Sub.lns             pub static fn sub(val:Bar) {
+@Sub.Bar           52 main.lns               Val(Sub.Bar, aaa:Sub.Foo),
+(cd test; ../lnstags --simpleLog --log debug inq-at ref Sub.lns 9 5)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/Sub.lns:   8:  1 -- DeclAlge
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.Bar.Val1
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  Sub.lns:   8:  1 -- DeclAlge
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Bar.Val1
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.Bar.Val1   24 test/Sub.lns              case .Val1 {
-@test.@Sub.Bar.Val1   24 test/Sub.lns              case .Val1 {
-./lnstags --simpleLog inq-at ref test/Sub.lns 12 15 --log debug
+@Sub.Bar.Val1      24 Sub.lns                   case .Val1 {
+@Sub.Bar.Val1      24 Sub.lns                   case .Val1 {
+(cd test; ../lnstags --simpleLog --log debug inq-at ref Sub.lns 12 15)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/Sub.lns:  12:  1 -- DeclClass
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.IF
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  Sub.lns:  12:  1 -- DeclClass
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.IF
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.IF      15 test/Sub.lns     pub proto class Hoge extend (Mapping, IF);
-@test.@Sub.IF      16 test/Sub.lns     pub class Hoge extend (Mapping, IF) {
-@test.@Sub.IF       6 test/main.lns    let ifObj:Sub.IF = hoge;
-./lnstags --simpleLog inq-at ref test/Sub.lns 13 12 --log debug
+@Sub.IF            15 Sub.lns          pub proto class Hoge extend (Mapping, IF);
+@Sub.IF            16 Sub.lns          pub class Hoge extend (Mapping, IF) {
+@Sub.IF             6 main.lns         let ifObj:Sub.IF = hoge;
+(cd test; ../lnstags --simpleLog --log debug inq-at ref Sub.lns 13 12)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/Sub.lns:  13: 11 -- DeclMethod
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.IF.func
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  Sub.lns:  13: 11 -- DeclMethod
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.IF.func
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.IF.func    8 test/main.lns    ifObj.func( Sub.Foo.Val1 );
-./lnstags --simpleLog inq-at ref test/Sub.lns 15 17 --log debug
+@Sub.IF.func        8 main.lns         ifObj.func( Sub.Foo.Val1 );
+(cd test; ../lnstags --simpleLog --log debug inq-at ref Sub.lns 15 17)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/Sub.lns:  15:  1 -- ProtoClass
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.Hoge
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  Sub.lns:  15:  1 -- ProtoClass
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Hoge
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.Hoge    39 test/Sub.lns     pub class HogeHoge extend Hoge {
-@test.@Sub.Hoge     5 test/main.lns    let hoge = new Sub.Hoge();
-@test.@Sub.Hoge     9 test/main.lns    Sub.Hoge.sub( .Val2 );
-@test.@Sub.Hoge    20 test/main.lns       let mut hoge2 = new Sub.Hoge();
-./lnstags --simpleLog inq-at ref test/Sub.lns 15 31 --log debug
+@Sub.Hoge          39 Sub.lns          pub class HogeHoge extend Hoge {
+@Sub.Hoge          74 Sub.lns          pub alias FooBar = Hoge;
+@Sub.Hoge           5 main.lns         let hoge = new Sub.Hoge();
+@Sub.Hoge           9 main.lns         Sub.Hoge.sub( .Val2 );
+@Sub.Hoge          20 main.lns            let mut hoge2 = new Sub.Hoge();
+(cd test; ../lnstags --simpleLog --log debug inq-at ref Sub.lns 15 31)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/Sub.lns:  15: 30 -- ExpRef
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  Sub.lns:  15: 30 -- ExpRef
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- Mapping
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Mapping            15 test/Sub.lns     pub proto class Hoge extend (Mapping, IF);
-Mapping            16 test/Sub.lns     pub class Hoge extend (Mapping, IF) {
-./lnstags --simpleLog inq-at ref test/Sub.lns 16 12 --log debug
+Mapping            15 Sub.lns          pub proto class Hoge extend (Mapping, IF);
+Mapping            16 Sub.lns          pub class Hoge extend (Mapping, IF) {
+(cd test; ../lnstags --simpleLog --log debug inq-at ref Sub.lns 16 12)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/Sub.lns:  16:  1 -- DeclClass
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.Hoge
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  Sub.lns:  16:  1 -- DeclClass
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Hoge
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.Hoge    39 test/Sub.lns     pub class HogeHoge extend Hoge {
-@test.@Sub.Hoge     5 test/main.lns    let hoge = new Sub.Hoge();
-@test.@Sub.Hoge     9 test/main.lns    Sub.Hoge.sub( .Val2 );
-@test.@Sub.Hoge    20 test/main.lns       let mut hoge2 = new Sub.Hoge();
-./lnstags --simpleLog inq-at ref test/Sub.lns 16 33 --log debug
+@Sub.Hoge          39 Sub.lns          pub class HogeHoge extend Hoge {
+@Sub.Hoge          74 Sub.lns          pub alias FooBar = Hoge;
+@Sub.Hoge           5 main.lns         let hoge = new Sub.Hoge();
+@Sub.Hoge           9 main.lns         Sub.Hoge.sub( .Val2 );
+@Sub.Hoge          20 main.lns            let mut hoge2 = new Sub.Hoge();
+(cd test; ../lnstags --simpleLog --log debug inq-at ref Sub.lns 16 33)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/Sub.lns:  16: 33 -- ExpRef
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.IF
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  Sub.lns:  16: 33 -- ExpRef
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.IF
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.IF      15 test/Sub.lns     pub proto class Hoge extend (Mapping, IF);
-@test.@Sub.IF      16 test/Sub.lns     pub class Hoge extend (Mapping, IF) {
-@test.@Sub.IF       6 test/main.lns    let ifObj:Sub.IF = hoge;
-./lnstags --simpleLog inq-at ref test/Sub.lns 17 12 --log debug
+@Sub.IF            15 Sub.lns          pub proto class Hoge extend (Mapping, IF);
+@Sub.IF            16 Sub.lns          pub class Hoge extend (Mapping, IF) {
+@Sub.IF             6 main.lns         let ifObj:Sub.IF = hoge;
+(cd test; ../lnstags --simpleLog --log debug inq-at ref Sub.lns 17 12)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/Sub.lns:  17:  4 -- DeclMember
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.Hoge.val
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  Sub.lns:  17:  4 -- DeclMember
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Hoge.val
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.Hoge.val   17 test/Sub.lns        let mut val:int{pub,pub};
-@test.@Sub.Hoge.val   17 test/Sub.lns        let mut val:int{pub,pub};
-@test.@Sub.Hoge.val   19 test/Sub.lns           self.val = 0;
-./lnstags --simpleLog inq-at ref test/Sub.lns 18 12 --log debug
+@Sub.Hoge.val      17 Sub.lns             let mut val:int{pub,pub};
+@Sub.Hoge.val      17 Sub.lns             let mut val:int{pub,pub};
+@Sub.Hoge.val      19 Sub.lns                self.val = 0;
+(cd test; ../lnstags --simpleLog --log debug inq-at ref Sub.lns 18 12)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/Sub.lns:  18: 11 -- DeclConstr
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.Hoge.__init
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  Sub.lns:  18: 11 -- DeclConstr
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Hoge.__init
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.Hoge.__init    5 test/main.lns    let hoge = new Sub.Hoge();
-@test.@Sub.Hoge.__init   20 test/main.lns       let mut hoge2 = new Sub.Hoge();
-./lnstags --simpleLog inq-at def test/Sub.lns 21 21 --log debug
+@Sub.Hoge.__init    5 main.lns         let hoge = new Sub.Hoge();
+@Sub.Hoge.__init   20 main.lns            let mut hoge2 = new Sub.Hoge();
+@Sub.Hoge.__init   41 main.lns            let val = new Sub.FooBar();
+(cd test; ../lnstags --simpleLog --log debug inq-at def Sub.lns 21 21)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/Sub.lns:  21: 20 -- ExpRef
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.Foo
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  Sub.lns:  21: 20 -- ExpRef
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Foo
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.Foo      4 test/Sub.lns     pub enum Foo {
-./lnstags --simpleLog inq-at def test/Sub.lns 24 16 --log debug
+@Sub.Foo            4 Sub.lns          pub enum Foo {
+(cd test; ../lnstags --simpleLog --log debug inq-at def Sub.lns 24 16)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/Sub.lns:  24: 16 -- ExpRef
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.Bar.Val1
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  Sub.lns:  24: 16 -- ExpRef
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Bar.Val1
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.Bar.Val1    9 test/Sub.lns        Val1,
-./lnstags --simpleLog inq-at def test/Sub.lns 33 14 --log debug
+@Sub.Bar.Val1       9 Sub.lns             Val1,
+(cd test; ../lnstags --simpleLog --log debug inq-at def Sub.lns 33 14)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/Sub.lns:  33: 12 -- ExpOmitEnum
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.Foo.Val1
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  Sub.lns:  33: 12 -- ExpOmitEnum
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Foo.Val1
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.Foo.Val1    5 test/Sub.lns        Val1,
-./lnstags --simpleLog inq-at def test/Sub.lns 41 9 --log debug
+@Sub.Foo.Val1       5 Sub.lns             Val1,
+(cd test; ../lnstags --simpleLog --log debug inq-at def Sub.lns 41 9)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/Sub.lns:  41:  7 -- ExpCallSuper
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.Hoge.func
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  Sub.lns:  41:  7 -- ExpCallSuper
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Hoge.func
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.Hoge.func   21 test/Sub.lns        pub fn func(val:Foo);
-@test.@Sub.Hoge.func   31 test/Sub.lns     pub fn Hoge.func(val:Foo) {
-@test.@Sub.Hoge.func   40 test/Sub.lns        pub override fn func( val:Foo ) {
-@test.@Sub.Hoge.func   48 test/Sub.lns        pub override fn func( val:Foo ) {
-./lnstags --simpleLog inq-at def test/Sub.lns 46 9 --log debug
+@Sub.Hoge.func     21 Sub.lns             pub fn func(val:Foo);
+@Sub.Hoge.func     31 Sub.lns          pub fn Hoge.func(val:Foo) {
+@Sub.Hoge.func     40 Sub.lns             pub override fn func( val:Foo ) {
+@Sub.Hoge.func     48 Sub.lns             pub override fn func( val:Foo ) {
+(cd test; ../lnstags --simpleLog --log debug inq-at def Sub.lns 46 9)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/Sub.lns:  46:  7 -- ExpCallSuperCtor
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.HogeHoge.__init
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  Sub.lns:  46:  7 -- ExpCallSuperCtor
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.HogeHoge.__init
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.HogeHoge.__init   39 test/Sub.lns     pub class HogeHoge extend Hoge {
-./lnstags --simpleLog inq-at def test/Sub.lns 54 9 --log debug
+@Sub.HogeHoge.__init   39 Sub.lns          pub class HogeHoge extend Hoge {
+(cd test; ../lnstags --simpleLog --log debug inq-at def Sub.lns 54 9)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/Sub.lns:  54:  7 -- ExpCallSuperCtor
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.HogeHogeHoge.__init
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  Sub.lns:  54:  7 -- ExpCallSuperCtor
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.HogeHogeHoge.__init
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.HogeHogeHoge.__init   45 test/Sub.lns        pub fn __init() {
-cat test/Sub2.lns | ./lnstags --simpleLog inq-at ref -i test/Sub.lns 2 5 --log debug
+@Sub.HogeHogeHoge.__init   45 Sub.lns             pub fn __init() {
+(cd test; ../lnstags --simpleLog --log debug inq-at ref Sub.lns 74 13)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  test/Sub.lns:   1:  1 -- DeclEnum
-Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @test.@Sub.Foo.Val1
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  Sub.lns:  74:  1 -- Alias
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.FooBar
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
-@test.@Sub.Foo.Val1   33 test/Sub.lns           case .Val1 {
-@test.@Sub.Foo.Val1    7 test/main.lns    hoge.func( .Val1 );
-@test.@Sub.Foo.Val1    8 test/main.lns    ifObj.func( Sub.Foo.Val1 );
-./lnstags --simpleLog inq def @test.@Sub.Bar.Val1
-@test.@Sub.Bar.Val1    9 test/Sub.lns        Val1,
-./lnstags --simpleLog inq def @test.@Sub.Hoge.func
-@test.@Sub.Hoge.func   21 test/Sub.lns        pub fn func(val:Foo);
-@test.@Sub.Hoge.func   31 test/Sub.lns     pub fn Hoge.func(val:Foo) {
-@test.@Sub.Hoge.func   40 test/Sub.lns        pub override fn func( val:Foo ) {
-@test.@Sub.Hoge.func   48 test/Sub.lns        pub override fn func( val:Foo ) {
-./lnstags --simpleLog inq ref @test.@Sub.Hoge.func
-@test.@Sub.Hoge.func   41 test/Sub.lns           super( val );
-@test.@Sub.Hoge.func    7 test/main.lns    hoge.func( .Val1 );
-@test.@Sub.Hoge.func    8 test/main.lns    ifObj.func( Sub.Foo.Val1 );
-./lnstags --simpleLog inq ref @test.@Sub.HogeHoge.__init
-@test.@Sub.HogeHoge.__init   46 test/Sub.lns           super();
-@test.@Sub.HogeHoge.__init   10 test/main.lns    let hogehoge = new Sub.HogeHoge();
+@Sub.FooBar        41 main.lns            let val = new Sub.FooBar();
+(cd test; ../lnstags --simpleLog --log debug inq-at ref Sub.lns 75 12)
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  Sub.lns:  75:  1 -- DeclForm
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Form
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+@Sub.Form          45 main.lns            fn getForm() : Sub.Form {
+(cd test; cat Sub2.lns | ../lnstags --simpleLog inq-at ref -i Sub.lns 2 5 --log debug)
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  Sub.lns:   1:  1 -- DeclEnum
+Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Foo.Val1
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+@Sub.Foo.Val1      33 Sub.lns                case .Val1 {
+@Sub.Foo.Val1       7 main.lns         hoge.func( .Val1 );
+@Sub.Foo.Val1       8 main.lns         ifObj.func( Sub.Foo.Val1 );
+(cd test; ../lnstags --simpleLog --log debug inq def @Sub.Bar.Val1)
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+@Sub.Bar.Val1       9 Sub.lns             Val1,
+(cd test; ../lnstags --simpleLog --log debug inq def @Sub.Hoge.func)
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+@Sub.Hoge.func     21 Sub.lns             pub fn func(val:Foo);
+@Sub.Hoge.func     31 Sub.lns          pub fn Hoge.func(val:Foo) {
+@Sub.Hoge.func     40 Sub.lns             pub override fn func( val:Foo ) {
+@Sub.Hoge.func     48 Sub.lns             pub override fn func( val:Foo ) {
+(cd test; ../lnstags --simpleLog --log debug inq ref @Sub.Hoge.func)
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+@Sub.Hoge.func     41 Sub.lns                super( val );
+@Sub.Hoge.func      7 main.lns         hoge.func( .Val1 );
+@Sub.Hoge.func      8 main.lns         ifObj.func( Sub.Foo.Val1 );
+(cd test; ../lnstags --simpleLog --log debug inq ref @Sub.HogeHoge.__init)
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+@Sub.HogeHoge.__init   46 Sub.lns                super();
+@Sub.HogeHoge.__init   10 main.lns         let hogehoge = new Sub.HogeHoge();

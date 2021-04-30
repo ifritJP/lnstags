@@ -215,7 +215,7 @@ function SyntaxFilter:__init(ast)
    
    self.ast = ast
 end
-function SyntaxFilter:getPatternFromNode( analyzeFileInfo, nearest )
+function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
    local __func__ = '@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode'
 
    local function isInner( pos, name )
@@ -229,11 +229,31 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, nearest )
    
    
    
+   
+   
    Log.log( Log.Level.Log, __func__, 19, function (  )
    
       return string.format( "%s %s:%4d:%3d -- %s", "nearestNode -- ", nearest:get_effectivePos().streamName, nearest:get_effectivePos().lineNo, nearest:get_effectivePos().column, Nodes.getNodeKindName( nearest:get_kind() ))
    end )
    
+   
+   
+   do
+      local workNode = _lune.__Cast( nearest, 3, Nodes.ImportNode )
+      if workNode ~= nil then
+         do
+            local _switchExp = inqMod
+            if _switchExp == Option.InqMode.Def then
+               return self:getFull( workNode:get_expType(), false )
+            elseif _switchExp == Option.InqMode.Ref then
+               return Ast.getFullNameSym( self, workNode:get_symbolInfo() )
+            elseif _switchExp == Option.InqMode.Set then
+            end
+         end
+         
+         return nil
+      end
+   end
    
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.ExpRefNode )
@@ -306,6 +326,7 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, nearest )
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.DeclFuncNode )
       if workNode ~= nil then
+         
          do
             local name = workNode:get_declInfo():get_name()
             if name ~= nil then
@@ -315,6 +336,7 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, nearest )
                
             end
          end
+         
          
       end
    end
@@ -372,6 +394,7 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, nearest )
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.DeclMethodNode )
       if workNode ~= nil then
+         
          do
             local name = workNode:get_declInfo():get_name()
             if name ~= nil then
@@ -381,6 +404,7 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, nearest )
                
             end
          end
+         
          
       end
    end
@@ -431,6 +455,7 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, nearest )
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.DeclConstrNode )
       if workNode ~= nil then
+         
          do
             local name = workNode:get_declInfo():get_name()
             if name ~= nil then
@@ -440,6 +465,7 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, nearest )
                
             end
          end
+         
          
       end
    end
@@ -471,7 +497,8 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, nearest )
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.DeclMacroNode )
       if workNode ~= nil then
-         if isInner( workNode:get_declInfo():get_name().pos, workNode:get_declInfo():get_name().txt ) then
+         local name = workNode:get_declInfo():get_name()
+         if isInner( name.pos, name.txt ) then
             return self:getFull( workNode:get_expType(), false )
          end
          
@@ -504,14 +531,45 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, nearest )
       end
    end
    
-   Log.log( Log.Level.Err, __func__, 173, function (  )
+   do
+      local workNode = _lune.__Cast( nearest, 3, Nodes.AliasNode )
+      if workNode ~= nil then
+         
+         if isInner( _lune.unwrap( workNode:get_newSymbol():get_pos()), workNode:get_newSymbol():get_name() ) then
+            return Ast.getFullNameSym( self, workNode:get_newSymbol() )
+         end
+         
+         
+      end
+   end
+   
+   do
+      local workNode = _lune.__Cast( nearest, 3, Nodes.DeclFormNode )
+      if workNode ~= nil then
+         
+         do
+            local name = workNode:get_declInfo():get_name()
+            if name ~= nil then
+               if isInner( name.pos, name.txt ) then
+                  return self:getFull( workNode:get_expType(), false )
+               end
+               
+            end
+         end
+         
+         
+      end
+   end
+   
+   
+   Log.log( Log.Level.Err, __func__, 191, function (  )
    
       return string.format( "unknown pattern -- %s", Nodes.getNodeKindName( nearest:get_kind() ))
    end )
    
    return nil
 end
-function SyntaxFilter:getPattern( path, analyzeFileInfo )
+function SyntaxFilter:getPattern( path, analyzeFileInfo, inqMod )
 
    local function isInner( pos, name )
    
@@ -608,7 +666,7 @@ function SyntaxFilter:getPattern( path, analyzeFileInfo )
       do
          local nearest = nearestNode
          if nearest ~= nil then
-            pattern = self:getPatternFromNode( analyzeFileInfo, nearest )
+            pattern = self:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
          end
       end
       
@@ -621,7 +679,7 @@ function SyntaxFilter.setmeta( obj )
 end
 
 
-local function getPatterAt( db, analyzeFileInfo )
+local function getPatterAt( db, analyzeFileInfo, inqMod )
 
    
    local fileId = db:getFileIdFromPath( analyzeFileInfo:get_path() )
@@ -645,7 +703,7 @@ local function getPatterAt( db, analyzeFileInfo )
    
    
    if analyzeFileInfo:get_stdinFlag() then
-      useStdInMod = LnsUtil.scriptPath2ModuleFromProjDir( path, projDir )
+      useStdInMod = LnsUtil.scriptPath2ModuleFromProjDir( analyzeFileInfo:get_path(), projDir )
    else
     
       useStdInMod = nil
@@ -657,8 +715,8 @@ local function getPatterAt( db, analyzeFileInfo )
    
       if ast:get_streamName() == path then
          local filter = SyntaxFilter.new(ast)
-         pattern = filter:getPattern( path, analyzeFileInfo )
-         Log.log( Log.Level.Log, __func__, 280, function (  )
+         pattern = filter:getPattern( path, analyzeFileInfo, inqMod )
+         Log.log( Log.Level.Log, __func__, 303, function (  )
          
             return string.format( "pattern -- %s", pattern)
          end )
