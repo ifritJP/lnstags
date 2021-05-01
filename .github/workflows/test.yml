@@ -1,0 +1,25 @@
+name: Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    # ubuntu の環境でビルドテスト
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 5 # 5分で強制停止
+    
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^1.16
+    - name: Test
+      run: |
+        make -C src check
+        make -C src buildDB
