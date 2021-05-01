@@ -5,7 +5,7 @@ SRCS += $(shell find lns -iname '*.lns')
 
 
 help:
-	@echo make build
+	@echo make build [LNS_OPT=opt]
 	@echo make buildDB
 	@echo make check
 

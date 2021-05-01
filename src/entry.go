@@ -1,7 +1,7 @@
 package main
 
 import . "github.com/ifritJP/LuneScript/src/lune/base/runtime_go"
-import . "lnstags/lns/tags"
+import . "github.com/ifritJP/lnstags/lns/tags"
 
 //IMPORT:
 ////TEST:import . "lns/lune/base"
