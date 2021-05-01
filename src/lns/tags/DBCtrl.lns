@@ -303,6 +303,20 @@ pub class ItemOverride extend (Mapping) {
 }
 
 
+pub fn DBCtrl.getProjId( path:str ) : int!
+{
+   let mut projId:int! = nil;
+   self.mapRowList(
+      "projInfo", "dir = '%s'" (path), 1, nil, fn( items: &Map<str,&stem> ) : bool
+      {
+         if! let projInfo = ItemProjInfo._fromStem( items ) {
+            projId = projInfo.$id;
+         }
+         return false;
+      }##);
+   return projId;
+}
+
 /**
 ファイルパス path を登録する。
 
@@ -314,16 +328,7 @@ pub class ItemOverride extend (Mapping) {
 */
 pub fn DBCtrl.addProj( path:str ) mut : int, bool
 {
-   let mut projId:int! = nil;
-   self.mapRowList(
-      "projInfo", "dir = '%s'" (path), 1, nil, fn( items: &Map<str,&stem> ) : bool
-      {
-         if! let projInfo = ItemProjInfo._fromStem( items ) {
-            projId = projInfo.$id;
-         }
-         return false;
-      }##);
-   when! projId {
+   if! let projId = self.getProjId( path ) {
       return projId, false;
    }
    let id = self.idMgrProjInfo.getIdNext();
@@ -379,6 +384,22 @@ pub fn DBCtrl.addFile( mut path:str, mod:str ) mut : int, bool
                 ( id, path, mod.gsub( "@", "" ), projId ) );
    return id, true;
 }
+
+pub form MapFileCallBack( item:&ItemFilePath ) : bool;
+
+pub fn DBCtrl.mapFilePath(callback:MapFileCallBack ) mut {
+   self.mapRowList(
+      "filePath", nil, nil, nil, fn( items: &Map<str,&stem> ) : bool
+      {
+         if! let filePath = ItemFilePath._fromStem( items ) {
+            if not callback( filePath ) {
+               return false;
+            }
+         }
+         return true;
+      }##);
+}
+
 
 pub fn DBCtrl.getFileIdFromPath( mut path:str ) mut : int {
    path = normalizePath( path );

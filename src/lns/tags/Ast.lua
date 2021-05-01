@@ -143,8 +143,13 @@ local function getFullNameSym( filter, symbolInfo )
 end
 _moduleObj.getFullNameSym = getFullNameSym
 
-local function buildAst( logLevel, path, projDir, useStdInMod, forceAll, astCallback )
+local function buildAst( logLevel, pathList, projDir, useStdInMod, forceAll, astCallback )
 
+   if #pathList == 0 then
+      return 
+   end
+   
+   
    LnsLog.setLevel( logLevel )
    LnsUtil.setDebugFlag( false )
    
@@ -153,13 +158,13 @@ local function buildAst( logLevel, path, projDir, useStdInMod, forceAll, astCall
    end
    
    
-   local lnsOpt = LnsOpt.createDefaultOption( path, projDir )
+   local lnsOpt = LnsOpt.createDefaultOption( pathList, projDir )
    lnsOpt.targetLuaVer = LuaVer.ver53
    if forceAll then
       lnsOpt.transCtrlInfo.uptodateMode = _lune.newAlge( Types.CheckingUptodateMode.ForceAll)
    else
     
-      lnsOpt.transCtrlInfo.uptodateMode = _lune.newAlge( Types.CheckingUptodateMode.Force1, {LnsUtil.scriptPath2Module( path )})
+      lnsOpt.transCtrlInfo.uptodateMode = _lune.newAlge( Types.CheckingUptodateMode.Force1, {LnsUtil.scriptPath2Module( pathList[1] )})
    end
    
    

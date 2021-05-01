@@ -710,7 +710,7 @@ local function getPatterAt( db, analyzeFileInfo, inqMod )
    end
    
    
-   Ast.buildAst( LnsLog.Level.Err, path, projDir, useStdInMod, false, function ( ast )
+   Ast.buildAst( LnsLog.Level.Err, {path}, projDir, useStdInMod, false, function ( ast )
       local __func__ = '@lns.@tags.@Pattern.getPatterAt.<anonymous>'
    
       if ast:get_streamName() == path then

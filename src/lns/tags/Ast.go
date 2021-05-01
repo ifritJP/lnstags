@@ -23,22 +23,25 @@ func Ast_getFullNameSym(filter *Nodes.Nodes_Filter,symbolInfo *LnsAst.Ast_Symbol
 }
 
 // 22: decl @lns.@tags.@Ast.buildAst
-func Ast_buildAst(logLevel LnsInt,path string,projDir LnsAny,useStdInMod LnsAny,forceAll bool,astCallback front.Front_AstCallback) {
+func Ast_buildAst(logLevel LnsInt,pathList *LnsList,projDir LnsAny,useStdInMod LnsAny,forceAll bool,astCallback front.Front_AstCallback) {
+    if pathList.Len() == 0{
+        return 
+    }
     LnsLog.Log_setLevel(logLevel)
     LnsUtil.Util_setDebugFlag(false)
     if useStdInMod != nil{
-        useStdInMod_5718 := useStdInMod.(string)
-        Parser.Parser_StreamParser_setStdinStream(useStdInMod_5718)
+        useStdInMod_5720 := useStdInMod.(string)
+        Parser.Parser_StreamParser_setStdinStream(useStdInMod_5720)
     }
     var lnsOpt *LnsOpt.Option_Option
-    lnsOpt = LnsOpt.Option_createDefaultOption(path, projDir)
+    lnsOpt = LnsOpt.Option_createDefaultOption(pathList, projDir)
     lnsOpt.TargetLuaVer = LuaVer.LuaVer_ver53
     
     if forceAll{
         lnsOpt.TransCtrlInfo.UptodateMode = Types.Types_CheckingUptodateMode__ForceAll_Obj
         
     } else { 
-        lnsOpt.TransCtrlInfo.UptodateMode = &Types.Types_CheckingUptodateMode__Force1{LnsUtil.Util_scriptPath2Module(path)}
+        lnsOpt.TransCtrlInfo.UptodateMode = &Types.Types_CheckingUptodateMode__Force1{LnsUtil.Util_scriptPath2Module(pathList.GetAt(1).(string))}
         
     }
     front.Front_build(lnsOpt, astCallback)

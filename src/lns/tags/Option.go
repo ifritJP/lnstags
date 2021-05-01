@@ -38,9 +38,11 @@ const Option_Mode__Inq = "inq"
 const Option_Mode__InqAt = "inq-at"
 const Option_Mode__Suffix = "suffix"
 const Option_Mode__Test = "test"
+const Option_Mode__Update = "update"
 var Option_ModeList_ = NewLnsList( []LnsAny {
   Option_Mode__Init,
   Option_Mode__Build,
+  Option_Mode__Update,
   Option_Mode__Inq,
   Option_Mode__InqAt,
   Option_Mode__Suffix,
@@ -58,6 +60,7 @@ var Option_ModeMap_ = map[string]string {
   Option_Mode__InqAt: "Mode.InqAt",
   Option_Mode__Suffix: "Mode.Suffix",
   Option_Mode__Test: "Mode.Test",
+  Option_Mode__Update: "Mode.Update",
 }
 func Option_Mode__from(arg1 string) LnsAny{
     if _, ok := Option_ModeMap_[arg1]; ok { return arg1 }
@@ -68,11 +71,11 @@ func Option_Mode_getTxt(arg1 string) string {
     return Option_ModeMap_[arg1];
 }
 type analyzeArgs__getNextOpNonNilFunc_1106_ func (arg1 string) string
-// 50: decl @lns.@tags.@Option.printUsage
+// 51: decl @lns.@tags.@Option.printUsage
 func Option_printUsage_1095_(messages LnsAny) {
     if messages != nil{
-        messages_77 := messages.(string)
-        Lns_io_stderr.Write(Lns_getVM().String_format("%s\n", []LnsAny{messages_77}))
+        messages_78 := messages.(string)
+        Lns_io_stderr.Write(Lns_getVM().String_format("%s\n", []LnsAny{messages_78}))
     }
     Lns_print([]LnsAny{"usage: lnstags init [option]"})
     Lns_print([]LnsAny{"usage: lnstags build [option] filepath"})
@@ -91,7 +94,7 @@ func analyzeArgs___anonymous_1109_(mess string) string {
 
 
 
-// 62: decl @lns.@tags.@Option.analyzeArgs
+// 63: decl @lns.@tags.@Option.analyzeArgs
 func Option_analyzeArgs(argList *LnsList) *Option_Option {
     var option *Option_Option
     option = NewOption_Option()
@@ -111,13 +114,13 @@ func Option_analyzeArgs(argList *LnsList) *Option_Option {
             var arg string
             arg = argList.GetAt(index).(string)
             if Lns_isCondTrue( Lns_car(Lns_getVM().String_find(arg,"^-", nil, nil))){
-                if _switch383 := arg; _switch383 == "-i" {
+                if _switch385 := arg; _switch385 == "-i" {
                     option.analyzeFileInfo.stdinFlag = true
                     
-                } else if _switch383 == "--log" {
+                } else if _switch385 == "--log" {
                     option.logLevel = Log_str2level(getNextOpNonNil("logLevel"))
                     
-                } else if _switch383 == "--simpleLog" {
+                } else if _switch385 == "--simpleLog" {
                     Log_enableDetail(false)
                 }
             } else { 
@@ -204,13 +207,13 @@ func Option_analyzeArgs(argList *LnsList) *Option_Option {
                     work := _work.(string)
                     mode = work
                     
-                    if _switch666 := mode; _switch666 == Option_Mode__Inq {
+                    if _switch668 := mode; _switch668 == Option_Mode__Inq {
                         option.inqMode = getInqMode()
                         
                         option.pattern = getNextOpNonNil("none pattern")
                         
                         Log_setLevel(Log_Level__Warn)
-                    } else if _switch666 == Option_Mode__InqAt {
+                    } else if _switch668 == Option_Mode__InqAt {
                         option.inqMode = getInqMode()
                         
                         option.analyzeFileInfo.path = getNextOpNonNil("none path")
@@ -219,7 +222,7 @@ func Option_analyzeArgs(argList *LnsList) *Option_Option {
                         
                         option.analyzeFileInfo.column = getNextOpInt("none column")
                         
-                    } else if _switch666 == Option_Mode__Suffix {
+                    } else if _switch668 == Option_Mode__Suffix {
                         option.pattern = getNextOpNonNil("none pattern")
                         
                     }
@@ -228,8 +231,27 @@ func Option_analyzeArgs(argList *LnsList) *Option_Option {
                 }
             }
         } else { 
-            if _switch702 := mode; _switch702 == Option_Mode__Build {
-                option.pathList.Insert(arg)
+            if _switch763 := mode; _switch763 == Option_Mode__Build {
+                if arg == "@-"{
+                    for  {
+                        var line string
+                        
+                        {
+                            _line := Lns_io_stdin.Read("*l")
+                            if _line == nil{
+                                break
+                            } else {
+                                line = _line.(string)
+                            }
+                        }
+                        if len(line) > 0{
+                            Lns_print([]LnsAny{"hoge:", line})
+                            option.pathList.Insert(line)
+                        }
+                    }
+                } else { 
+                    option.pathList.Insert(arg)
+                }
             }
         }
     }
@@ -241,8 +263,8 @@ func Option_analyzeArgs(argList *LnsList) *Option_Option {
         }
     }
     if mode != nil{
-        mode_140 := mode.(string)
-        option.mode = mode_140
+        mode_148 := mode.(string)
+        option.mode = mode_148
         
         return option
     }
@@ -295,7 +317,7 @@ func (self *Option_AnalyzeFileInfo) Get_path() string{ return self.path }
 func (self *Option_AnalyzeFileInfo) Get_lineNo() LnsInt{ return self.lineNo }
 func (self *Option_AnalyzeFileInfo) Get_column() LnsInt{ return self.column }
 func (self *Option_AnalyzeFileInfo) Get_stdinFlag() bool{ return self.stdinFlag }
-// 24: DeclConstr
+// 25: DeclConstr
 func (self *Option_AnalyzeFileInfo) InitOption_AnalyzeFileInfo() {
     self.path = ""
     
@@ -358,7 +380,7 @@ func (self *Option_Option) Get_inqMode() string{ return self.inqMode }
 func (self *Option_Option) Get_pattern() string{ return self.pattern }
 func (self *Option_Option) Get_analyzeFileInfo() *Option_AnalyzeFileInfo{ return self.analyzeFileInfo }
 func (self *Option_Option) Get_logLevel() LnsAny{ return self.logLevel }
-// 40: DeclConstr
+// 41: DeclConstr
 func (self *Option_Option) InitOption_Option() {
     self.logLevel = nil
     

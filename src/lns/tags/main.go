@@ -28,23 +28,45 @@ func main_inq_1007_(inqMode string,pattern string) LnsInt {
     return 0
 }
 
-func __main___anonymous_1017_(item *DBCtrl_ItemNamespace) bool {
+// 34: decl @lns.@tags.@main.build
+func main_build_1014_(pathList *LnsList) LnsInt {
+    DBCtrl_initDB(main_dbPath)
+    var db *DBCtrl_DBCtrl
+    
+    {
+        _db := DBCtrl_open(main_dbPath, false)
+        if _db == nil{
+            Lns_print([]LnsAny{"error"})
+            return 1
+        } else {
+            db = _db.(*DBCtrl_DBCtrl)
+        }
+    }
+    db.FP.Commit()
+    Analyze_start(db, pathList)
+    db.FP.Close()
+    return 0
+}
+
+
+func __main___anonymous_1033_(item *DBCtrl_ItemNamespace) bool {
     Lns_print([]LnsAny{item.FP.Get_name()})
     return true
 }
-// 34: decl @lns.@tags.@main.__main
+// 48: decl @lns.@tags.@main.__main
 func Main___main(args *LnsList) LnsInt {
     Lns_main_init()
     var option *Option_Option
     option = Option_analyzeArgs(args)
-    if _switch439 := option.FP.Get_mode(); _switch439 == Option_Mode__Init {
+    if _switch578 := option.FP.Get_mode(); _switch578 == Option_Mode__Init {
         DBCtrl_initDB(main_dbPath)
-    } else if _switch439 == Option_Mode__Build {
-        DBCtrl_initDB(main_dbPath)
+    } else if _switch578 == Option_Mode__Build {
+        return main_build_1014_(option.FP.Get_pathList())
+    } else if _switch578 == Option_Mode__Update {
         var db *DBCtrl_DBCtrl
         
         {
-            _db := DBCtrl_open(main_dbPath, false)
+            _db := DBCtrl_open(main_dbPath, true)
             if _db == nil{
                 Lns_print([]LnsAny{"error"})
                 return 1
@@ -52,14 +74,25 @@ func Main___main(args *LnsList) LnsInt {
                 db = _db.(*DBCtrl_DBCtrl)
             }
         }
-        db.FP.Commit()
-        Analyze_start(db, option)
+        var projId LnsAny
+        projId = db.FP.GetProjId("./")
+        var pathList *LnsList
+        pathList = NewLnsList([]LnsAny{})
+        db.FP.MapFilePath(DBCtrl_MapFileCallBack(func(item *DBCtrl_ItemFilePath) bool {
+            if Lns_isCondTrue( Lns_GetEnv().PopVal( Lns_GetEnv().IncStack() ||
+                Lns_GetEnv().SetStackVal( item.FP.Get_projId() == projId) &&
+                Lns_GetEnv().SetStackVal( Lns_op_not(db.FP.GetMainFilePath(item.FP.Get_id()))) ).(bool)){
+                pathList.Insert(item.FP.Get_path())
+            }
+            return true
+        }))
         db.FP.Close()
-    } else if _switch439 == Option_Mode__Suffix {
+        return main_build_1014_(pathList)
+    } else if _switch578 == Option_Mode__Suffix {
         var db *DBCtrl_DBCtrl
         
         {
-            _db := DBCtrl_open(main_dbPath, false)
+            _db := DBCtrl_open(main_dbPath, true)
             if _db == nil{
                 Lns_print([]LnsAny{"error"})
                 return 1
@@ -67,17 +100,17 @@ func Main___main(args *LnsList) LnsInt {
                 db = _db.(*DBCtrl_DBCtrl)
             }
         }
-        db.FP.MapNamespaceSuffix(option.FP.Get_pattern(), DBCtrl_NameSpaceCallback(__main___anonymous_1017_))
+        db.FP.MapNamespaceSuffix(option.FP.Get_pattern(), DBCtrl_NameSpaceCallback(__main___anonymous_1033_))
         db.FP.Close()
-    } else if _switch439 == Option_Mode__Inq {
+    } else if _switch578 == Option_Mode__Inq {
         main_inq_1007_(option.FP.Get_inqMode(), option.FP.Get_pattern())
-    } else if _switch439 == Option_Mode__InqAt {
+    } else if _switch578 == Option_Mode__InqAt {
         var analyzeFileInfo *Option_AnalyzeFileInfo
         analyzeFileInfo = option.FP.Get_analyzeFileInfo()
         var db *DBCtrl_DBCtrl
         
         {
-            _db := DBCtrl_open(main_dbPath, false)
+            _db := DBCtrl_open(main_dbPath, true)
             if _db == nil{
                 Lns_print([]LnsAny{"error"})
                 return 1
@@ -99,7 +132,7 @@ func Main___main(args *LnsList) LnsInt {
         }
         db.FP.Close()
         main_inq_1007_(option.FP.Get_inqMode(), pattern)
-    } else if _switch439 == Option_Mode__Dump {
+    } else if _switch578 == Option_Mode__Dump {
         var db *DBCtrl_DBCtrl
         
         {
@@ -113,7 +146,7 @@ func Main___main(args *LnsList) LnsInt {
         }
         db.FP.DumpAll()
         db.FP.Close()
-    } else if _switch439 == Option_Mode__Test {
+    } else if _switch578 == Option_Mode__Test {
         DBCtrl_test()
     }
     return 0

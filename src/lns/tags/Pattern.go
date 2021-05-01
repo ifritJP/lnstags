@@ -60,7 +60,7 @@ func Pattern_getPatterAt(db *DBCtrl_DBCtrl,analyzeFileInfo *Option_AnalyzeFileIn
         useStdInMod = nil
         
     }
-    Ast_buildAst(LnsLog.Log_Level__Err, path, projDir, useStdInMod, false, front.Front_AstCallback(func(ast *TransUnit.TransUnit_ASTInfo) {
+    Ast_buildAst(LnsLog.Log_Level__Err, NewLnsList([]LnsAny{path}), projDir, useStdInMod, false, front.Front_AstCallback(func(ast *TransUnit.TransUnit_ASTInfo) {
         __func__ := "@lns.@tags.@Pattern.getPatterAt.<anonymous>"
         if ast.FP.Get_streamName() == path{
             var filter *Pattern_SyntaxFilter

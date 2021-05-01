@@ -9,6 +9,7 @@ pub enum InqMode {
 pub enum Mode {
    Init = "init",
    Build = "build",
+   Update = "update",
    Inq = "inq",
    InqAt = "inq-at",
    Suffix = "suffix",
@@ -153,8 +154,20 @@ pub fn analyzeArgs( argList:&List<str> ) : &Option {
          }
       } else {
          switch mode {
-            case .Build {   
-               option.pathList.insert( arg );
+            case .Build {
+               if arg == "@-" {
+                  while true {
+                     let! line = io.stdin.read( "*l" ) {
+                        break;
+                     };
+                     if #line > 0 {
+                        print( "hoge:", line );
+                        option.pathList.insert( line );
+                     }
+                  }
+               } else {
+                  option.pathList.insert( arg );
+               }
             }
          }
       }

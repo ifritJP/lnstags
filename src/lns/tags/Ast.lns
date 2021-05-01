@@ -19,9 +19,14 @@ pub fn getFullNameSym<T>( filter:&Nodes.Filter<T>, symbolInfo:&LnsAst.SymbolInfo
    return name;
 }
 
-pub fn buildAst( logLevel:LnsLog.Level, path:str, projDir:str!, useStdInMod:str!,
-                 forceAll:bool, astCallback:front.AstCallback )
+pub fn buildAst(
+   logLevel:LnsLog.Level, pathList:&List<str>, projDir:str!, useStdInMod:str!,
+   forceAll:bool, astCallback:front.AstCallback )
 {
+   if #pathList == 0 {
+      return;
+   }
+   
    LnsLog.setLevel( logLevel );
    LnsUtil.setDebugFlag( false );
 
@@ -30,8 +35,7 @@ pub fn buildAst( logLevel:LnsLog.Level, path:str, projDir:str!, useStdInMod:str!
    }
 
    
-   
-   let mut lnsOpt = LnsOpt.createDefaultOption( path, projDir );
+   let mut lnsOpt = LnsOpt.createDefaultOption( pathList, projDir );
    // ver 51, 52 では構文エラーになるケースがあるので、
    // ここでは 53 として処理する。
    // 本来はオプション指定した方が良いかも。
@@ -40,7 +44,8 @@ pub fn buildAst( logLevel:LnsLog.Level, path:str, projDir:str!, useStdInMod:str!
    if forceAll {
       lnsOpt.transCtrlInfo.uptodateMode = .ForceAll;
    } else {
-      lnsOpt.transCtrlInfo.uptodateMode = .Force1( LnsUtil.scriptPath2Module( path ) );
+      lnsOpt.transCtrlInfo.uptodateMode = .Force1(
+         LnsUtil.scriptPath2Module( pathList[ 1 ] ) );
    }
       
    front.build( lnsOpt, astCallback );

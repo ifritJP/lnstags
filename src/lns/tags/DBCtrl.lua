@@ -886,7 +886,7 @@ function ItemOverride._fromMapSub( obj, val )
 end
 
 
-function DBCtrl:addProj( path )
+function DBCtrl:getProjId( path )
 
    local projId = nil
    self:mapRowList( "projInfo", string.format( "dir = '%s'", path), 1, nil, function ( items )
@@ -900,8 +900,16 @@ function DBCtrl:addProj( path )
       
       return false
    end )
-   if projId ~= nil then
-      return projId, false
+   return projId
+end
+
+function DBCtrl:addProj( path )
+
+   do
+      local projId = self:getProjId( path )
+      if projId ~= nil then
+         return projId, false
+      end
    end
    
    local id = self.idMgrProjInfo:getIdNext(  )
@@ -957,6 +965,27 @@ function DBCtrl:addFile( path, mod )
 end
 
 
+
+
+function DBCtrl:mapFilePath( callback )
+
+   self:mapRowList( "filePath", nil, nil, nil, function ( items )
+   
+      do
+         local filePath = ItemFilePath._fromStem( items )
+         if filePath ~= nil then
+            if not callback( filePath ) then
+               return false
+            end
+            
+         end
+      end
+      
+      return true
+   end )
+end
+
+
 function DBCtrl:getFileIdFromPath( path )
    local __func__ = '@lns.@tags.@DBCtrl.DBCtrl.getFileIdFromPath'
 
@@ -977,7 +1006,7 @@ function DBCtrl:getFileIdFromPath( path )
       return fileId
    end
    
-   Log.log( Log.Level.Err, __func__, 397, function (  )
+   Log.log( Log.Level.Err, __func__, 418, function (  )
    
       return string.format( "not found file -- %s", path)
    end )
@@ -1161,7 +1190,7 @@ end
 local function create( dbPath )
    local __func__ = '@lns.@tags.@DBCtrl.create'
 
-   Log.log( Log.Level.Log, __func__, 555, function (  )
+   Log.log( Log.Level.Log, __func__, 576, function (  )
    
       return "create"
    end )
@@ -1384,7 +1413,7 @@ local function test(  )
    
    do
       local _
-      local _641, added = db:addNamespace( "@hoge", _moduleObj.rootNsId )
+      local _659, added = db:addNamespace( "@hoge", _moduleObj.rootNsId )
       print( "added", added )
    end
    

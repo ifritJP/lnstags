@@ -295,7 +295,7 @@ pub fn getPatterAt(
       useStdInMod = nil;
    }
 
-   Ast.buildAst( .Err, path, projDir, useStdInMod, false,
+   Ast.buildAst( .Err, [path], projDir, useStdInMod, false,
              fn ( ast: TransUnit.ASTInfo ) {
                 if ast.$streamName == path {
                    let mut filter = new SyntaxFilter( ast );

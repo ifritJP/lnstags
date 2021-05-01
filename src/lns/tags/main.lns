@@ -31,6 +31,20 @@ fn inq( inqMode:Option.InqMode, pattern:str ) : int {
    return 0;
 }
 
+fn build( pathList:&List<str> ) : int {
+   // 現状は build 時に init する
+   DBCtrl.initDB( dbPath );
+   let! mut db = DBCtrl.open( dbPath, false ) {
+      print( "error" );
+      return 1;
+   };
+   db.commit();
+   
+   Analyze.start( db, pathList );
+   db.close();
+   return 0;
+}
+
 pub fn __main( args:&List<str> ) : int {
 
 
@@ -41,19 +55,27 @@ pub fn __main( args:&List<str> ) : int {
          DBCtrl.initDB( dbPath );
       }
       case .Build {
-         // 現状は build 時に init する
-         DBCtrl.initDB( dbPath );
-         let! mut db = DBCtrl.open( dbPath, false ) {
+         return build( option.$pathList );
+      }
+      case .Update {
+         let! mut db = DBCtrl.open( dbPath, true ) {
             print( "error" );
             return 1;
          };
-         db.commit();
-         
-         Analyze.start( db, option );
+         let projId = db.getProjId( "./" );
+         let mut pathList:List<str> = [];
+         db.mapFilePath( fn( item:&DBCtrl.ItemFilePath ) : bool {
+            if item.$projId == projId and not db.getMainFilePath( item.$id ) {
+               pathList.insert( item.$path );
+            }
+            return true;
+         });
          db.close();
+
+         return build( pathList );
       }
       case .Suffix {
-         let! mut db = DBCtrl.open( dbPath, false ) {
+         let! mut db = DBCtrl.open( dbPath, true ) {
             print( "error" );
             return 1;
          };
@@ -73,7 +95,7 @@ pub fn __main( args:&List<str> ) : int {
       case .InqAt {
          let analyzeFileInfo = option.$analyzeFileInfo;
 
-         let! mut db = DBCtrl.open( dbPath, false ) {
+         let! mut db = DBCtrl.open( dbPath, true ) {
             print( "error" );
             return 1;
          };

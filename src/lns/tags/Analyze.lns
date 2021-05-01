@@ -19,7 +19,6 @@ class Opt {
 }
 
 class tagFilter extend Nodes.Filter<Opt> {
-   let option:&Option.Option;
    let mut db:DBCtrl.DBCtrl;
    let streamName:str;
    let mut type2nsid:Map<&LnsAst.TypeInfo,int>;
@@ -48,12 +47,11 @@ class tagFilter extend Nodes.Filter<Opt> {
 
    
    local fn __init( rootNode:&Nodes.RootNode,
-                    option:&Option.Option, db:DBCtrl.DBCtrl, streamName:str )
+                    db:DBCtrl.DBCtrl, streamName:str )
    {
       super( true, rootNode.$moduleTypeInfo, rootNode.$moduleTypeInfo.$scope );
       self.moduleTypeInfo = rootNode.$moduleTypeInfo;
       self.file2id = {};
-      self.option = option;
       self.db = db;
       self.streamName = streamName;
       self.type2nsid = {};
@@ -397,23 +395,25 @@ pub override fn tagFilter.processRoot(
 };
 
 
-fn dumpRoot( rootNode:&Nodes.RootNode, db:DBCtrl.DBCtrl,
-             option:&Option.Option, streamName:str )
+fn dumpRoot( rootNode:&Nodes.RootNode, db:DBCtrl.DBCtrl, streamName:str )
 {
    Log._log( .Log, streamName );
-   let mut filter = new tagFilter( rootNode, option, db, streamName );
+   let mut filter = new tagFilter( rootNode, db, streamName );
    rootNode.processFilter( filter, new Opt() );
 }
 
-pub fn start( db:DBCtrl.DBCtrl, option:&Option.Option ) {
-   // lns のログレベル設定
-   foreach path in option.$pathList {
-      Ast.buildAst( .Log, path, nil, nil, true, fn ( ast: TransUnit.ASTInfo ) {
+pub fn start( db:DBCtrl.DBCtrl, pathList:&List<str> ) {
+
+   let mut set:Set<str> = (@);
+   
+   Ast.buildAst( .Log, pathList, nil, nil, true, fn ( ast: TransUnit.ASTInfo ) {
+      if not set.has( ast.$streamName ) {
+         set.add( ast.$streamName );
          if! let rootNode = ast.$node@@@Nodes.RootNode {
             db.begin();
-            dumpRoot( rootNode, db, option, ast.$streamName );
+            dumpRoot( rootNode, db, ast.$streamName );
             db.commit();
          }
-      });
-   }
+      }
+   });
 }

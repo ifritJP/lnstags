@@ -100,6 +100,24 @@ local function inq( inqMode, pattern )
    return 0
 end
 
+local function build( pathList )
+
+   DBCtrl.initDB( dbPath )
+   local db = DBCtrl.open( dbPath, false )
+   if  nil == db then
+      local _db = db
+   
+      print( "error" )
+      return 1
+   end
+   
+   db:commit(  )
+   
+   Analyze.start( db, pathList )
+   db:close(  )
+   return 0
+end
+
 local function __main( args )
 
    
@@ -110,8 +128,9 @@ local function __main( args )
       if _switchExp == Option.Mode.Init then
          DBCtrl.initDB( dbPath )
       elseif _switchExp == Option.Mode.Build then
-         DBCtrl.initDB( dbPath )
-         local db = DBCtrl.open( dbPath, false )
+         return build( option:get_pathList() )
+      elseif _switchExp == Option.Mode.Update then
+         local db = DBCtrl.open( dbPath, true )
          if  nil == db then
             local _db = db
          
@@ -119,12 +138,21 @@ local function __main( args )
             return 1
          end
          
-         db:commit(  )
+         local projId = db:getProjId( "./" )
+         local pathList = {}
+         db:mapFilePath( function ( item )
          
-         Analyze.start( db, option )
+            if item:get_projId() == projId and not db:getMainFilePath( item:get_id() ) then
+               table.insert( pathList, item:get_path() )
+            end
+            
+            return true
+         end )
          db:close(  )
+         
+         return build( pathList )
       elseif _switchExp == Option.Mode.Suffix then
-         local db = DBCtrl.open( dbPath, false )
+         local db = DBCtrl.open( dbPath, true )
          if  nil == db then
             local _db = db
          
@@ -145,7 +173,7 @@ local function __main( args )
       elseif _switchExp == Option.Mode.InqAt then
          local analyzeFileInfo = option:get_analyzeFileInfo()
          
-         local db = DBCtrl.open( dbPath, false )
+         local db = DBCtrl.open( dbPath, true )
          if  nil == db then
             local _db = db
          

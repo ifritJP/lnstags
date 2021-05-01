@@ -128,21 +128,24 @@ Mode.__allList[1] = Mode.Init
 Mode.Build = 'build'
 Mode._val2NameMap['build'] = 'Build'
 Mode.__allList[2] = Mode.Build
+Mode.Update = 'update'
+Mode._val2NameMap['update'] = 'Update'
+Mode.__allList[3] = Mode.Update
 Mode.Inq = 'inq'
 Mode._val2NameMap['inq'] = 'Inq'
-Mode.__allList[3] = Mode.Inq
+Mode.__allList[4] = Mode.Inq
 Mode.InqAt = 'inq-at'
 Mode._val2NameMap['inq-at'] = 'InqAt'
-Mode.__allList[4] = Mode.InqAt
+Mode.__allList[5] = Mode.InqAt
 Mode.Suffix = 'suffix'
 Mode._val2NameMap['suffix'] = 'Suffix'
-Mode.__allList[5] = Mode.Suffix
+Mode.__allList[6] = Mode.Suffix
 Mode.Dump = 'dump'
 Mode._val2NameMap['dump'] = 'Dump'
-Mode.__allList[6] = Mode.Dump
+Mode.__allList[7] = Mode.Dump
 Mode.Test = 'test'
 Mode._val2NameMap['test'] = 'Test'
-Mode.__allList[7] = Mode.Test
+Mode.__allList[8] = Mode.Test
 
 
 local AnalyzeFileInfo = {}
@@ -363,7 +366,27 @@ local function analyzeArgs( argList )
          do
             local _switchExp = mode
             if _switchExp == Mode.Build then
-               table.insert( option.pathList, arg )
+               if arg == "@-" then
+                  while true do
+                     local line = io.stdin:read( "*l" )
+                     if  nil == line then
+                        local _line = line
+                     
+                        break
+                     end
+                     
+                     if #line > 0 then
+                        print( "hoge:", line )
+                        table.insert( option.pathList, line )
+                     end
+                     
+                  end
+                  
+               else
+                
+                  table.insert( option.pathList, arg )
+               end
+               
             end
          end
          
