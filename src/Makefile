@@ -12,10 +12,13 @@ help:
 build: lnstags
 
 lnstags: $(SRCS)
+ifndef ONLY_GO
 	@echo $(SRCS) | sed 's/ /\n/g' |	\
 		$(LNSC) @- save -langGo --main lns.tags.main $(LNS_OPT)
 	$(LNSC) lns/tags/main.lns mkmain entry.go
+endif
 	go build -tags gopherlua
+
 
 buildDB: build
 	./lnstags init
