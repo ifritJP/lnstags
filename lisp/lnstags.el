@@ -200,7 +200,12 @@
 	  (equal mode "set"))
       (setq lnstags-mode "inq")
       (setq lnstags-opt2 (list mode tag))
-      (setq select-name tag))
+      (setq select-name
+	    (format "(%s)%s"
+		    (cond ((equal mode "def") "D")
+			  ((equal mode "ref") "R")
+			  ((equal mode "set") "S"))
+		    tag)))
      ((equal mode "suffix")
       (setq lnstags-mode "suffix")
       (setq lnstags-opt2 (list tag))
@@ -254,33 +259,26 @@
 			 'lnstags-tags-select-mode 'lnstags-tags-select X )))
      token)))
 
+(defun lnstags-inq (at-func mod)
+  (cond
+   ((equal mode '(4))
+    (funcall at-func))
+   (t
+    (let ((token (read-string "symbol?: " (lnstags-get-current-token))))
+      (lnstags-namespace-helm (current-buffer) token "suffix" mod))))
+  )
 
 (defun lnstags-ref (&optional mode)
   (interactive "P")
-  (cond
-   ((equal mode '(4))
-    (lnstags-ref-at))
-   (t
-    (lnstags-namespace-helm (current-buffer) (lnstags-get-current-token)
-			    "suffix" "ref"))))
+  (lnstags-inq 'lnstags-ref-at "ref"))
 
 (defun lnstags-def (&optional mode)
   (interactive "P")
-  (cond
-   ((equal mode '(4))
-    (lnstags-def-at))
-   (t
-    (lnstags-namespace-helm (current-buffer) (lnstags-get-current-token)
-			    "suffix" "def"))))
+  (lnstags-inq 'lnstags-def-at "def"))
 
 (defun lnstags-set (&optional mode)
   (interactive "P")
-  (cond
-   ((equal mode '(4))
-    (lnstags-set-at))
-   (t
-    (lnstags-namespace-helm (current-buffer) (lnstags-get-current-token)
-			    "suffix" "set"))))
+  (lnstags-inq 'lnstags-set-at "set"))
 
 (defun lnstags-ref-at ()
   (interactive)

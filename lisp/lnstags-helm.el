@@ -124,10 +124,16 @@
   )
 (defun lnstags-helm-history-select (item)
   (setq lnstags-helm-history-cur (plist-get item :time))
-  (helm :sources (plist-get item :helm)
-	:keymap lnstags-heml-map
-	:buffer lnstags-helm-buffer-name)
-  )
+  (let ((lnstags-params (plist-get item :helm))
+	candidate-list select-func)
+    (setq candidate-list (cdr (assoc 'candidates lnstags-params )))
+    (setq select-func (cdr (assoc 'action lnstags-params )))
+    (if (eq (length candidate-list) 1)
+	(funcall select-func (cdr (car candidate-list)))
+      (helm :sources lnstags-params
+	    :keymap lnstags-heml-map
+	    :buffer lnstags-helm-buffer-name))
+  ))
 (defun lnstags-helm-history-show ()
   (interactive)
   (helm :sources `((name . "lnstags-history")
@@ -143,26 +149,26 @@
 					     header-name projDir)
   (let (candidate-list lnstags-params)
     (setq candidate-list (funcall create-candidate-list-func projDir))
+    (setq candidate-list
+	  (sort candidate-list
+		(lambda (X Y)
+		  (let* ((infoX (cdr X))
+			 (infoY (cdr Y))
+			 (pathX (plist-get infoX :path))
+			 (pathY (plist-get infoY :path)))
+		    (if (string< pathX pathY)
+			t
+		      (if (string= pathX pathY)
+			  (if (< (plist-get infoX :line) (plist-get infoY :line))
+			      t
+			    nil)))))))
+    (setq lnstags-params
+	  `((name . ,(concat lnstags-helm-buffer-name header-name))
+	    (candidates . ,candidate-list)
+	    (action . ,select-func)))
+    (lnstags-helm-history-add-tail lnstags-params)
     (if (eq (length candidate-list) 1)
 	(funcall select-func (cdr (car candidate-list)))
-      (setq candidate-list
-	    (sort candidate-list
-		  (lambda (X Y)
-		    (let* ((infoX (cdr X))
-			   (infoY (cdr Y))
-			   (pathX (plist-get infoX :path))
-			   (pathY (plist-get infoY :path)))
-		      (if (string< pathX pathY)
-			  t
-			(if (string= pathX pathY)
-			    (if (< (plist-get infoX :line) (plist-get infoY :line))
-				t
-			      nil)))))))
-      (setq lnstags-params
-	    `((name . ,(concat lnstags-helm-buffer-name header-name))
-	      (candidates . ,candidate-list)
-	      (action . ,select-func)))
-      (lnstags-helm-history-add-tail lnstags-params)
       (let ((helm-candidate-number-limit 9999))
 	(helm :sources lnstags-params
 	      :keymap lnstags-heml-map

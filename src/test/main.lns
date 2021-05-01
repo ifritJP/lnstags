@@ -57,21 +57,9 @@ print( hoge.$val );
    print( hoge2.val );
 }
 {
-   macro _Stat() {
-      {
-         let mut list:List<stat> = [];
-         let mut subcaseList:List<stat> = [];
-         subcaseList.insert( `{
-            print( "hoge:" );
-         });
-         let className = "AAA";
-         list.insert( `{ 
-            fn ,,,"process_%s" (className) ~~ () {
-               ,,subcaseList
-            }} );
-         
-      }
-      ,,list;
+   fn func<OPT>( gen:&Sub.Gen<OPT>, opt:OPT ) {
+      gen.sub( opt, opt );
    }
-   _Stat();
+   let val = new Sub.Gen<int>( 0 );
+   func( val, 2 );
 }

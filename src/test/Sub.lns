@@ -73,3 +73,9 @@ pub macro _Hoge2( test:stat ) {
 }
 pub alias FooBar = Hoge;
 pub form Form();
+pub class Gen<T> {
+   let val:T;
+   pub fn sub<T2>( val:T, val2:T2 ) {
+      print( val, val2 );
+   }
+}

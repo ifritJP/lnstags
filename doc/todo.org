@@ -13,7 +13,7 @@
   - [X] Mapping, accessor の自動生成
   - [X] =__func__=, =__mod__= 系
   - [X] alias
-  - [ ] generic の型パラメータ
+  - [X] generic の型パラメータ
   - [X] accessor の継承関係が登録されていない。    
   - [X] マクロ展開した token の位置情報を分かり易くする
   - [X] 代入場所
@@ -35,5 +35,5 @@
       ジャンプ後の db が参照できない。
 - [X] subfile からタグジャンプできない
 - [X] 問い合わせの際に、 ast 解析せずにシンボル名から辿れるモードを追加する
-- [ ] def-at, ref-at ではなく、 def, ref の際に、  history に登録されない。
-  - [ ] def, ref の際に、シンボルをマニュアル入力できるようにする。
+- [X] def-at, ref-at ではなく、 def, ref の際に、  history に登録されない。
+  - [X] def, ref の際に、シンボルをマニュアル入力できるようにする。

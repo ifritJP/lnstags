@@ -415,6 +415,10 @@ function tagFilter:registerDecl( nodeManager, processInfo )
    end
    for __index, workNode in pairs( nodeManager:getDeclFormNodeList(  ) ) do
       registDeclType( workNode )
+      for __index, altType in pairs( workNode:get_expType():get_itemTypeInfoList() ) do
+         registDeclTypeOp( altType, workNode:get_pos() )
+      end
+      
    end
    
    
@@ -425,6 +429,10 @@ function tagFilter:registerDecl( nodeManager, processInfo )
    
    for __index, workNode in pairs( nodeManager:getDeclClassNodeList(  ) ) do
       registDeclType( workNode )
+      for __index, altType in pairs( workNode:get_expType():get_itemTypeInfoList() ) do
+         registDeclTypeOp( altType, workNode:get_pos() )
+      end
+      
       registerAutoMethod( workNode:get_expType(), workNode:get_pos() )
    end
    
@@ -436,6 +444,10 @@ function tagFilter:registerDecl( nodeManager, processInfo )
    
    for __index, workNode in pairs( nodeManager:getDeclFuncNodeList(  ) ) do
       registDeclType( workNode )
+      for __index, altType in pairs( workNode:get_expType():get_itemTypeInfoList() ) do
+         registDeclTypeOp( altType, workNode:get_pos() )
+      end
+      
    end
    
    for __index, workNode in pairs( nodeManager:getProtoMethodNodeList(  ) ) do
@@ -462,6 +474,10 @@ function tagFilter:registerDecl( nodeManager, processInfo )
             end
          end
          
+      end
+      
+      for __index, altType in pairs( methodType:get_itemTypeInfoList() ) do
+         registDeclTypeOp( altType, pos )
       end
       
       return nsId
@@ -495,7 +511,7 @@ function tagFilter:registerDecl( nodeManager, processInfo )
          end
          table.sort( __sorted )
          for __index, name in ipairs( __sorted ) do
-            local _6086 = __map[ name ]
+            local _6092 = __map[ name ]
             do
                do
                   local _exp = _lune.nilacc( workNode:get_algeType():get_scope(), 'getSymbolInfoChild', 'callmtd' , name )
@@ -571,7 +587,7 @@ function tagFilter:registerRefs( nodeManager )
       
       local nsId, added = self:registerSymbol( symbolInfo )
       if added and not LnsAst.isBuiltin( symbolInfo:get_namespaceTypeInfo():get_typeId() ) then
-         Log.log( Log.Level.Err, __func__, 248, function (  )
+         Log.log( Log.Level.Err, __func__, 260, function (  )
          
             return string.format( "no register sym -- %d:%d:%s", pos.lineNo, pos.column, Ast.getFullNameSym( self, symbolInfo ))
          end )
@@ -586,7 +602,7 @@ function tagFilter:registerRefs( nodeManager )
    
       local nsId, added = self:registerType( typeInfo )
       if added and not LnsAst.isBuiltin( typeInfo:get_typeId() ) then
-         Log.log( Log.Level.Err, __func__, 257, function (  )
+         Log.log( Log.Level.Err, __func__, 269, function (  )
          
             return string.format( "no register type -- %d:%d:%s", pos.lineNo, pos.column, self:getFull( typeInfo, false ))
          end )
@@ -674,7 +690,7 @@ function tagFilter:registerRefs( nodeManager )
          if _exp ~= nil then
             registerRefSym( _exp, workNode:get_pos(), false )
          else
-            Log.log( Log.Level.Warn, __func__, 341, function (  )
+            Log.log( Log.Level.Warn, __func__, 353, function (  )
             
                return string.format( "no symbolInfo -- %s", workNode:get_field().txt)
             end )
@@ -747,7 +763,7 @@ end
 local function dumpRoot( rootNode, db, option, streamName )
    local __func__ = '@lns.@tags.@Analyze.dumpRoot'
 
-   Log.log( Log.Level.Log, __func__, 391, function (  )
+   Log.log( Log.Level.Log, __func__, 403, function (  )
    
       return streamName
    end )
