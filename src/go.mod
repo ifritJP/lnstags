@@ -1,4 +1,4 @@
-module github.com/ifritJP/lnstags
+module github.com/ifritJP/lnstags/src
 
 go 1.16
 

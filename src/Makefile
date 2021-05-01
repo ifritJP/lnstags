@@ -17,7 +17,7 @@ ifndef ONLY_GO
 		$(LNSC) @- save -langGo --main lns.tags.main $(LNS_OPT)
 	$(LNSC) lns/tags/main.lns mkmain entry.go
 endif
-	go build -tags gopherlua
+	go build -tags gopherlua -o lnstags
 
 
 buildDB: build
