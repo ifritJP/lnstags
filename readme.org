@@ -1,0 +1,15 @@
+#+TITLE: lnstags
+# -*- coding:utf-8 -*-
+#+AUTHOR: ifritJP
+#+STARTUP: nofold
+#+OPTIONS: ^:{}
+
+https://github.com/ifritJP/lnstags/actions/workflows/main.yml/badge.svg
+
+** What's lnstags
+   
+lnstags is the source code tag system for LuneScript.
+
+Latest document (for Japanese)
+
+https://ifritjp.github.io/documents/lunescript/lnstags/
