@@ -133,7 +133,7 @@ func Option_analyzeArgs(argList *LnsList) *Option_Option {
     getNextOpNonNil = analyzeArgs__getNextOpNonNilFunc_1106_(func(mess string) string {
         {
             _arg := getNextOp()
-            if _arg != nil {
+            if !Lns_IsNil( _arg ) {
                 arg := _arg.(string)
                 return arg
             }
@@ -147,11 +147,11 @@ func Option_analyzeArgs(argList *LnsList) *Option_Option {
     getNextOpInt = func(mess string) LnsInt {
         {
             _arg := getNextOp()
-            if _arg != nil {
+            if !Lns_IsNil( _arg ) {
                 arg := _arg.(string)
                 {
                     _num := Lns_tonumber(arg, nil)
-                    if _num != nil {
+                    if !Lns_IsNil( _num ) {
                         num := _num.(LnsReal)
                         return (LnsInt)(num)
                     }
@@ -203,7 +203,7 @@ func Option_analyzeArgs(argList *LnsList) *Option_Option {
         if Lns_op_not(mode){
             {
                 _work := Option_Mode__from(arg)
-                if _work != nil {
+                if !Lns_IsNil( _work ) {
                     work := _work.(string)
                     mode = work
                     
@@ -257,7 +257,7 @@ func Option_analyzeArgs(argList *LnsList) *Option_Option {
     }
     {
         _logLevel := option.logLevel
-        if _logLevel != nil {
+        if !Lns_IsNil( _logLevel ) {
             logLevel := _logLevel.(LnsInt)
             Log_setLevel(logLevel)
         }

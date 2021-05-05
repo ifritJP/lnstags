@@ -119,8 +119,8 @@ func (self *Util_SourceCodeLineAccessorFactory) InitUtil_SourceCodeLineAccessorF
 // 20: decl @lns.@tags.@Util.SourceCodeLineAccessorFactory.create
 func (self *Util_SourceCodeLineAccessorFactory) Create(filePath string,fileContents LnsAny) LnsAny {
     {
-        __exp := self.path2accessor.Items[filePath]
-        if __exp != nil {
+        __exp := self.path2accessor.Get(filePath)
+        if !Lns_IsNil( __exp ) {
             _exp := __exp.(*Util_SourceCodeLineAccessor)
             return _exp
         }

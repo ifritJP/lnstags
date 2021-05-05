@@ -235,7 +235,7 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
     
     {
         _workNode := Nodes.Nodes_ImportNodeDownCastF(nearest.FP)
-        if _workNode != nil {
+        if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_ImportNode)
             if _switch297 := inqMod; _switch297 == Option_InqMode__Def {
                 return self.FP.GetFull(workNode.FP.Get_expType(), false)
@@ -248,19 +248,19 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
     }
     {
         _workNode := Nodes.Nodes_ExpRefNodeDownCastF(nearest.FP)
-        if _workNode != nil {
+        if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_ExpRefNode)
             return Ast_getFullNameSym(&self.Nodes_Filter, workNode.FP.Get_symbolInfo())
         }
     }
     {
         _workNode := Nodes.Nodes_RefFieldNodeDownCastF(nearest.FP)
-        if _workNode != nil {
+        if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_RefFieldNode)
             if isInner(workNode.FP.Get_field().Pos, workNode.FP.Get_field().Txt){
                 {
                     _symbolInfo := workNode.FP.Get_symbolInfo()
-                    if _symbolInfo != nil {
+                    if !Lns_IsNil( _symbolInfo ) {
                         symbolInfo := _symbolInfo.(*LnsAst.Ast_SymbolInfo)
                         return Ast_getFullNameSym(&self.Nodes_Filter, symbolInfo)
                     }
@@ -270,7 +270,7 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
     }
     {
         _workNode := Nodes.Nodes_DeclVarNodeDownCastF(nearest.FP)
-        if _workNode != nil {
+        if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_DeclVarNode)
             for _, _varSym := range( workNode.FP.Get_symbolInfoList().Items ) {
                 varSym := _varSym.(LnsAst.Ast_SymbolInfoDownCast).ToAst_SymbolInfo()
@@ -283,7 +283,7 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
     }
     {
         _workNode := Nodes.Nodes_ExpOmitEnumNodeDownCastF(nearest.FP)
-        if _workNode != nil {
+        if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_ExpOmitEnumNode)
             if isInner(workNode.FP.Get_effectivePos(), workNode.FP.Get_valInfo().FP.Get_name()){
                 return Ast_getFullNameSym(&self.Nodes_Filter, workNode.FP.Get_valInfo().FP.Get_symbolInfo())
@@ -292,7 +292,7 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
     }
     {
         _workNode := Nodes.Nodes_NewAlgeValNodeDownCastF(nearest.FP)
-        if _workNode != nil {
+        if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_NewAlgeValNode)
             if isInner(workNode.FP.Get_effectivePos(), workNode.FP.Get_valInfo().FP.Get_name()){
                 return Ast_getFullNameSym(&self.Nodes_Filter, workNode.FP.Get_valInfo().FP.Get_symbolInfo())
@@ -301,7 +301,7 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
     }
     {
         _workNode := Nodes.Nodes_ExpMacroExpNodeDownCastF(nearest.FP)
-        if _workNode != nil {
+        if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_ExpMacroExpNode)
             if isInner(workNode.FP.Get_effectivePos(), workNode.FP.Get_expType().FP.Get_rawTxt()){
                 return self.FP.GetFull(workNode.FP.Get_macroType(), false)
@@ -310,11 +310,11 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
     }
     {
         _workNode := Nodes.Nodes_DeclFuncNodeDownCastF(nearest.FP)
-        if _workNode != nil {
+        if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_DeclFuncNode)
             {
                 _name := workNode.FP.Get_declInfo().FP.Get_name()
-                if _name != nil {
+                if !Lns_IsNil( _name ) {
                     name := _name.(*Types.Types_Token)
                     if isInner(name.Pos, name.Txt){
                         return self.FP.GetFull(workNode.FP.Get_expType(), false)
@@ -326,7 +326,7 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
     }
     {
         _workNode := Nodes.Nodes_DeclEnumNodeDownCastF(nearest.FP)
-        if _workNode != nil {
+        if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_DeclEnumNode)
             var name *Types.Types_Token
             name = workNode.FP.Get_name()
@@ -344,7 +344,7 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
     }
     {
         _workNode := Nodes.Nodes_DeclAlgeNodeDownCastF(nearest.FP)
-        if _workNode != nil {
+        if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_DeclAlgeNode)
             var name *Types.Types_Token
             name = workNode.FP.Get_name()
@@ -362,7 +362,7 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
     }
     {
         _workNode := Nodes.Nodes_DeclClassNodeDownCastF(nearest.FP)
-        if _workNode != nil {
+        if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_DeclClassNode)
             if isInner(workNode.FP.Get_name().Pos, workNode.FP.Get_name().Txt){
                 return self.FP.GetFull(workNode.FP.Get_expType(), false)
@@ -371,11 +371,11 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
     }
     {
         _workNode := Nodes.Nodes_DeclMethodNodeDownCastF(nearest.FP)
-        if _workNode != nil {
+        if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_DeclMethodNode)
             {
                 _name := workNode.FP.Get_declInfo().FP.Get_name()
-                if _name != nil {
+                if !Lns_IsNil( _name ) {
                     name := _name.(*Types.Types_Token)
                     if isInner(name.Pos, name.Txt){
                         return self.FP.GetFull(workNode.FP.Get_expType(), false)
@@ -387,7 +387,7 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
     }
     {
         _workNode := Nodes.Nodes_ProtoClassNodeDownCastF(nearest.FP)
-        if _workNode != nil {
+        if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_ProtoClassNode)
             var name *Types.Types_Token
             name = workNode.FP.Get_name()
@@ -398,7 +398,7 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
     }
     {
         _workNode := Nodes.Nodes_DeclMemberNodeDownCastF(nearest.FP)
-        if _workNode != nil {
+        if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_DeclMemberNode)
             if isInner(Lns_unwrap( workNode.FP.Get_symbolInfo().FP.Get_pos()).(*Types.Types_Position), workNode.FP.Get_symbolInfo().FP.Get_name()){
                 return Ast_getFullNameSym(&self.Nodes_Filter, workNode.FP.Get_symbolInfo())
@@ -406,7 +406,7 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
             
             {
                 _token, _symbol := workNode.FP.Get_getterToken(), workNode.FP.GetGetterSym()
-                if _token != nil && _symbol != nil {
+                if !Lns_IsNil( _token ) && !Lns_IsNil( _symbol ) {
                     token := _token.(*Types.Types_Token)
                     symbol := _symbol.(*LnsAst.Ast_SymbolInfo)
                     if isInner(token.Pos, token.Txt){
@@ -416,7 +416,7 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
             }
             {
                 _token, _symbol := workNode.FP.Get_setterToken(), workNode.FP.GetSetterSym()
-                if _token != nil && _symbol != nil {
+                if !Lns_IsNil( _token ) && !Lns_IsNil( _symbol ) {
                     token := _token.(*Types.Types_Token)
                     symbol := _symbol.(*LnsAst.Ast_SymbolInfo)
                     if isInner(token.Pos, token.Txt){
@@ -428,11 +428,11 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
     }
     {
         _workNode := Nodes.Nodes_DeclConstrNodeDownCastF(nearest.FP)
-        if _workNode != nil {
+        if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_DeclConstrNode)
             {
                 _name := workNode.FP.Get_declInfo().FP.Get_name()
-                if _name != nil {
+                if !Lns_IsNil( _name ) {
                     name := _name.(*Types.Types_Token)
                     if isInner(name.Pos, name.Txt){
                         return self.FP.GetFull(workNode.FP.Get_expType(), false)
@@ -444,21 +444,21 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
     }
     {
         _workNode := Nodes.Nodes_ExpCallSuperCtorNodeDownCastF(nearest.FP)
-        if _workNode != nil {
+        if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_ExpCallSuperCtorNode)
             return self.FP.GetFull(workNode.FP.Get_methodType(), false)
         }
     }
     {
         _workNode := Nodes.Nodes_ExpCallSuperNodeDownCastF(nearest.FP)
-        if _workNode != nil {
+        if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_ExpCallSuperNode)
             return self.FP.GetFull(workNode.FP.Get_methodType(), false)
         }
     }
     {
         _workNode := Nodes.Nodes_ExpNewNodeDownCastF(nearest.FP)
-        if _workNode != nil {
+        if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_ExpNewNode)
             if isInner(workNode.FP.Get_pos(), "new"){
                 return self.FP.GetFull(workNode.FP.Get_ctorTypeInfo(), false)
@@ -467,7 +467,7 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
     }
     {
         _workNode := Nodes.Nodes_DeclMacroNodeDownCastF(nearest.FP)
-        if _workNode != nil {
+        if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_DeclMacroNode)
             var name *Types.Types_Token
             name = workNode.FP.Get_declInfo().FP.Get_name()
@@ -478,7 +478,7 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
     }
     {
         _workNode := Nodes.Nodes_ExpMacroExpNodeDownCastF(nearest.FP)
-        if _workNode != nil {
+        if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_ExpMacroExpNode)
             if isInner(workNode.FP.Get_pos(), workNode.FP.Get_macroType().FP.Get_rawTxt()){
                 return self.FP.GetFull(workNode.FP.Get_macroType(), false)
@@ -487,11 +487,11 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
     }
     {
         _workNode := Nodes.Nodes_GetFieldNodeDownCastF(nearest.FP)
-        if _workNode != nil {
+        if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_GetFieldNode)
             {
                 _symbolInfo := workNode.FP.Get_symbolInfo()
-                if _symbolInfo != nil {
+                if !Lns_IsNil( _symbolInfo ) {
                     symbolInfo := _symbolInfo.(*LnsAst.Ast_SymbolInfo)
                     if isInner(workNode.FP.Get_field().Pos, workNode.FP.Get_field().Txt){
                         return Ast_getFullNameSym(&self.Nodes_Filter, symbolInfo)
@@ -502,7 +502,7 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
     }
     {
         _workNode := Nodes.Nodes_AliasNodeDownCastF(nearest.FP)
-        if _workNode != nil {
+        if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_AliasNode)
             if isInner(Lns_unwrap( workNode.FP.Get_newSymbol().FP.Get_pos()).(*Types.Types_Position), workNode.FP.Get_newSymbol().FP.Get_name()){
                 return Ast_getFullNameSym(&self.Nodes_Filter, workNode.FP.Get_newSymbol())
@@ -512,11 +512,11 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
     }
     {
         _workNode := Nodes.Nodes_DeclFormNodeDownCastF(nearest.FP)
-        if _workNode != nil {
+        if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_DeclFormNode)
             {
                 _name := workNode.FP.Get_declInfo().FP.Get_name()
-                if _name != nil {
+                if !Lns_IsNil( _name ) {
                     name := _name.(*Types.Types_Token)
                     if isInner(name.Pos, name.Txt){
                         return self.FP.GetFull(workNode.FP.Get_expType(), false)
@@ -558,11 +558,11 @@ func (self *Pattern_SyntaxFilter) GetPattern(path string,analyzeFileInfo *Option
                     Lns_GetEnv().SetStackVal( analyzeFileInfo.FP.Get_column() >= node.FP.Get_effectivePos().Column) ).(bool)){
                     {
                         _declMemberNode := Nodes.Nodes_DeclMemberNodeDownCastF(node.FP)
-                        if _declMemberNode != nil {
+                        if !Lns_IsNil( _declMemberNode ) {
                             declMemberNode := _declMemberNode.(*Nodes.Nodes_DeclMemberNode)
                             {
                                 _token := declMemberNode.FP.Get_getterToken()
-                                if _token != nil {
+                                if !Lns_IsNil( _token ) {
                                     token := _token.(*Types.Types_Token)
                                     if isInner(token.Pos, token.Txt){
                                         nearestNode = node
@@ -573,7 +573,7 @@ func (self *Pattern_SyntaxFilter) GetPattern(path string,analyzeFileInfo *Option
                             }
                             {
                                 _token := declMemberNode.FP.Get_setterToken()
-                                if _token != nil {
+                                if !Lns_IsNil( _token ) {
                                     token := _token.(*Types.Types_Token)
                                     if isInner(token.Pos, token.Txt){
                                         nearestNode = node
@@ -586,7 +586,7 @@ func (self *Pattern_SyntaxFilter) GetPattern(path string,analyzeFileInfo *Option
                     }
                     {
                         _nearest := nearestNode
-                        if _nearest != nil {
+                        if !Lns_IsNil( _nearest ) {
                             nearest := _nearest.(*Nodes.Nodes_Node)
                             if nearest.FP.Get_effectivePos().LineNo != analyzeFileInfo.FP.Get_lineNo(){
                                 nearestNode = node
@@ -607,7 +607,7 @@ func (self *Pattern_SyntaxFilter) GetPattern(path string,analyzeFileInfo *Option
                 } else { 
                     {
                         _nearest := nearestNode
-                        if _nearest != nil {
+                        if !Lns_IsNil( _nearest ) {
                             nearest := _nearest.(*Nodes.Nodes_Node)
                             if Lns_isCondTrue( Lns_GetEnv().PopVal( Lns_GetEnv().IncStack() ||
                                 Lns_GetEnv().SetStackVal( nearest.FP.Get_effectivePos().LineNo < node.FP.Get_effectivePos().LineNo) &&
@@ -632,7 +632,7 @@ func (self *Pattern_SyntaxFilter) GetPattern(path string,analyzeFileInfo *Option
         }), 0, NewLnsSet([]LnsAny{}))
         {
             _nearest := nearestNode
-            if _nearest != nil {
+            if !Lns_IsNil( _nearest ) {
                 nearest := _nearest.(*Nodes.Nodes_Node)
                 pattern = self.FP.getPatternFromNode(analyzeFileInfo, inqMod, nearest)
                 

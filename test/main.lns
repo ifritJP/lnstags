@@ -3,7 +3,7 @@ subfile use mainSub;
 import Sub;
 Sub.func();
 let hoge = new Sub.Hoge();
-let ifObj:Sub.IF = hoge;
+let ifObj:&Sub.IF = hoge;
 hoge.func( .Val1 );
 ifObj.func( Sub.Foo.Val1 );
 Sub.Hoge.sub( .Val2 );

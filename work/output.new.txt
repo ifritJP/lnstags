@@ -13,7 +13,7 @@ Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 @main.Sub           4 main.lns         Sub.func();
 @main.Sub           5 main.lns         let hoge = new Sub.Hoge();
-@main.Sub           6 main.lns         let ifObj:Sub.IF = hoge;
+@main.Sub           6 main.lns         let ifObj:&Sub.IF = hoge;
 @main.Sub           8 main.lns         ifObj.func( Sub.Foo.Val1 );
 @main.Sub           9 main.lns         Sub.Hoge.sub( .Val2 );
 @main.Sub          10 main.lns         let hogehoge = new Sub.HogeHoge();
@@ -62,9 +62,9 @@ Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 @Sub.Hoge          15 Sub.lns          pub proto class Hoge extend (Mapping, IF);
 @Sub.Hoge          16 Sub.lns          pub class Hoge extend (Mapping, IF) {
-(cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 6 15)
+(cd test; ../lnstags --simpleLog --log debug inq-at def main.lns 6 16)
 Level.Log:@lns.@tags.@DBCtrl.open:open
-Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   6: 15 -- RefField
+Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  main.lns:   6: 16 -- RefField
 Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.IF
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
@@ -274,7 +274,7 @@ Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 @Sub.IF            15 Sub.lns          pub proto class Hoge extend (Mapping, IF);
 @Sub.IF            16 Sub.lns          pub class Hoge extend (Mapping, IF) {
-@Sub.IF             6 main.lns         let ifObj:Sub.IF = hoge;
+@Sub.IF             6 main.lns         let ifObj:&Sub.IF = hoge;
 (cd test; ../lnstags --simpleLog --log debug inq-at ref Sub.lns 13 12)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  Sub.lns:  13: 11 -- DeclMethod
@@ -322,7 +322,7 @@ Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 @Sub.IF            15 Sub.lns          pub proto class Hoge extend (Mapping, IF);
 @Sub.IF            16 Sub.lns          pub class Hoge extend (Mapping, IF) {
-@Sub.IF             6 main.lns         let ifObj:Sub.IF = hoge;
+@Sub.IF             6 main.lns         let ifObj:&Sub.IF = hoge;
 (cd test; ../lnstags --simpleLog --log debug inq-at ref Sub.lns 17 16)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  Sub.lns:  17:  8 -- DeclMember

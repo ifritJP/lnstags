@@ -107,7 +107,7 @@ fn tagFilter.addSymbolRef( mbrNsId:int, mut pos:&Types.Position, setOp:bool ) mu
 
 
 fn tagFilter.registerDecl(
-   nodeManager:&Nodes.NodeManager, processInfo: LnsAst.ProcessInfo ) mut
+   nodeManager:&Nodes.NodeManager ) mut
 {
    fn registDeclTypeOp( typeInfo:&LnsAst.TypeInfo, mut pos:&Types.Position ) : int {
       let nsId = self.registerType( typeInfo );
@@ -254,7 +254,7 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
          }
       }
       let nsId, added = self.registerSymbol( symbolInfo );
-      if added and not LnsAst.isBuiltin( symbolInfo.$namespaceTypeInfo.$typeId ) {
+      if added and not LnsAst.isBuiltin( symbolInfo.$namespaceTypeInfo.$typeId.id ) {
          Log._log( .Err, "no register sym -- %d:%d:%s"
                    ( pos.lineNo, pos.column, Ast.getFullNameSym( self, symbolInfo ) ) );
       }
@@ -263,7 +263,7 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
 
    fn registerRefType( typeInfo:&LnsAst.TypeInfo, pos:&Types.Position ) {
       let nsId, added = self.registerType( typeInfo );
-      if added and not LnsAst.isBuiltin( typeInfo.$typeId ) {
+      if added and not LnsAst.isBuiltin( typeInfo.$typeId.id ) {
          Log._log( .Err, "no register type -- %d:%d:%s"
                    ( pos.lineNo, pos.column, self.getFull( typeInfo, false ) ) );
       }
@@ -371,7 +371,7 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
 }
 
 pub override fn tagFilter.processRoot(
-   node: Nodes.RootNode, opt:Opt ) mut
+   node: &Nodes.RootNode, opt:Opt ) mut
 {
    self.type2nsid[ LnsAst.headTypeInfo ] = DBCtrl.rootNsId;
    let modNsId = self.registerType( node.$moduleTypeInfo );
@@ -390,7 +390,7 @@ pub override fn tagFilter.processRoot(
    }
    
 
-   self.registerDecl( node.$nodeManager, node.$processInfo );
+   self.registerDecl( node.$nodeManager );
    self.registerRefs( node.$nodeManager );
 };
 

@@ -35,18 +35,21 @@
 
 
 (defun lnstags-tags-select (item)
-  (setq line (plist-get item :line))
-  (setq file (plist-get item :path))
-  (setq relative (plist-get item :relative))
-  (setq projDir (plist-get item :projDir))
-  (let ((prev-buffer (current-buffer)))
-    (find-file file)
-    (set (make-local-variable 'lnstags-file-info)
-	 `(:path ,relative :projDir ,projDir))
-    (lnstags-projs-add projDir (lnstags-get-parentDir relative))
-    (goto-line line)
-    (recenter)
-    ))
+  (let* ((line (plist-get item :line))
+	 (file (plist-get item :path))
+	 (relative (plist-get item :relative))
+	 (projDir (plist-get item :projDir))
+	 (latest (lnstags-helm-history-latest))
+	 (latest-cdr (cdr latest)))
+    (plist-put latest-cdr :latest (plist-get item :disp))
+    (let ((prev-buffer (current-buffer)))
+      (find-file file)
+      (set (make-local-variable 'lnstags-file-info)
+	   `(:path ,relative :projDir ,projDir))
+      (lnstags-projs-add projDir (lnstags-get-parentDir relative))
+      (goto-line line)
+      (recenter)
+      )))
 
 (defun lnstags-conv-disp-path (path omit &optional base-dir)
   (when (string-match "^!" path)
@@ -73,34 +76,41 @@
 		 (looking-at ".*<not found>"))
 	     (message (lnstags-match-token 0)))
 	    (t
-	     (when (not (looking-at "^\\([^ \t]+\\)[ \t]+\\([0-9]+\\)[ \t]\\([^ \t]+\\)[ \t]\\(.*\\)$"))
-	       (lnstags-err "illegal format"))
-	     (let* ((symbol (lnstags-match-token 1))
-		    (line (string-to-number (lnstags-match-token 2)))
-		    (path (lnstags-match-token 3))
-		    (txt (lnstags-match-token 4)))
-	       (setq candidate-list
-		     (cons (cons (concat
-				  (when output-symbol-flag
-				    (concat (propertize symbol 'face lnstags-candidate-face)
-					    ":\t"))
-				  (format "%s:%d:%s"
-					  (propertize
-					   (lnstags-conv-disp-path path t projDir)
-					   'face lnstags-candidate-path-face)
-					  line txt))
-				 (list :line line
- 				       :path (expand-file-name path projDir)
-				       :relative path
-				       :projDir projDir
-				       ))
-			   candidate-list)))))
+	     (when (looking-at "^\\([^ \t]+\\)[ \t]+\\([0-9]+\\)[ \t]\\([^ \t]+\\)[ \t]\\(.*\\)$")
+	       (let* ((symbol (lnstags-match-token 1))
+		      (line (string-to-number (lnstags-match-token 2)))
+		      (path (lnstags-match-token 3))
+		      (txt (lnstags-match-token 4))
+		      disp)
+		 (setq disp
+		       (concat
+			(when output-symbol-flag
+			  (concat (propertize symbol 'face lnstags-candidate-face)
+				  ":\t"))
+			(format "%s:%d:%s"
+				(propertize
+				 (lnstags-conv-disp-path path t projDir)
+				 'face lnstags-candidate-path-face)
+				line txt)))
+		 (setq candidate-list
+		       (cons (cons disp
+				   (list :line line
+					 :path (expand-file-name path projDir)
+					 :relative path
+					 :projDir projDir
+					 :disp (regexp-quote disp)
+					 ))
+			     candidate-list))))))
       (next-line))
     candidate-list
     ))
 
 (defvar lnstags-helm-history nil)
 (defvar lnstags-helm-history-cur nil)
+
+(defun lnstags-helm-history-latest ()
+  (nth (1- (length lnstags-helm-history)) lnstags-helm-history)
+  )
 
 (defun lnstags-helm-history-add-tail (item)
   (let ((time (format-time-string "%m/%d-%T" (current-time))))
@@ -132,6 +142,7 @@
 	(funcall select-func (cdr (car candidate-list)))
       (helm :sources lnstags-params
 	    :keymap lnstags-heml-map
+	    :preselect (plist-get item :latest)
 	    :buffer lnstags-helm-buffer-name))
   ))
 (defun lnstags-helm-history-show ()

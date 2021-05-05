@@ -35,7 +35,7 @@ inq: build
 	$(call inq-test,inq-at def main.lns 4 6)
 	$(call inq-test,inq-at def main.lns 5 12)
 	$(call inq-test,inq-at def main.lns 5 21)
-	$(call inq-test,inq-at def main.lns 6 15)
+	$(call inq-test,inq-at def main.lns 6 16)
 	$(call inq-test,inq-at def main.lns 7 7)
 	$(call inq-test,inq-at def main.lns 7 13)
 	$(call inq-test,inq-at def main.lns 8 7)
