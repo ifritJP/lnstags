@@ -679,7 +679,7 @@ function SyntaxFilter.setmeta( obj )
 end
 
 
-local function getPatterAt( db, analyzeFileInfo, inqMod )
+local function getPatterAt( db, analyzeFileInfo, inqMod, transCtrlInfo )
 
    
    local fileId = db:getFileIdFromPath( analyzeFileInfo:get_path() )
@@ -710,13 +710,13 @@ local function getPatterAt( db, analyzeFileInfo, inqMod )
    end
    
    
-   Ast.buildAst( LnsLog.Level.Err, {path}, projDir, useStdInMod, false, function ( ast )
+   Ast.buildAst( LnsLog.Level.Err, {path}, projDir, useStdInMod, false, transCtrlInfo, function ( ast )
       local __func__ = '@lns.@tags.@Pattern.getPatterAt.<anonymous>'
    
       if ast:get_streamName() == path then
          local filter = SyntaxFilter.new(ast)
          pattern = filter:getPattern( path, analyzeFileInfo, inqMod )
-         Log.log( Log.Level.Log, __func__, 303, function (  )
+         Log.log( Log.Level.Log, __func__, 304, function (  )
          
             return string.format( "pattern -- %s", pattern)
          end )

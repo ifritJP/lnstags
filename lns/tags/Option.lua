@@ -5,6 +5,43 @@ local _lune = {}
 if _lune3 then
    _lune = _lune3
 end
+function _lune.newAlge( kind, vals )
+   local memInfoList = kind[ 2 ]
+   if not memInfoList then
+      return kind
+   end
+   return { kind[ 1 ], vals }
+end
+
+function _lune._fromList( obj, list, memInfoList )
+   if type( list ) ~= "table" then
+      return false
+   end
+   for index, memInfo in ipairs( memInfoList ) do
+      local val, key = memInfo.func( list[ index ], memInfo.child )
+      if val == nil and not memInfo.nilable then
+         return false, key and string.format( "%s[%s]", memInfo.name, key) or memInfo.name
+      end
+      obj[ index ] = val
+   end
+   return true
+end
+function _lune._AlgeFrom( Alge, val )
+   local work = Alge._name2Val[ val[ 1 ] ]
+   if not work then
+      return nil
+   end
+   if #work == 1 then
+     return work
+   end
+   local paramList = {}
+   local result, mess = _lune._fromList( paramList, val[ 2 ], work[ 2 ] )
+   if not result then
+      return nil, mess
+   end
+   return { work[ 1 ], paramList }
+end
+
 function _lune.loadModule( mod )
    if __luneScript then
       return  __luneScript:loadModule( mod )
@@ -66,6 +103,7 @@ if not _lune3 then
    _lune3 = _lune
 end
 local Log = _lune.loadModule( 'lns.tags.Log' )
+local LnsTypes = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Types' )
 
 local InqMode = {}
 _moduleObj.InqMode = InqMode
@@ -194,6 +232,7 @@ function Option:__init()
    self.inqMode = InqMode.Def
    self.pattern = ""
    self.analyzeFileInfo = AnalyzeFileInfo.new()
+   self.transCtrlInfo = LnsTypes.TransCtrlInfo.create_normal(  )
 end
 function Option.setmeta( obj )
   setmetatable( obj, { __index = Option  } )
@@ -215,6 +254,9 @@ function Option:get_analyzeFileInfo()
 end
 function Option:get_logLevel()
    return self.logLevel
+end
+function Option:get_transCtrlInfo()
+   return self.transCtrlInfo
 end
 
 
@@ -263,6 +305,8 @@ local function analyzeArgs( argList )
                   option.logLevel = Log.str2level( getNextOpNonNil( "logLevel" ) )
                elseif _switchExp == "--simpleLog" then
                   Log.enableDetail( false )
+               elseif _switchExp == "--legacy-mutable-control" then
+                  option.transCtrlInfo.legacyMutableControl = true
                end
             end
             
@@ -376,7 +420,6 @@ local function analyzeArgs( argList )
                      end
                      
                      if #line > 0 then
-                        print( "hoge:", line )
                         table.insert( option.pathList, line )
                      end
                      

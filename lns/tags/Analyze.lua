@@ -510,7 +510,7 @@ function tagFilter:registerDecl( nodeManager )
          end
          table.sort( __sorted )
          for __index, name in ipairs( __sorted ) do
-            local _3966 = __map[ name ]
+            local _3965 = __map[ name ]
             do
                do
                   local _exp = _lune.nilacc( workNode:get_algeType():get_scope(), 'getSymbolInfoChild', 'callmtd' , name )
@@ -689,10 +689,13 @@ function tagFilter:registerRefs( nodeManager )
          if _exp ~= nil then
             registerRefSym( _exp, workNode:get_pos(), false )
          else
-            Log.log( Log.Level.Warn, __func__, 351, function (  )
-            
-               return string.format( "no symbolInfo -- %s", workNode:get_field().txt)
-            end )
+            if not workNode:get_macroArgFlag() then
+               Log.log( Log.Level.Warn, __func__, 352, function (  )
+               
+                  return string.format( "no symbolInfo -- %s, %s:%d:%d", workNode:get_field().txt, workNode:get_pos().streamName, workNode:get_pos().lineNo, workNode:get_pos().column)
+               end )
+               
+            end
             
          end
       end
@@ -762,7 +765,7 @@ end
 local function dumpRoot( rootNode, db, streamName )
    local __func__ = '@lns.@tags.@Analyze.dumpRoot'
 
-   Log.log( Log.Level.Log, __func__, 400, function (  )
+   Log.log( Log.Level.Log, __func__, 404, function (  )
    
       return streamName
    end )
@@ -771,12 +774,11 @@ local function dumpRoot( rootNode, db, streamName )
    rootNode:processFilter( filter, Opt.new() )
 end
 
-local function start( db, pathList )
+local function start( db, pathList, transCtrlInfo )
 
-   
    local set = {}
    
-   Ast.buildAst( LnsLog.Level.Log, pathList, nil, nil, true, function ( ast )
+   Ast.buildAst( LnsLog.Level.Log, pathList, nil, nil, true, transCtrlInfo, function ( ast )
    
       if not _lune._Set_has(set, ast:get_streamName() ) then
          set[ast:get_streamName()]= true

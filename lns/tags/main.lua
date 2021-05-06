@@ -5,6 +5,43 @@ local _lune = {}
 if _lune3 then
    _lune = _lune3
 end
+function _lune.newAlge( kind, vals )
+   local memInfoList = kind[ 2 ]
+   if not memInfoList then
+      return kind
+   end
+   return { kind[ 1 ], vals }
+end
+
+function _lune._fromList( obj, list, memInfoList )
+   if type( list ) ~= "table" then
+      return false
+   end
+   for index, memInfo in ipairs( memInfoList ) do
+      local val, key = memInfo.func( list[ index ], memInfo.child )
+      if val == nil and not memInfo.nilable then
+         return false, key and string.format( "%s[%s]", memInfo.name, key) or memInfo.name
+      end
+      obj[ index ] = val
+   end
+   return true
+end
+function _lune._AlgeFrom( Alge, val )
+   local work = Alge._name2Val[ val[ 1 ] ]
+   if not work then
+      return nil
+   end
+   if #work == 1 then
+     return work
+   end
+   local paramList = {}
+   local result, mess = _lune._fromList( paramList, val[ 2 ], work[ 2 ] )
+   if not result then
+      return nil, mess
+   end
+   return { work[ 1 ], paramList }
+end
+
 function _lune.loadModule( mod )
    if __luneScript then
       return  __luneScript:loadModule( mod )
@@ -72,6 +109,7 @@ local Util = _lune.loadModule( 'lns.tags.Util' )
 local Inq = _lune.loadModule( 'lns.tags.Inq' )
 local Log = _lune.loadModule( 'lns.tags.Log' )
 local Pattern = _lune.loadModule( 'lns.tags.Pattern' )
+local LnsTypes = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Types' )
 
 local dbPath = "lnstags.sqlite3"
 
@@ -100,7 +138,7 @@ local function inq( inqMode, pattern )
    return 0
 end
 
-local function build( pathList )
+local function build( pathList, transCtrlInfo )
 
    DBCtrl.initDB( dbPath )
    local db = DBCtrl.open( dbPath, false )
@@ -113,7 +151,7 @@ local function build( pathList )
    
    db:commit(  )
    
-   Analyze.start( db, pathList )
+   Analyze.start( db, pathList, transCtrlInfo )
    db:close(  )
    return 0
 end
@@ -128,7 +166,7 @@ local function __main( args )
       if _switchExp == Option.Mode.Init then
          DBCtrl.initDB( dbPath )
       elseif _switchExp == Option.Mode.Build then
-         return build( option:get_pathList() )
+         return build( option:get_pathList(), option:get_transCtrlInfo() )
       elseif _switchExp == Option.Mode.Update then
          local db = DBCtrl.open( dbPath, true )
          if  nil == db then
@@ -150,7 +188,7 @@ local function __main( args )
          end )
          db:close(  )
          
-         return build( pathList )
+         return build( pathList, option:get_transCtrlInfo() )
       elseif _switchExp == Option.Mode.Suffix then
          local db = DBCtrl.open( dbPath, true )
          if  nil == db then
@@ -182,7 +220,7 @@ local function __main( args )
          end
          
          
-         local pattern = Pattern.getPatterAt( db, analyzeFileInfo, option:get_inqMode() )
+         local pattern = Pattern.getPatterAt( db, analyzeFileInfo, option:get_inqMode(), option:get_transCtrlInfo() )
          if  nil == pattern then
             local _pattern = pattern
          

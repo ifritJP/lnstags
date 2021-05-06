@@ -268,8 +268,8 @@ class SyntaxFilter extend Nodes.Filter<str> {
 }
 
 pub fn getPatterAt(
-   db:DBCtrl.DBCtrl,
-   analyzeFileInfo:&Option.AnalyzeFileInfo, inqMod:Option.InqMode ) : str!
+   db:DBCtrl.DBCtrl, analyzeFileInfo:&Option.AnalyzeFileInfo,
+   inqMod:Option.InqMode, transCtrlInfo:&Types.TransCtrlInfo ) : str!
 {
 
    let fileId = db.getFileIdFromPath( analyzeFileInfo.$path );
@@ -295,14 +295,15 @@ pub fn getPatterAt(
       useStdInMod = nil;
    }
 
-   Ast.buildAst( .Err, [path], projDir, useStdInMod, false,
-             fn ( ast: TransUnit.ASTInfo ) {
-                if ast.$streamName == path {
-                   let mut filter = new SyntaxFilter( ast );
-                   pattern = filter.getPattern( path, analyzeFileInfo, inqMod );
-                   Log._log( .Log, "pattern -- %s" (pattern) );
-                }
-             });
+   Ast.buildAst(
+      .Err, [path], projDir, useStdInMod, false, transCtrlInfo,
+      fn ( ast: TransUnit.ASTInfo ) {
+         if ast.$streamName == path {
+            let mut filter = new SyntaxFilter( ast );
+            pattern = filter.getPattern( path, analyzeFileInfo, inqMod );
+            Log._log( .Log, "pattern -- %s" (pattern) );
+         }
+      });
 
    return pattern;
 }

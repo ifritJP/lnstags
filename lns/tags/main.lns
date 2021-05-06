@@ -7,6 +7,7 @@ import lns.tags.Util;
 import lns.tags.Inq;
 import lns.tags.Log;
 import lns.tags.Pattern;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Types as LnsTypes;
 
 
 let dbPath = "lnstags.sqlite3";
@@ -31,7 +32,7 @@ fn inq( inqMode:Option.InqMode, pattern:str ) : int {
    return 0;
 }
 
-fn build( pathList:&List<str> ) : int {
+fn build( pathList:&List<str>, transCtrlInfo:&LnsTypes.TransCtrlInfo ) : int {
    // 現状は build 時に init する
    DBCtrl.initDB( dbPath );
    let! mut db = DBCtrl.open( dbPath, false ) {
@@ -40,7 +41,7 @@ fn build( pathList:&List<str> ) : int {
    };
    db.commit();
    
-   Analyze.start( db, pathList );
+   Analyze.start( db, pathList, transCtrlInfo );
    db.close();
    return 0;
 }
@@ -48,14 +49,14 @@ fn build( pathList:&List<str> ) : int {
 pub fn __main( args:&List<str> ) : int {
 
 
-   let option = Option.analyzeArgs( args );
+   let mut option = Option.analyzeArgs( args );
 
    _switch option.$mode {
       case .Init {
          DBCtrl.initDB( dbPath );
       }
       case .Build {
-         return build( option.$pathList );
+         return build( option.$pathList, option.$transCtrlInfo );
       }
       case .Update {
          let! mut db = DBCtrl.open( dbPath, true ) {
@@ -72,7 +73,7 @@ pub fn __main( args:&List<str> ) : int {
          });
          db.close();
 
-         return build( pathList );
+         return build( pathList, option.$transCtrlInfo );
       }
       case .Suffix {
          let! mut db = DBCtrl.open( dbPath, true ) {
@@ -100,7 +101,8 @@ pub fn __main( args:&List<str> ) : int {
             return 1;
          };
          
-         let! pattern = Pattern.getPatterAt( db, analyzeFileInfo, option.$inqMode ) {
+         let! pattern = Pattern.getPatterAt(
+            db, analyzeFileInfo, option.$inqMode, option.$transCtrlInfo ) {
             db.close();
             print( "illegal pos -- %s:%d:%d"
                    ( analyzeFileInfo.$path,

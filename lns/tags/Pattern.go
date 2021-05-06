@@ -14,7 +14,7 @@ import LnsUtil "github.com/ifritJP/LuneScript/src/lune/base"
 var init_Pattern bool
 var Pattern__mod__ string
 // for 287
-func Pattern_convExp1979(arg1 []LnsAny) string {
+func Pattern_convExp1983(arg1 []LnsAny) string {
     return Lns_getFromMulti( arg1, 0 ).(string)
 }
 
@@ -26,7 +26,7 @@ func Pattern_convExp1979(arg1 []LnsAny) string {
 
 
 // 270: decl @lns.@tags.@Pattern.getPatterAt
-func Pattern_getPatterAt(db *DBCtrl_DBCtrl,analyzeFileInfo *Option_AnalyzeFileInfo,inqMod string) LnsAny {
+func Pattern_getPatterAt(db *DBCtrl_DBCtrl,analyzeFileInfo *Option_AnalyzeFileInfo,inqMod string,transCtrlInfo *Types.Types_TransCtrlInfo) LnsAny {
     var fileId LnsInt
     fileId = db.FP.GetFileIdFromPath(analyzeFileInfo.FP.Get_path())
     var path string
@@ -49,7 +49,7 @@ func Pattern_getPatterAt(db *DBCtrl_DBCtrl,analyzeFileInfo *Option_AnalyzeFileIn
         Lns_GetEnv().SetStackVal( Lns_car(Lns_getVM().String_find(path,"^%.%.", nil, nil))) ||
         Lns_GetEnv().SetStackVal( Lns_car(Lns_getVM().String_find(path,"^/", nil, nil))) )){
         var dir string
-        dir = Pattern_convExp1979(Lns_2DDD(Lns_getVM().String_gsub(path,"/[^/]+$", "")))
+        dir = Pattern_convExp1983(Lns_2DDD(Lns_getVM().String_gsub(path,"/[^/]+$", "")))
         projDir = LnsUtil.Util_searchProjDir(dir)
         
     }
@@ -60,14 +60,14 @@ func Pattern_getPatterAt(db *DBCtrl_DBCtrl,analyzeFileInfo *Option_AnalyzeFileIn
         useStdInMod = nil
         
     }
-    Ast_buildAst(LnsLog.Log_Level__Err, NewLnsList([]LnsAny{path}), projDir, useStdInMod, false, front.Front_AstCallback(func(ast *TransUnit.TransUnit_ASTInfo) {
+    Ast_buildAst(LnsLog.Log_Level__Err, NewLnsList([]LnsAny{path}), projDir, useStdInMod, false, transCtrlInfo, front.Front_AstCallback(func(ast *TransUnit.TransUnit_ASTInfo) {
         __func__ := "@lns.@tags.@Pattern.getPatterAt.<anonymous>"
         if ast.FP.Get_streamName() == path{
             var filter *Pattern_SyntaxFilter
             filter = NewPattern_SyntaxFilter(ast)
             pattern = filter.FP.GetPattern(path, analyzeFileInfo, inqMod)
             
-            Log_log(Log_Level__Log, __func__, 303, Log_CreateMessage(func() string {
+            Log_log(Log_Level__Log, __func__, 304, Log_CreateMessage(func() string {
                 return Lns_getVM().String_format("pattern -- %s", []LnsAny{pattern})
             }))
             

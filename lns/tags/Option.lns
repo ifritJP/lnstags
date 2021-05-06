@@ -1,4 +1,5 @@
 import lns.tags.Log;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Types as LnsTypes;
 
 pub enum InqMode {
    Def = "def",
@@ -37,6 +38,7 @@ pub class Option {
    local let mut pattern:str {pub&};
    local let mut analyzeFileInfo:AnalyzeFileInfo {pub&};
    local let mut logLevel:Log.Level! {pub};
+   local let mut transCtrlInfo:LnsTypes.TransCtrlInfo {pub};
 
    local fn __init() {
       self.logLevel = nil;
@@ -45,6 +47,7 @@ pub class Option {
       self.inqMode = .Def;
       self.pattern = "";
       self.analyzeFileInfo = new AnalyzeFileInfo();
+      self.transCtrlInfo = LnsTypes.TransCtrlInfo.create_normal();
    }
 }
 
@@ -88,6 +91,9 @@ pub fn analyzeArgs( argList:&List<str> ) : &Option {
                }
                case "--simpleLog" {
                   Log.enableDetail( false );
+               }
+               case "--legacy-mutable-control" {
+                  option.transCtrlInfo.legacyMutableControl = true;
                }
             }
          } else {
@@ -161,7 +167,6 @@ pub fn analyzeArgs( argList:&List<str> ) : &Option {
                         break;
                      };
                      if #line > 0 {
-                        print( "hoge:", line );
                         option.pathList.insert( line );
                      }
                   }

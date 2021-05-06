@@ -1,6 +1,7 @@
 // This code is transcompiled by LuneScript.
 package tags
 import . "github.com/ifritJP/LuneScript/src/lune/base/runtime_go"
+import LnsTypes "github.com/ifritJP/LuneScript/src/lune/base"
 var init_Option bool
 var Option__mod__ string
 // decl enum -- InqMode 
@@ -70,12 +71,12 @@ func Option_Mode__from(arg1 string) LnsAny{
 func Option_Mode_getTxt(arg1 string) string {
     return Option_ModeMap_[arg1];
 }
-type analyzeArgs__getNextOpNonNilFunc_1106_ func (arg1 string) string
-// 51: decl @lns.@tags.@Option.printUsage
-func Option_printUsage_1095_(messages LnsAny) {
+type analyzeArgs__getNextOpNonNilFunc_1076_ func (arg1 string) string
+// 54: decl @lns.@tags.@Option.printUsage
+func Option_printUsage_1068_(messages LnsAny) {
     if messages != nil{
-        messages_78 := messages.(string)
-        Lns_io_stderr.Write(Lns_getVM().String_format("%s\n", []LnsAny{messages_78}))
+        messages_152 := messages.(string)
+        Lns_io_stderr.Write(Lns_getVM().String_format("%s\n", []LnsAny{messages_152}))
     }
     Lns_print([]LnsAny{"usage: lnstags init [option]"})
     Lns_print([]LnsAny{"usage: lnstags build [option] filepath"})
@@ -85,8 +86,8 @@ func Option_printUsage_1095_(messages LnsAny) {
     Lns_getVM().OS_exit(1)
 }
 
-func analyzeArgs___anonymous_1109_(mess string) string {
-    Option_printUsage_1095_("")
+func analyzeArgs___anonymous_1078_(mess string) string {
+    Option_printUsage_1068_("")
 // insert a dummy
     return ""
 }
@@ -94,14 +95,14 @@ func analyzeArgs___anonymous_1109_(mess string) string {
 
 
 
-// 63: decl @lns.@tags.@Option.analyzeArgs
+// 66: decl @lns.@tags.@Option.analyzeArgs
 func Option_analyzeArgs(argList *LnsList) *Option_Option {
     var option *Option_Option
     option = NewOption_Option()
     var index LnsInt
     index = 1
-    var getNextOpNonNil analyzeArgs__getNextOpNonNilFunc_1106_
-    getNextOpNonNil = analyzeArgs__getNextOpNonNilFunc_1106_(analyzeArgs___anonymous_1109_)
+    var getNextOpNonNil analyzeArgs__getNextOpNonNilFunc_1076_
+    getNextOpNonNil = analyzeArgs__getNextOpNonNilFunc_1076_(analyzeArgs___anonymous_1078_)
     
     var getNextOp func() LnsAny
     getNextOp = func() LnsAny {
@@ -114,14 +115,17 @@ func Option_analyzeArgs(argList *LnsList) *Option_Option {
             var arg string
             arg = argList.GetAt(index).(string)
             if Lns_isCondTrue( Lns_car(Lns_getVM().String_find(arg,"^-", nil, nil))){
-                if _switch385 := arg; _switch385 == "-i" {
+                if _switch414 := arg; _switch414 == "-i" {
                     option.analyzeFileInfo.stdinFlag = true
                     
-                } else if _switch385 == "--log" {
+                } else if _switch414 == "--log" {
                     option.logLevel = Log_str2level(getNextOpNonNil("logLevel"))
                     
-                } else if _switch385 == "--simpleLog" {
+                } else if _switch414 == "--simpleLog" {
                     Log_enableDetail(false)
+                } else if _switch414 == "--legacy-mutable-control" {
+                    option.transCtrlInfo.LegacyMutableControl = true
+                    
                 }
             } else { 
                 return arg
@@ -130,7 +134,7 @@ func Option_analyzeArgs(argList *LnsList) *Option_Option {
     // insert a dummy
         return nil
     }
-    getNextOpNonNil = analyzeArgs__getNextOpNonNilFunc_1106_(func(mess string) string {
+    getNextOpNonNil = analyzeArgs__getNextOpNonNilFunc_1076_(func(mess string) string {
         {
             _arg := getNextOp()
             if !Lns_IsNil( _arg ) {
@@ -138,7 +142,7 @@ func Option_analyzeArgs(argList *LnsList) *Option_Option {
                 return arg
             }
         }
-        Option_printUsage_1095_(mess)
+        Option_printUsage_1068_(mess)
     // insert a dummy
         return ""
     })
@@ -156,10 +160,10 @@ func Option_analyzeArgs(argList *LnsList) *Option_Option {
                         return (LnsInt)(num)
                     }
                 }
-                Option_printUsage_1095_(Lns_getVM().String_format("illegal num -- %s", []LnsAny{arg}))
+                Option_printUsage_1068_(Lns_getVM().String_format("illegal num -- %s", []LnsAny{arg}))
             }
         }
-        Option_printUsage_1095_(mess)
+        Option_printUsage_1068_(mess)
     // insert a dummy
         return 0
     }
@@ -170,7 +174,7 @@ func Option_analyzeArgs(argList *LnsList) *Option_Option {
         {
             _nextToken := getNextOp()
             if _nextToken == nil{
-                Option_printUsage_1095_("illegal inqMod")
+                Option_printUsage_1068_("illegal inqMod")
             } else {
                 nextToken = _nextToken.(string)
             }
@@ -180,7 +184,7 @@ func Option_analyzeArgs(argList *LnsList) *Option_Option {
         {
             _inqMode := Option_InqMode__from(nextToken)
             if _inqMode == nil{
-                Option_printUsage_1095_(Lns_getVM().String_format("illegal inqMod -- %s", []LnsAny{nextToken}))
+                Option_printUsage_1068_(Lns_getVM().String_format("illegal inqMod -- %s", []LnsAny{nextToken}))
             } else {
                 inqMode = _inqMode.(string)
             }
@@ -207,13 +211,13 @@ func Option_analyzeArgs(argList *LnsList) *Option_Option {
                     work := _work.(string)
                     mode = work
                     
-                    if _switch668 := mode; _switch668 == Option_Mode__Inq {
+                    if _switch697 := mode; _switch697 == Option_Mode__Inq {
                         option.inqMode = getInqMode()
                         
                         option.pattern = getNextOpNonNil("none pattern")
                         
                         Log_setLevel(Log_Level__Warn)
-                    } else if _switch668 == Option_Mode__InqAt {
+                    } else if _switch697 == Option_Mode__InqAt {
                         option.inqMode = getInqMode()
                         
                         option.analyzeFileInfo.path = getNextOpNonNil("none path")
@@ -222,16 +226,16 @@ func Option_analyzeArgs(argList *LnsList) *Option_Option {
                         
                         option.analyzeFileInfo.column = getNextOpInt("none column")
                         
-                    } else if _switch668 == Option_Mode__Suffix {
+                    } else if _switch697 == Option_Mode__Suffix {
                         option.pattern = getNextOpNonNil("none pattern")
                         
                     }
                 } else {
-                    Option_printUsage_1095_(Lns_getVM().String_format("illegal option -- %s", []LnsAny{arg}))
+                    Option_printUsage_1068_(Lns_getVM().String_format("illegal option -- %s", []LnsAny{arg}))
                 }
             }
         } else { 
-            if _switch763 := mode; _switch763 == Option_Mode__Build {
+            if _switch780 := mode; _switch780 == Option_Mode__Build {
                 if arg == "@-"{
                     for  {
                         var line string
@@ -245,7 +249,6 @@ func Option_analyzeArgs(argList *LnsList) *Option_Option {
                             }
                         }
                         if len(line) > 0{
-                            Lns_print([]LnsAny{"hoge:", line})
                             option.pathList.Insert(line)
                         }
                     }
@@ -263,12 +266,12 @@ func Option_analyzeArgs(argList *LnsList) *Option_Option {
         }
     }
     if mode != nil{
-        mode_148 := mode.(string)
-        option.mode = mode_148
+        mode_223 := mode.(string)
+        option.mode = mode_223
         
         return option
     }
-    Option_printUsage_1095_("none mode")
+    Option_printUsage_1068_("none mode")
 // insert a dummy
     return nil
 }
@@ -317,7 +320,7 @@ func (self *Option_AnalyzeFileInfo) Get_path() string{ return self.path }
 func (self *Option_AnalyzeFileInfo) Get_lineNo() LnsInt{ return self.lineNo }
 func (self *Option_AnalyzeFileInfo) Get_column() LnsInt{ return self.column }
 func (self *Option_AnalyzeFileInfo) Get_stdinFlag() bool{ return self.stdinFlag }
-// 25: DeclConstr
+// 26: DeclConstr
 func (self *Option_AnalyzeFileInfo) InitOption_AnalyzeFileInfo() {
     self.path = ""
     
@@ -338,6 +341,7 @@ type Option_OptionMtd interface {
     Get_mode() string
     Get_pathList() *LnsList
     Get_pattern() string
+    Get_transCtrlInfo() *LnsTypes.Types_TransCtrlInfo
 }
 type Option_Option struct {
     pathList *LnsList
@@ -346,6 +350,7 @@ type Option_Option struct {
     pattern string
     analyzeFileInfo *Option_AnalyzeFileInfo
     logLevel LnsAny
+    transCtrlInfo *LnsTypes.Types_TransCtrlInfo
     FP Option_OptionMtd
 }
 func Option_Option2Stem( obj LnsAny ) LnsAny {
@@ -380,7 +385,8 @@ func (self *Option_Option) Get_inqMode() string{ return self.inqMode }
 func (self *Option_Option) Get_pattern() string{ return self.pattern }
 func (self *Option_Option) Get_analyzeFileInfo() *Option_AnalyzeFileInfo{ return self.analyzeFileInfo }
 func (self *Option_Option) Get_logLevel() LnsAny{ return self.logLevel }
-// 41: DeclConstr
+func (self *Option_Option) Get_transCtrlInfo() *LnsTypes.Types_TransCtrlInfo{ return self.transCtrlInfo }
+// 43: DeclConstr
 func (self *Option_Option) InitOption_Option() {
     self.logLevel = nil
     
@@ -394,6 +400,8 @@ func (self *Option_Option) InitOption_Option() {
     
     self.analyzeFileInfo = NewOption_AnalyzeFileInfo()
     
+    self.transCtrlInfo = LnsTypes.Types_TransCtrlInfo_create_normal()
+    
 }
 
 
@@ -403,6 +411,7 @@ func Lns_Option_init() {
     Option__mod__ = "@lns.@tags.@Option"
     Lns_InitMod()
     Lns_Log_init()
+    LnsTypes.Lns_Types_init()
 }
 func init() {
     init_Option = false

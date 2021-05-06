@@ -348,7 +348,11 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
       if! workNode.$symbolInfo {
          registerRefSym( _exp, workNode.$pos, false );
       } else {
-         Log._log( .Warn, "no symbolInfo -- %s" (workNode.$field.txt ) );
+         if not workNode.$macroArgFlag {
+            Log._log( .Warn, "no symbolInfo -- %s, %s:%d:%d"
+                      (workNode.$field.txt, workNode.$pos.streamName,
+                        workNode.$pos.lineNo, workNode.$pos.column ) );
+         }
       }
    }
    foreach workNode in nodeManager.getGetFieldNodeList() {
@@ -402,18 +406,21 @@ fn dumpRoot( rootNode:&Nodes.RootNode, db:DBCtrl.DBCtrl, streamName:str )
    rootNode.processFilter( filter, new Opt() );
 }
 
-pub fn start( db:DBCtrl.DBCtrl, pathList:&List<str> ) {
-
+pub fn start(
+   db:DBCtrl.DBCtrl, pathList:&List<str>, transCtrlInfo:&Types.TransCtrlInfo )
+{
    let mut set:Set<str> = (@);
    
-   Ast.buildAst( .Log, pathList, nil, nil, true, fn ( ast: TransUnit.ASTInfo ) {
-      if not set.has( ast.$streamName ) {
-         set.add( ast.$streamName );
-         if! let rootNode = ast.$node@@@Nodes.RootNode {
-            db.begin();
-            dumpRoot( rootNode, db, ast.$streamName );
-            db.commit();
+   Ast.buildAst(
+      .Log, pathList, nil, nil, true, transCtrlInfo,
+      fn ( ast: TransUnit.ASTInfo ) {
+         if not set.has( ast.$streamName ) {
+            set.add( ast.$streamName );
+            if! let rootNode = ast.$node@@@Nodes.RootNode {
+               db.begin();   
+               dumpRoot( rootNode, db, ast.$streamName );
+               db.commit();  
+            }
          }
-      }
-   });
+      });
 }

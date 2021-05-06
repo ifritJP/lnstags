@@ -22,19 +22,19 @@ func DBAccess_open(path string,readonly bool) LnsAny {
     return NewDBAccess_DBAccess(db, path, readonly)
 }
 
-func DBAccess_begin___anonymous_1039_() string {
+func DBAccess_begin___anonymous_1026_() string {
     return "start"
 }
-func DBAccess_begin___anonymous_1042_() string {
+func DBAccess_begin___anonymous_1028_() string {
     return "db mode is read only"
 }
-func DBAccess_commit___anonymous_1048_() string {
+func DBAccess_commit___anonymous_1032_() string {
     return "commit: start"
 }
-func DBAccess_commit___anonymous_1051_() string {
+func DBAccess_commit___anonymous_1034_() string {
     return "commit: end"
 }
-func DBAccess_createTables___anonymous_1072_(stmt string,msg string) {
+func DBAccess_createTables___anonymous_1048_(stmt string,msg string) {
     if Lns_op_not(Lns_car(Lns_getVM().String_find(msg,"already exists", 1, true))){
         Lns_print([]LnsAny{msg})
     }
@@ -123,10 +123,10 @@ func (self *DBAccess_DBAccess) outputLog(message string) {
 // 48: decl @lns.@tags.@DBAccess.DBAccess.begin
 func (self *DBAccess_DBAccess) Begin() {
     __func__ := "@lns.@tags.@DBAccess.DBAccess.begin"
-    Log_log(Log_Level__Log, __func__, 50, Log_CreateMessage(DBAccess_begin___anonymous_1039_))
+    Log_log(Log_Level__Log, __func__, 50, Log_CreateMessage(DBAccess_begin___anonymous_1026_))
     
     if self.readonlyFlag{
-        Log_log(Log_Level__Err, __func__, 53, Log_CreateMessage(DBAccess_begin___anonymous_1042_))
+        Log_log(Log_Level__Err, __func__, 53, Log_CreateMessage(DBAccess_begin___anonymous_1028_))
         
         Lns_getVM().OS_exit(1)
     }
@@ -146,10 +146,10 @@ func (self *DBAccess_DBAccess) Commit() {
     }
     self.beginFlag = false
     
-    Log_log(Log_Level__Log, __func__, 78, Log_CreateMessage(DBAccess_commit___anonymous_1048_))
+    Log_log(Log_Level__Log, __func__, 78, Log_CreateMessage(DBAccess_commit___anonymous_1032_))
     
     self.db.Commit()
-    Log_log(Log_Level__Log, __func__, 82, Log_CreateMessage(DBAccess_commit___anonymous_1051_))
+    Log_log(Log_Level__Log, __func__, 82, Log_CreateMessage(DBAccess_commit___anonymous_1034_))
     
 }
 
@@ -243,7 +243,7 @@ func (self *DBAccess_DBAccess) MapRowList(tableName string,condition LnsAny,limi
 
 // 159: decl @lns.@tags.@DBAccess.DBAccess.createTables
 func (self *DBAccess_DBAccess) CreateTables(sqlTxt string) {
-    self.FP.Exec(sqlTxt, base.Base_errHandleForm(DBAccess_createTables___anonymous_1072_))
+    self.FP.Exec(sqlTxt, base.Base_errHandleForm(DBAccess_createTables___anonymous_1048_))
 }
 
 // 169: decl @lns.@tags.@DBAccess.DBAccess.insert

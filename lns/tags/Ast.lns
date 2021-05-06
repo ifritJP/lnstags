@@ -21,7 +21,7 @@ pub fn getFullNameSym<T>( filter:&Nodes.Filter<T>, symbolInfo:&LnsAst.SymbolInfo
 
 pub fn buildAst(
    logLevel:LnsLog.Level, pathList:&List<str>, projDir:str!, useStdInMod:str!,
-   forceAll:bool, astCallback:front.AstCallback )
+   forceAll:bool, transCtrlInfo:&Types.TransCtrlInfo, astCallback:front.AstCallback )
 {
    if #pathList == 0 {
       return;
@@ -40,6 +40,7 @@ pub fn buildAst(
    // ここでは 53 として処理する。
    // 本来はオプション指定した方が良いかも。
    lnsOpt.targetLuaVer = LuaVer.ver53;
+   lnsOpt.transCtrlInfo.legacyMutableControl = transCtrlInfo.legacyMutableControl;
    // .meta があったときでも ast 解析するように .Force 設定
    if forceAll {
       lnsOpt.transCtrlInfo.uptodateMode = .ForceAll;

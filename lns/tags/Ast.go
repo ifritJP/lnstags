@@ -23,19 +23,21 @@ func Ast_getFullNameSym(filter *Nodes.Nodes_Filter,symbolInfo *LnsAst.Ast_Symbol
 }
 
 // 22: decl @lns.@tags.@Ast.buildAst
-func Ast_buildAst(logLevel LnsInt,pathList *LnsList,projDir LnsAny,useStdInMod LnsAny,forceAll bool,astCallback front.Front_AstCallback) {
+func Ast_buildAst(logLevel LnsInt,pathList *LnsList,projDir LnsAny,useStdInMod LnsAny,forceAll bool,transCtrlInfo *Types.Types_TransCtrlInfo,astCallback front.Front_AstCallback) {
     if pathList.Len() == 0{
         return 
     }
     LnsLog.Log_setLevel(logLevel)
     LnsUtil.Util_setDebugFlag(false)
     if useStdInMod != nil{
-        useStdInMod_3671 := useStdInMod.(string)
-        Parser.Parser_StreamParser_setStdinStream(useStdInMod_3671)
+        useStdInMod_3670 := useStdInMod.(string)
+        Parser.Parser_StreamParser_setStdinStream(useStdInMod_3670)
     }
     var lnsOpt *LnsOpt.Option_Option
     lnsOpt = LnsOpt.Option_createDefaultOption(pathList, projDir)
     lnsOpt.TargetLuaVer = LuaVer.LuaVer_ver53
+    
+    lnsOpt.TransCtrlInfo.LegacyMutableControl = transCtrlInfo.LegacyMutableControl
     
     if forceAll{
         lnsOpt.TransCtrlInfo.UptodateMode = Types.Types_CheckingUptodateMode__ForceAll_Obj

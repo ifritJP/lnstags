@@ -1,11 +1,12 @@
 // This code is transcompiled by LuneScript.
 package tags
 import . "github.com/ifritJP/LuneScript/src/lune/base/runtime_go"
+import LnsTypes "github.com/ifritJP/LuneScript/src/lune/base"
 var init_main bool
 var main__mod__ string
 var main_dbPath string
-// 14: decl @lns.@tags.@main.inq
-func main_inq_1007_(inqMode string,pattern string) LnsInt {
+// 15: decl @lns.@tags.@main.inq
+func main_inq_1004_(inqMode string,pattern string) LnsInt {
     var db *DBCtrl_DBCtrl
     
     {
@@ -17,19 +18,19 @@ func main_inq_1007_(inqMode string,pattern string) LnsInt {
             db = _db.(*DBCtrl_DBCtrl)
         }
     }
-    if _switch97 := inqMode; _switch97 == Option_InqMode__Def {
+    if _switch98 := inqMode; _switch98 == Option_InqMode__Def {
         Inq_InqDef(db, pattern)
-    } else if _switch97 == Option_InqMode__Ref {
+    } else if _switch98 == Option_InqMode__Ref {
         Inq_InqRef(db, pattern, false)
-    } else if _switch97 == Option_InqMode__Set {
+    } else if _switch98 == Option_InqMode__Set {
         Inq_InqRef(db, pattern, true)
     }
     db.FP.Close()
     return 0
 }
 
-// 34: decl @lns.@tags.@main.build
-func main_build_1014_(pathList *LnsList) LnsInt {
+// 35: decl @lns.@tags.@main.build
+func main_build_1009_(pathList *LnsList,transCtrlInfo *LnsTypes.Types_TransCtrlInfo) LnsInt {
     DBCtrl_initDB(main_dbPath)
     var db *DBCtrl_DBCtrl
     
@@ -43,26 +44,26 @@ func main_build_1014_(pathList *LnsList) LnsInt {
         }
     }
     db.FP.Commit()
-    Analyze_start(db, pathList)
+    Analyze_start(db, pathList, transCtrlInfo)
     db.FP.Close()
     return 0
 }
 
 
-func __main___anonymous_1033_(item *DBCtrl_ItemNamespace) bool {
+func __main___anonymous_1022_(item *DBCtrl_ItemNamespace) bool {
     Lns_print([]LnsAny{item.FP.Get_name()})
     return true
 }
-// 48: decl @lns.@tags.@main.__main
+// 49: decl @lns.@tags.@main.__main
 func Main___main(args *LnsList) LnsInt {
     Lns_main_init()
     var option *Option_Option
     option = Option_analyzeArgs(args)
-    if _switch578 := option.FP.Get_mode(); _switch578 == Option_Mode__Init {
+    if _switch594 := option.FP.Get_mode(); _switch594 == Option_Mode__Init {
         DBCtrl_initDB(main_dbPath)
-    } else if _switch578 == Option_Mode__Build {
-        return main_build_1014_(option.FP.Get_pathList())
-    } else if _switch578 == Option_Mode__Update {
+    } else if _switch594 == Option_Mode__Build {
+        return main_build_1009_(option.FP.Get_pathList(), option.FP.Get_transCtrlInfo())
+    } else if _switch594 == Option_Mode__Update {
         var db *DBCtrl_DBCtrl
         
         {
@@ -87,8 +88,8 @@ func Main___main(args *LnsList) LnsInt {
             return true
         }))
         db.FP.Close()
-        return main_build_1014_(pathList)
-    } else if _switch578 == Option_Mode__Suffix {
+        return main_build_1009_(pathList, option.FP.Get_transCtrlInfo())
+    } else if _switch594 == Option_Mode__Suffix {
         var db *DBCtrl_DBCtrl
         
         {
@@ -100,11 +101,11 @@ func Main___main(args *LnsList) LnsInt {
                 db = _db.(*DBCtrl_DBCtrl)
             }
         }
-        db.FP.MapNamespaceSuffix(option.FP.Get_pattern(), DBCtrl_NameSpaceCallback(__main___anonymous_1033_))
+        db.FP.MapNamespaceSuffix(option.FP.Get_pattern(), DBCtrl_NameSpaceCallback(__main___anonymous_1022_))
         db.FP.Close()
-    } else if _switch578 == Option_Mode__Inq {
-        main_inq_1007_(option.FP.Get_inqMode(), option.FP.Get_pattern())
-    } else if _switch578 == Option_Mode__InqAt {
+    } else if _switch594 == Option_Mode__Inq {
+        main_inq_1004_(option.FP.Get_inqMode(), option.FP.Get_pattern())
+    } else if _switch594 == Option_Mode__InqAt {
         var analyzeFileInfo *Option_AnalyzeFileInfo
         analyzeFileInfo = option.FP.Get_analyzeFileInfo()
         var db *DBCtrl_DBCtrl
@@ -121,7 +122,7 @@ func Main___main(args *LnsList) LnsInt {
         var pattern string
         
         {
-            _pattern := Pattern_getPatterAt(db, analyzeFileInfo, option.FP.Get_inqMode())
+            _pattern := Pattern_getPatterAt(db, analyzeFileInfo, option.FP.Get_inqMode(), option.FP.Get_transCtrlInfo())
             if _pattern == nil{
                 db.FP.Close()
                 Lns_print([]LnsAny{Lns_getVM().String_format("illegal pos -- %s:%d:%d", []LnsAny{analyzeFileInfo.FP.Get_path(), analyzeFileInfo.FP.Get_lineNo(), analyzeFileInfo.FP.Get_column()})})
@@ -131,8 +132,8 @@ func Main___main(args *LnsList) LnsInt {
             }
         }
         db.FP.Close()
-        main_inq_1007_(option.FP.Get_inqMode(), pattern)
-    } else if _switch578 == Option_Mode__Dump {
+        main_inq_1004_(option.FP.Get_inqMode(), pattern)
+    } else if _switch594 == Option_Mode__Dump {
         var db *DBCtrl_DBCtrl
         
         {
@@ -146,7 +147,7 @@ func Main___main(args *LnsList) LnsInt {
         }
         db.FP.DumpAll()
         db.FP.Close()
-    } else if _switch578 == Option_Mode__Test {
+    } else if _switch594 == Option_Mode__Test {
         DBCtrl_test()
     }
     return 0
@@ -164,6 +165,7 @@ func Lns_main_init() {
     Lns_Inq_init()
     Lns_Log_init()
     Lns_Pattern_init()
+    LnsTypes.Lns_Types_init()
     main_dbPath = "lnstags.sqlite3"
 }
 func init() {
