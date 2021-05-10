@@ -5,43 +5,6 @@ local _lune = {}
 if _lune3 then
    _lune = _lune3
 end
-function _lune.newAlge( kind, vals )
-   local memInfoList = kind[ 2 ]
-   if not memInfoList then
-      return kind
-   end
-   return { kind[ 1 ], vals }
-end
-
-function _lune._fromList( obj, list, memInfoList )
-   if type( list ) ~= "table" then
-      return false
-   end
-   for index, memInfo in ipairs( memInfoList ) do
-      local val, key = memInfo.func( list[ index ], memInfo.child )
-      if val == nil and not memInfo.nilable then
-         return false, key and string.format( "%s[%s]", memInfo.name, key) or memInfo.name
-      end
-      obj[ index ] = val
-   end
-   return true
-end
-function _lune._AlgeFrom( Alge, val )
-   local work = Alge._name2Val[ val[ 1 ] ]
-   if not work then
-      return nil
-   end
-   if #work == 1 then
-     return work
-   end
-   local paramList = {}
-   local result, mess = _lune._fromList( paramList, val[ 2 ], work[ 2 ] )
-   if not result then
-      return nil, mess
-   end
-   return { work[ 1 ], paramList }
-end
-
 function _lune._Set_or( setObj, otherSet )
    for val in pairs( otherSet ) do
       setObj[ val ] = true
@@ -272,6 +235,7 @@ function tagFilter:addFileId( path, mod )
    end
    
    local fileId = self.db:addFile( path, mod )
+   
    Log.log( Log.Level.Debug, __func__, 34, function (  )
    
       return string.format( "add file -- %d, %s", fileId, path)
@@ -330,6 +294,7 @@ function tagFilter:registerType( typeInfo )
    local parentNsId = self:registerType( typeInfo:get_parentInfo() )
    local name = self:getFull( typeInfo, false )
    local nsId, added = self.db:addNamespace( name, parentNsId )
+   
    Log.log( Log.Level.Debug, __func__, 72, function (  )
    
       return string.format( "%s %s %d", name, added, nsId)
@@ -354,6 +319,7 @@ function tagFilter:registerSymbol( symbolInfo )
    local parentNsId = self:registerType( symbolInfo:get_namespaceTypeInfo() )
    local name = Ast.getFullNameSym( self, symbolInfo )
    local nsId, added = self.db:addNamespace( name, parentNsId )
+   
    Log.log( Log.Level.Debug, __func__, 86, function (  )
    
       return string.format( "%s %s %d", name, added, nsId)
@@ -371,6 +337,7 @@ function tagFilter:registDeclSym( symbolInfo )
    local pos = _lune.unwrap( _lune.nilacc( symbolInfo:get_pos(), 'get_orgPos', 'callmtd' ))
    local fileId = self:getFileId( pos.streamName )
    self.db:addSymbolDecl( symNsId, fileId, pos.lineNo, pos.column )
+   
    Log.log( Log.Level.Debug, __func__, 96, function (  )
    
       return symbolInfo:get_name()
@@ -510,7 +477,7 @@ function tagFilter:registerDecl( nodeManager )
          end
          table.sort( __sorted )
          for __index, name in ipairs( __sorted ) do
-            local _3965 = __map[ name ]
+            local _168 = __map[ name ]
             do
                do
                   local _exp = _lune.nilacc( workNode:get_algeType():get_scope(), 'getSymbolInfoChild', 'callmtd' , name )
@@ -586,6 +553,7 @@ function tagFilter:registerRefs( nodeManager )
       
       local nsId, added = self:registerSymbol( symbolInfo )
       if added and not LnsAst.isBuiltin( symbolInfo:get_namespaceTypeInfo():get_typeId().id ) then
+         
          Log.log( Log.Level.Err, __func__, 258, function (  )
          
             return string.format( "no register sym -- %d:%d:%s", pos.lineNo, pos.column, Ast.getFullNameSym( self, symbolInfo ))
@@ -601,6 +569,7 @@ function tagFilter:registerRefs( nodeManager )
    
       local nsId, added = self:registerType( typeInfo )
       if added and not LnsAst.isBuiltin( typeInfo:get_typeId().id ) then
+         
          Log.log( Log.Level.Err, __func__, 267, function (  )
          
             return string.format( "no register type -- %d:%d:%s", pos.lineNo, pos.column, self:getFull( typeInfo, false ))
@@ -690,6 +659,7 @@ function tagFilter:registerRefs( nodeManager )
             registerRefSym( _exp, workNode:get_pos(), false )
          else
             if not workNode:get_macroArgFlag() then
+               
                Log.log( Log.Level.Warn, __func__, 352, function (  )
                
                   return string.format( "no symbolInfo -- %s, %s:%d:%d", workNode:get_field().txt, workNode:get_pos().streamName, workNode:get_pos().lineNo, workNode:get_pos().column)
@@ -765,6 +735,7 @@ end
 local function dumpRoot( rootNode, db, streamName )
    local __func__ = '@lns.@tags.@Analyze.dumpRoot'
 
+   
    Log.log( Log.Level.Log, __func__, 404, function (  )
    
       return streamName

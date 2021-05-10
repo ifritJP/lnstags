@@ -13,8 +13,8 @@ import LnsLog "github.com/ifritJP/LuneScript/src/lune/base"
 import LnsUtil "github.com/ifritJP/LuneScript/src/lune/base"
 var init_Pattern bool
 var Pattern__mod__ string
-// for 287
-func Pattern_convExp1983(arg1 []LnsAny) string {
+// for 288
+func Pattern_convExp1988(arg1 []LnsAny) string {
     return Lns_getFromMulti( arg1, 0 ).(string)
 }
 
@@ -25,7 +25,7 @@ func Pattern_convExp1983(arg1 []LnsAny) string {
 
 
 
-// 270: decl @lns.@tags.@Pattern.getPatterAt
+// 271: decl @lns.@tags.@Pattern.getPatterAt
 func Pattern_getPatterAt(db *DBCtrl_DBCtrl,analyzeFileInfo *Option_AnalyzeFileInfo,inqMod string,transCtrlInfo *Types.Types_TransCtrlInfo) LnsAny {
     var fileId LnsInt
     fileId = db.FP.GetFileIdFromPath(analyzeFileInfo.FP.Get_path())
@@ -49,7 +49,7 @@ func Pattern_getPatterAt(db *DBCtrl_DBCtrl,analyzeFileInfo *Option_AnalyzeFileIn
         Lns_GetEnv().SetStackVal( Lns_car(Lns_getVM().String_find(path,"^%.%.", nil, nil))) ||
         Lns_GetEnv().SetStackVal( Lns_car(Lns_getVM().String_find(path,"^/", nil, nil))) )){
         var dir string
-        dir = Pattern_convExp1983(Lns_2DDD(Lns_getVM().String_gsub(path,"/[^/]+$", "")))
+        dir = Pattern_convExp1988(Lns_2DDD(Lns_getVM().String_gsub(path,"/[^/]+$", "")))
         projDir = LnsUtil.Util_searchProjDir(dir)
         
     }
@@ -67,7 +67,7 @@ func Pattern_getPatterAt(db *DBCtrl_DBCtrl,analyzeFileInfo *Option_AnalyzeFileIn
             filter = NewPattern_SyntaxFilter(ast)
             pattern = filter.FP.GetPattern(path, analyzeFileInfo, inqMod)
             
-            Log_log(Log_Level__Log, __func__, 304, Log_CreateMessage(func() string {
+            Log_log(Log_Level__Log, __func__, 305, Log_CreateMessage(func() string {
                 return Lns_getVM().String_format("pattern -- %s", []LnsAny{pattern})
             }))
             
@@ -210,12 +210,12 @@ func NewPattern_SyntaxFilter(arg1 *TransUnit.TransUnit_ASTInfo) *Pattern_SyntaxF
 }
 // 27: DeclConstr
 func (self *Pattern_SyntaxFilter) InitPattern_SyntaxFilter(ast *TransUnit.TransUnit_ASTInfo) {
-    self.InitNodes_Filter(true, ast.FP.Get_moduleTypeInfo(), ast.FP.Get_moduleTypeInfo().FP.Get_scope())
+    self.InitNodes_Filter(true, ast.FP.Get_exportInfo().FP.Get_moduleTypeInfo(), ast.FP.Get_exportInfo().FP.Get_moduleTypeInfo().FP.Get_scope())
     self.ast = ast
     
 }
 
-// 33: decl @lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode
+// 34: decl @lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode
 func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_AnalyzeFileInfo,inqMod string,nearest *Nodes.Nodes_Node) LnsAny {
     __func__ := "@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode"
     var isInner func(pos *Types.Types_Position,name string) bool
@@ -237,11 +237,11 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
         _workNode := Nodes.Nodes_ImportNodeDownCastF(nearest.FP)
         if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_ImportNode)
-            if _switch297 := inqMod; _switch297 == Option_InqMode__Def {
+            if _switch300 := inqMod; _switch300 == Option_InqMode__Def {
                 return self.FP.GetFull(workNode.FP.Get_expType(), false)
-            } else if _switch297 == Option_InqMode__Ref {
+            } else if _switch300 == Option_InqMode__Ref {
                 return Ast_getFullNameSym(&self.Nodes_Filter, workNode.FP.Get_symbolInfo())
-            } else if _switch297 == Option_InqMode__Set {
+            } else if _switch300 == Option_InqMode__Set {
             }
             return nil
         }
@@ -526,14 +526,14 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
             
         }
     }
-    Log_log(Log_Level__Err, __func__, 191, Log_CreateMessage(func() string {
+    Log_log(Log_Level__Err, __func__, 192, Log_CreateMessage(func() string {
         return Lns_getVM().String_format("unknown pattern -- %s", []LnsAny{Nodes.Nodes_getNodeKindName(nearest.FP.Get_kind())})
     }))
     
     return nil
 }
 
-// 195: decl @lns.@tags.@Pattern.SyntaxFilter.getPattern
+// 196: decl @lns.@tags.@Pattern.SyntaxFilter.getPattern
 func (self *Pattern_SyntaxFilter) GetPattern(path string,analyzeFileInfo *Option_AnalyzeFileInfo,inqMod string) LnsAny {
     var isInner func(pos *Types.Types_Position,name string) bool
     isInner = func(pos *Types.Types_Position,name string) bool {

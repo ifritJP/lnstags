@@ -430,6 +430,7 @@ end
 local function open( path, readonly )
    local __func__ = '@lns.@tags.@DBCtrl.open'
 
+   
    Log.log( Log.Level.Log, __func__, 182, function (  )
    
       return "open"
@@ -456,6 +457,7 @@ local function open( path, readonly )
    if  nil == item then
       local _item = item
    
+      
       Log.log( Log.Level.Err, __func__, 196, function (  )
       
          return "unknown version"
@@ -466,6 +468,7 @@ local function open( path, readonly )
    end
    
    if tonumber( item:get_val() ) ~= DB_VERSION then
+      
       Log.log( Log.Level.Err, __func__, 201, function (  )
       
          return string.format( "not support version. -- %s", item:get_val())
@@ -1006,6 +1009,7 @@ function DBCtrl:getFileIdFromPath( path )
       return fileId
    end
    
+   
    Log.log( Log.Level.Err, __func__, 418, function (  )
    
       return string.format( "not found file -- %s", path)
@@ -1190,6 +1194,7 @@ end
 local function create( dbPath )
    local __func__ = '@lns.@tags.@DBCtrl.create'
 
+   
    Log.log( Log.Level.Log, __func__, 576, function (  )
    
       return "create"
@@ -1413,7 +1418,7 @@ local function test(  )
    
    do
       local _
-      local _638, added = db:addNamespace( "@hoge", _moduleObj.rootNsId )
+      local _587, added = db:addNamespace( "@hoge", _moduleObj.rootNsId )
       print( "added", added )
    end
    

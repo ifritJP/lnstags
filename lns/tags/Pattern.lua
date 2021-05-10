@@ -5,43 +5,6 @@ local _lune = {}
 if _lune3 then
    _lune = _lune3
 end
-function _lune.newAlge( kind, vals )
-   local memInfoList = kind[ 2 ]
-   if not memInfoList then
-      return kind
-   end
-   return { kind[ 1 ], vals }
-end
-
-function _lune._fromList( obj, list, memInfoList )
-   if type( list ) ~= "table" then
-      return false
-   end
-   for index, memInfo in ipairs( memInfoList ) do
-      local val, key = memInfo.func( list[ index ], memInfo.child )
-      if val == nil and not memInfo.nilable then
-         return false, key and string.format( "%s[%s]", memInfo.name, key) or memInfo.name
-      end
-      obj[ index ] = val
-   end
-   return true
-end
-function _lune._AlgeFrom( Alge, val )
-   local work = Alge._name2Val[ val[ 1 ] ]
-   if not work then
-      return nil
-   end
-   if #work == 1 then
-     return work
-   end
-   local paramList = {}
-   local result, mess = _lune._fromList( paramList, val[ 2 ], work[ 2 ] )
-   if not result then
-      return nil, mess
-   end
-   return { work[ 1 ], paramList }
-end
-
 function _lune._Set_or( setObj, otherSet )
    for val in pairs( otherSet ) do
       setObj[ val ] = true
@@ -211,7 +174,7 @@ function SyntaxFilter.new( ast )
    return obj
 end
 function SyntaxFilter:__init(ast) 
-   Nodes.Filter.__init( self,true, ast:get_moduleTypeInfo(), ast:get_moduleTypeInfo():get_scope())
+   Nodes.Filter.__init( self,true, ast:get_exportInfo():get_moduleTypeInfo(), ast:get_exportInfo():get_moduleTypeInfo():get_scope())
    
    self.ast = ast
 end
@@ -226,6 +189,7 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
       
       return false
    end
+   
    
    
    
@@ -562,7 +526,8 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
    end
    
    
-   Log.log( Log.Level.Err, __func__, 191, function (  )
+   
+   Log.log( Log.Level.Err, __func__, 192, function (  )
    
       return string.format( "unknown pattern -- %s", Nodes.getNodeKindName( nearest:get_kind() ))
    end )
@@ -652,6 +617,7 @@ function SyntaxFilter:getPattern( path, analyzeFileInfo, inqMod )
             end
             
             
+            
             Log.log( Log.Level.Trace, __func__, 19, function (  )
             
                return string.format( "%s %s:%4d:%3d -- %s", "visit:", node:get_effectivePos().streamName, node:get_effectivePos().lineNo, node:get_effectivePos().column, Nodes.getNodeKindName( node:get_kind() ))
@@ -716,7 +682,8 @@ local function getPatterAt( db, analyzeFileInfo, inqMod, transCtrlInfo )
       if ast:get_streamName() == path then
          local filter = SyntaxFilter.new(ast)
          pattern = filter:getPattern( path, analyzeFileInfo, inqMod )
-         Log.log( Log.Level.Log, __func__, 304, function (  )
+         
+         Log.log( Log.Level.Log, __func__, 305, function (  )
          
             return string.format( "pattern -- %s", pattern)
          end )

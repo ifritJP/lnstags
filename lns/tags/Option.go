@@ -75,8 +75,8 @@ type analyzeArgs__getNextOpNonNilFunc_1076_ func (arg1 string) string
 // 54: decl @lns.@tags.@Option.printUsage
 func Option_printUsage_1068_(messages LnsAny) {
     if messages != nil{
-        messages_152 := messages.(string)
-        Lns_io_stderr.Write(Lns_getVM().String_format("%s\n", []LnsAny{messages_152}))
+        messages_63 := messages.(string)
+        Lns_io_stderr.Write(Lns_getVM().String_format("%s\n", []LnsAny{messages_63}))
     }
     Lns_print([]LnsAny{"usage: lnstags init [option]"})
     Lns_print([]LnsAny{"usage: lnstags build [option] filepath"})
@@ -266,8 +266,8 @@ func Option_analyzeArgs(argList *LnsList) *Option_Option {
         }
     }
     if mode != nil{
-        mode_223 := mode.(string)
-        option.mode = mode_223
+        mode_134 := mode.(string)
+        option.mode = mode_134
         
         return option
     }

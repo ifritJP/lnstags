@@ -26,7 +26,8 @@ class SyntaxFilter extend Nodes.Filter<str> {
    let ast: TransUnit.ASTInfo;
    local fn __init( ast: TransUnit.ASTInfo )
    {
-      super( true, ast.$moduleTypeInfo, ast.$moduleTypeInfo.$scope );
+      super( true, ast.$exportInfo.$moduleTypeInfo,
+             ast.$exportInfo.$moduleTypeInfo.$scope );
       self.ast = ast;
    }
 

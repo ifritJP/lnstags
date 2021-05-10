@@ -141,6 +141,7 @@ end
 function DBAccess:begin(  )
    local __func__ = '@lns.@tags.@DBAccess.DBAccess.begin'
 
+   
    Log.log( Log.Level.Log, __func__, 50, function (  )
    
       return "start"
@@ -148,6 +149,7 @@ function DBAccess:begin(  )
    
    
    if self.readonlyFlag then
+      
       Log.log( Log.Level.Err, __func__, 53, function (  )
       
          return "db mode is read only"
@@ -176,6 +178,7 @@ function DBAccess:commit(  )
    
    self.beginFlag = false
    
+   
    Log.log( Log.Level.Log, __func__, 78, function (  )
    
       return "commit: start"
@@ -183,6 +186,7 @@ function DBAccess:commit(  )
    
    
    self.db:Commit(  )
+   
    
    Log.log( Log.Level.Log, __func__, 82, function (  )
    

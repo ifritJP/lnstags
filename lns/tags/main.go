@@ -30,7 +30,7 @@ func main_inq_1004_(inqMode string,pattern string) LnsInt {
 }
 
 // 35: decl @lns.@tags.@main.build
-func main_build_1009_(pathList *LnsList,transCtrlInfo *LnsTypes.Types_TransCtrlInfo) LnsInt {
+func main_build_1010_(pathList *LnsList,transCtrlInfo *LnsTypes.Types_TransCtrlInfo) LnsInt {
     DBCtrl_initDB(main_dbPath)
     var db *DBCtrl_DBCtrl
     
@@ -50,7 +50,7 @@ func main_build_1009_(pathList *LnsList,transCtrlInfo *LnsTypes.Types_TransCtrlI
 }
 
 
-func __main___anonymous_1022_(item *DBCtrl_ItemNamespace) bool {
+func __main___anonymous_1025_(item *DBCtrl_ItemNamespace) bool {
     Lns_print([]LnsAny{item.FP.Get_name()})
     return true
 }
@@ -62,7 +62,7 @@ func Main___main(args *LnsList) LnsInt {
     if _switch594 := option.FP.Get_mode(); _switch594 == Option_Mode__Init {
         DBCtrl_initDB(main_dbPath)
     } else if _switch594 == Option_Mode__Build {
-        return main_build_1009_(option.FP.Get_pathList(), option.FP.Get_transCtrlInfo())
+        return main_build_1010_(option.FP.Get_pathList(), option.FP.Get_transCtrlInfo())
     } else if _switch594 == Option_Mode__Update {
         var db *DBCtrl_DBCtrl
         
@@ -88,7 +88,7 @@ func Main___main(args *LnsList) LnsInt {
             return true
         }))
         db.FP.Close()
-        return main_build_1009_(pathList, option.FP.Get_transCtrlInfo())
+        return main_build_1010_(pathList, option.FP.Get_transCtrlInfo())
     } else if _switch594 == Option_Mode__Suffix {
         var db *DBCtrl_DBCtrl
         
@@ -101,7 +101,7 @@ func Main___main(args *LnsList) LnsInt {
                 db = _db.(*DBCtrl_DBCtrl)
             }
         }
-        db.FP.MapNamespaceSuffix(option.FP.Get_pattern(), DBCtrl_NameSpaceCallback(__main___anonymous_1022_))
+        db.FP.MapNamespaceSuffix(option.FP.Get_pattern(), DBCtrl_NameSpaceCallback(__main___anonymous_1025_))
         db.FP.Close()
     } else if _switch594 == Option_Mode__Inq {
         main_inq_1004_(option.FP.Get_inqMode(), option.FP.Get_pattern())
