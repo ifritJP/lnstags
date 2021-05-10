@@ -14,7 +14,7 @@ import LnsUtil "github.com/ifritJP/LuneScript/src/lune/base"
 var init_Pattern bool
 var Pattern__mod__ string
 // for 288
-func Pattern_convExp1988(arg1 []LnsAny) string {
+func Pattern_convExp1974(arg1 []LnsAny) string {
     return Lns_getFromMulti( arg1, 0 ).(string)
 }
 
@@ -49,7 +49,7 @@ func Pattern_getPatterAt(db *DBCtrl_DBCtrl,analyzeFileInfo *Option_AnalyzeFileIn
         Lns_GetEnv().SetStackVal( Lns_car(Lns_getVM().String_find(path,"^%.%.", nil, nil))) ||
         Lns_GetEnv().SetStackVal( Lns_car(Lns_getVM().String_find(path,"^/", nil, nil))) )){
         var dir string
-        dir = Pattern_convExp1988(Lns_2DDD(Lns_getVM().String_gsub(path,"/[^/]+$", "")))
+        dir = Pattern_convExp1974(Lns_2DDD(Lns_getVM().String_gsub(path,"/[^/]+$", "")))
         projDir = LnsUtil.Util_searchProjDir(dir)
         
     }
@@ -237,11 +237,11 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(analyzeFileInfo *Option_Ana
         _workNode := Nodes.Nodes_ImportNodeDownCastF(nearest.FP)
         if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_ImportNode)
-            if _switch300 := inqMod; _switch300 == Option_InqMode__Def {
+            if _switch298 := inqMod; _switch298 == Option_InqMode__Def {
                 return self.FP.GetFull(workNode.FP.Get_expType(), false)
-            } else if _switch300 == Option_InqMode__Ref {
+            } else if _switch298 == Option_InqMode__Ref {
                 return Ast_getFullNameSym(&self.Nodes_Filter, workNode.FP.Get_symbolInfo())
-            } else if _switch300 == Option_InqMode__Set {
+            } else if _switch298 == Option_InqMode__Set {
             }
             return nil
         }
