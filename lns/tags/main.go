@@ -6,11 +6,11 @@ var init_main bool
 var main__mod__ string
 var main_dbPath string
 // 15: decl @lns.@tags.@main.inq
-func main_inq_1004_(inqMode string,pattern string) LnsInt {
+func main_inq_1004_(_env *LnsEnv, inqMode string,pattern string) LnsInt {
     var db *DBCtrl_DBCtrl
     
     {
-        _db := DBCtrl_open(main_dbPath, false)
+        _db := DBCtrl_open(_env, main_dbPath, false)
         if _db == nil{
             Lns_print([]LnsAny{"error"})
             return -1
@@ -19,23 +19,23 @@ func main_inq_1004_(inqMode string,pattern string) LnsInt {
         }
     }
     if _switch98 := inqMode; _switch98 == Option_InqMode__Def {
-        Inq_InqDef(db, pattern)
+        Inq_InqDef(_env, db, pattern)
     } else if _switch98 == Option_InqMode__Ref {
-        Inq_InqRef(db, pattern, false)
+        Inq_InqRef(_env, db, pattern, false)
     } else if _switch98 == Option_InqMode__Set {
-        Inq_InqRef(db, pattern, true)
+        Inq_InqRef(_env, db, pattern, true)
     }
-    db.FP.Close()
+    db.FP.Close(_env)
     return 0
 }
 
 // 35: decl @lns.@tags.@main.build
-func main_build_1010_(pathList *LnsList,transCtrlInfo *LnsTypes.Types_TransCtrlInfo) LnsInt {
-    DBCtrl_initDB(main_dbPath)
+func main_build_1010_(_env *LnsEnv, pathList *LnsList,transCtrlInfo *LnsTypes.Types_TransCtrlInfo) LnsInt {
+    DBCtrl_initDB(_env, main_dbPath)
     var db *DBCtrl_DBCtrl
     
     {
-        _db := DBCtrl_open(main_dbPath, false)
+        _db := DBCtrl_open(_env, main_dbPath, false)
         if _db == nil{
             Lns_print([]LnsAny{"error"})
             return 1
@@ -43,31 +43,31 @@ func main_build_1010_(pathList *LnsList,transCtrlInfo *LnsTypes.Types_TransCtrlI
             db = _db.(*DBCtrl_DBCtrl)
         }
     }
-    db.FP.Commit()
-    Analyze_start(db, pathList, transCtrlInfo)
-    db.FP.Close()
+    db.FP.Commit(_env)
+    Analyze_start(_env, db, pathList, transCtrlInfo)
+    db.FP.Close(_env)
     return 0
 }
 
 
-func __main___anonymous_1025_(item *DBCtrl_ItemNamespace) bool {
-    Lns_print([]LnsAny{item.FP.Get_name()})
+func __main___anonymous_1025_(_env *LnsEnv, item *DBCtrl_ItemNamespace) bool {
+    Lns_print([]LnsAny{item.FP.Get_name(_env)})
     return true
 }
 // 49: decl @lns.@tags.@main.__main
-func Main___main(args *LnsList) LnsInt {
-    Lns_main_init()
+func Main___main(_env *LnsEnv, args *LnsList) LnsInt {
+    Lns_main_init( _env )
     var option *Option_Option
-    option = Option_analyzeArgs(args)
-    if _switch594 := option.FP.Get_mode(); _switch594 == Option_Mode__Init {
-        DBCtrl_initDB(main_dbPath)
+    option = Option_analyzeArgs(_env, args)
+    if _switch594 := option.FP.Get_mode(_env); _switch594 == Option_Mode__Init {
+        DBCtrl_initDB(_env, main_dbPath)
     } else if _switch594 == Option_Mode__Build {
-        return main_build_1010_(option.FP.Get_pathList(), option.FP.Get_transCtrlInfo())
+        return main_build_1010_(_env, option.FP.Get_pathList(_env), option.FP.Get_transCtrlInfo(_env))
     } else if _switch594 == Option_Mode__Update {
         var db *DBCtrl_DBCtrl
         
         {
-            _db := DBCtrl_open(main_dbPath, true)
+            _db := DBCtrl_open(_env, main_dbPath, true)
             if _db == nil{
                 Lns_print([]LnsAny{"error"})
                 return 1
@@ -76,24 +76,24 @@ func Main___main(args *LnsList) LnsInt {
             }
         }
         var projId LnsAny
-        projId = db.FP.GetProjId("./")
+        projId = db.FP.GetProjId(_env, "./")
         var pathList *LnsList
         pathList = NewLnsList([]LnsAny{})
-        db.FP.MapFilePath(DBCtrl_MapFileCallBack(func(item *DBCtrl_ItemFilePath) bool {
-            if Lns_isCondTrue( Lns_GetEnv().PopVal( Lns_GetEnv().IncStack() ||
-                Lns_GetEnv().SetStackVal( item.FP.Get_projId() == projId) &&
-                Lns_GetEnv().SetStackVal( Lns_op_not(db.FP.GetMainFilePath(item.FP.Get_id()))) ).(bool)){
-                pathList.Insert(item.FP.Get_path())
+        db.FP.MapFilePath(_env, DBCtrl_MapFileCallBack(func(_env *LnsEnv, item *DBCtrl_ItemFilePath) bool {
+            if Lns_isCondTrue( _env.PopVal( _env.IncStack() ||
+                _env.SetStackVal( item.FP.Get_projId(_env) == projId) &&
+                _env.SetStackVal( Lns_op_not(db.FP.GetMainFilePath(_env, item.FP.Get_id(_env)))) ).(bool)){
+                pathList.Insert(item.FP.Get_path(_env))
             }
             return true
         }))
-        db.FP.Close()
-        return main_build_1010_(pathList, option.FP.Get_transCtrlInfo())
+        db.FP.Close(_env)
+        return main_build_1010_(_env, pathList, option.FP.Get_transCtrlInfo(_env))
     } else if _switch594 == Option_Mode__Suffix {
         var db *DBCtrl_DBCtrl
         
         {
-            _db := DBCtrl_open(main_dbPath, true)
+            _db := DBCtrl_open(_env, main_dbPath, true)
             if _db == nil{
                 Lns_print([]LnsAny{"error"})
                 return 1
@@ -101,17 +101,17 @@ func Main___main(args *LnsList) LnsInt {
                 db = _db.(*DBCtrl_DBCtrl)
             }
         }
-        db.FP.MapNamespaceSuffix(option.FP.Get_pattern(), DBCtrl_NameSpaceCallback(__main___anonymous_1025_))
-        db.FP.Close()
+        db.FP.MapNamespaceSuffix(_env, option.FP.Get_pattern(_env), DBCtrl_NameSpaceCallback(__main___anonymous_1025_))
+        db.FP.Close(_env)
     } else if _switch594 == Option_Mode__Inq {
-        main_inq_1004_(option.FP.Get_inqMode(), option.FP.Get_pattern())
+        main_inq_1004_(_env, option.FP.Get_inqMode(_env), option.FP.Get_pattern(_env))
     } else if _switch594 == Option_Mode__InqAt {
         var analyzeFileInfo *Option_AnalyzeFileInfo
-        analyzeFileInfo = option.FP.Get_analyzeFileInfo()
+        analyzeFileInfo = option.FP.Get_analyzeFileInfo(_env)
         var db *DBCtrl_DBCtrl
         
         {
-            _db := DBCtrl_open(main_dbPath, true)
+            _db := DBCtrl_open(_env, main_dbPath, true)
             if _db == nil{
                 Lns_print([]LnsAny{"error"})
                 return 1
@@ -122,22 +122,22 @@ func Main___main(args *LnsList) LnsInt {
         var pattern string
         
         {
-            _pattern := Pattern_getPatterAt(db, analyzeFileInfo, option.FP.Get_inqMode(), option.FP.Get_transCtrlInfo())
+            _pattern := Pattern_getPatterAt(_env, db, analyzeFileInfo, option.FP.Get_inqMode(_env), option.FP.Get_transCtrlInfo(_env))
             if _pattern == nil{
-                db.FP.Close()
-                Lns_print([]LnsAny{Lns_getVM().String_format("illegal pos -- %s:%d:%d", []LnsAny{analyzeFileInfo.FP.Get_path(), analyzeFileInfo.FP.Get_lineNo(), analyzeFileInfo.FP.Get_column()})})
+                db.FP.Close(_env)
+                Lns_print([]LnsAny{_env.LuaVM.String_format("illegal pos -- %s:%d:%d", []LnsAny{analyzeFileInfo.FP.Get_path(_env), analyzeFileInfo.FP.Get_lineNo(_env), analyzeFileInfo.FP.Get_column(_env)})})
                 return 1
             } else {
                 pattern = _pattern.(string)
             }
         }
-        db.FP.Close()
-        main_inq_1004_(option.FP.Get_inqMode(), pattern)
+        db.FP.Close(_env)
+        main_inq_1004_(_env, option.FP.Get_inqMode(_env), pattern)
     } else if _switch594 == Option_Mode__Dump {
         var db *DBCtrl_DBCtrl
         
         {
-            _db := DBCtrl_open(main_dbPath, true)
+            _db := DBCtrl_open(_env, main_dbPath, true)
             if _db == nil{
                 Lns_print([]LnsAny{"error"})
                 return 1
@@ -145,27 +145,27 @@ func Main___main(args *LnsList) LnsInt {
                 db = _db.(*DBCtrl_DBCtrl)
             }
         }
-        db.FP.DumpAll()
-        db.FP.Close()
+        db.FP.DumpAll(_env)
+        db.FP.Close(_env)
     } else if _switch594 == Option_Mode__Test {
-        DBCtrl_test()
+        DBCtrl_test(_env)
     }
     return 0
 }
 
-func Lns_main_init() {
+func Lns_main_init(_env *LnsEnv) {
     if init_main { return }
     init_main = true
     main__mod__ = "@lns.@tags.@main"
     Lns_InitMod()
-    Lns_DBCtrl_init()
-    Lns_Analyze_init()
-    Lns_Option_init()
-    Lns_Util_init()
-    Lns_Inq_init()
-    Lns_Log_init()
-    Lns_Pattern_init()
-    LnsTypes.Lns_Types_init()
+    Lns_DBCtrl_init(_env)
+    Lns_Analyze_init(_env)
+    Lns_Option_init(_env)
+    Lns_Util_init(_env)
+    Lns_Inq_init(_env)
+    Lns_Log_init(_env)
+    Lns_Pattern_init(_env)
+    LnsTypes.Lns_Types_init(_env)
     main_dbPath = "lnstags.sqlite3"
 }
 func init() {

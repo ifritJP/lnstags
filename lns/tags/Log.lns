@@ -1,3 +1,5 @@
+_lune_control default_async_all;
+
 pub enum Level {
    Fatal,
    Err,
@@ -8,14 +10,15 @@ pub enum Level {
    Trace,
 }
 
-let mut name2levelMap:Map<str,Level> = {};
-name2levelMap[ "fatal" ] = .Fatal;
-name2levelMap[ "error" ] = .Err;
-name2levelMap[ "warn" ] = .Warn;
-name2levelMap[ "log" ] = .Log;
-name2levelMap[ "info" ] = .Info;
-name2levelMap[ "debug" ] = .Debug;
-name2levelMap[ "trace" ] = .Trace;
+let mut name2levelMap:&Map<str,Level> = {
+   "fatal": .Fatal,
+   "error": .Err,
+   "warn": .Warn,
+   "log": .Log,
+   "info": .Info,
+   "debug": .Debug,
+   "trace": .Trace,
+};
 
 pub fn str2level( txt:str ) : Level! {
    return name2levelMap[ txt ];
@@ -34,9 +37,9 @@ pub fn enableDetail( flag:bool ) {
 
 pub form CreateMessage(): str;
 
-let mut logStream:oStream = io.stderr;
 
 pub fn log( level:Level, funcName:str, lineNo:int, callback: CreateMessage ) {
+   let logStream:oStream = io.stderr;
    if level <= outputLevel {
       if detail {
          let nowClock = os.clock();

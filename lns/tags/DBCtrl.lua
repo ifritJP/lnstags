@@ -189,6 +189,8 @@ end
 if not _lune3 then
    _lune3 = _lune
 end
+
+
 local base = _lune.loadModule( 'go/github:com.ifritJP.lnssqlite3.src.lns.sqlite3.base' )
 local DBAccess = _lune.loadModule( 'lns.tags.DBAccess' )
 local Log = _lune.loadModule( 'lns.tags.Log' )
@@ -430,7 +432,7 @@ end
 local function open( path, readonly )
    local __func__ = '@lns.@tags.@DBCtrl.open'
 
-   Log.log( Log.Level.Log, __func__, 182, function (  )
+   Log.log( Log.Level.Log, __func__, 186, function (  )
    
       return "open"
    end )
@@ -456,7 +458,7 @@ local function open( path, readonly )
    if  nil == item then
       local _item = item
    
-      Log.log( Log.Level.Err, __func__, 196, function (  )
+      Log.log( Log.Level.Err, __func__, 200, function (  )
       
          return "unknown version"
       end )
@@ -466,7 +468,7 @@ local function open( path, readonly )
    end
    
    if tonumber( item:get_val() ) ~= DB_VERSION then
-      Log.log( Log.Level.Err, __func__, 201, function (  )
+      Log.log( Log.Level.Err, __func__, 205, function (  )
       
          return string.format( "not support version. -- %s", item:get_val())
       end )
@@ -1006,7 +1008,7 @@ function DBCtrl:getFileIdFromPath( path )
       return fileId
    end
    
-   Log.log( Log.Level.Err, __func__, 418, function (  )
+   Log.log( Log.Level.Err, __func__, 422, function (  )
    
       return string.format( "not found file -- %s", path)
    end )
@@ -1190,7 +1192,7 @@ end
 local function create( dbPath )
    local __func__ = '@lns.@tags.@DBCtrl.create'
 
-   Log.log( Log.Level.Log, __func__, 576, function (  )
+   Log.log( Log.Level.Log, __func__, 580, function (  )
    
       return "create"
    end )

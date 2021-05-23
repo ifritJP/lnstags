@@ -1,5 +1,7 @@
 // -*- coding: utf-8 -*-
 
+_lune_control default_async_all;
+
 import go/github:com.ifritJP.LuneScript.src.lune.base.Option as LnsOpt;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Types;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Parser;
@@ -21,7 +23,8 @@ pub fn getFullNameSym<T>( filter:&Nodes.Filter<T>, symbolInfo:&LnsAst.SymbolInfo
 
 pub fn buildAst(
    logLevel:LnsLog.Level, pathList:&List<str>, projDir:str!, useStdInMod:str!,
-   forceAll:bool, transCtrlInfo:&Types.TransCtrlInfo, astCallback:front.AstCallback )
+   forceAll:bool, transCtrlInfo:&Types.TransCtrlInfo,
+   astCallback:front.AstCallback ) __noasync
 {
    if #pathList == 0 {
       return;

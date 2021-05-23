@@ -1,5 +1,8 @@
 // -*- coding: utf-8 -*-
 
+_lune_control default_async_all;
+
+
 import go/github:com.ifritJP.lnssqlite3.src.lns.sqlite3.base;
 import lns.tags.Log;
 

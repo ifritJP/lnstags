@@ -1,4 +1,8 @@
 // -*- coding: utf-8 -*-
+
+_lune_control default_async_all;
+
+
 import go/github:com.ifritJP.lnssqlite3.src.lns.sqlite3.base;
 import lns.tags.DBAccess;
 import lns.tags.Log;
@@ -40,7 +44,7 @@ pub class DBCtrl {
       let mut id:stem! = nil;
       access.mapRowList(
          tableName, nil, 1, "MAX(id)", nil,
-         fn ( items:&Map<str,&stem>): bool {
+         fn ( items:&Map<str,&stem>) __trans: bool {
             id = items.id;
             return false;
          },
@@ -120,7 +124,7 @@ pub class DBCtrl {
    {
       let mut rows:List<&Map<str,&stem>> = [];
       self.mapRowList( tableName, condition, limit, attrib,
-		       fn( items: &Map<str,&stem> ) : bool
+		       fn( items: &Map<str,&stem> ) __trans: bool
                        {
 		          rows.insert( items );
 		          return true;

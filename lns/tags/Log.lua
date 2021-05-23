@@ -58,6 +58,8 @@ end
 if not _lune3 then
    _lune3 = _lune
 end
+
+
 local Level = {}
 _moduleObj.Level = Level
 Level._val2NameMap = {}
@@ -103,14 +105,7 @@ Level._val2NameMap[6] = 'Trace'
 Level.__allList[7] = Level.Trace
 
 
-local name2levelMap = {}
-name2levelMap["fatal"] = Level.Fatal
-name2levelMap["error"] = Level.Err
-name2levelMap["warn"] = Level.Warn
-name2levelMap["log"] = Level.Log
-name2levelMap["info"] = Level.Info
-name2levelMap["debug"] = Level.Debug
-name2levelMap["trace"] = Level.Trace
+local name2levelMap = {["fatal"] = Level.Fatal, ["error"] = Level.Err, ["warn"] = Level.Warn, ["log"] = Level.Log, ["info"] = Level.Info, ["debug"] = Level.Debug, ["trace"] = Level.Trace}
 
 local function str2level( txt )
 
@@ -134,10 +129,9 @@ _moduleObj.enableDetail = enableDetail
 
 
 
-local logStream = io.stderr
-
 local function log( level, funcName, lineNo, callback )
 
+   local logStream = io.stderr
    if level <= outputLevel then
       if detail then
          local nowClock = os.clock(  )

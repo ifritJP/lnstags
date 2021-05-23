@@ -1,5 +1,7 @@
 // -*- coding: utf-8 -*-
 
+_lune_control default_async_all;
+
 import lns.tags.DBCtrl;
 import lns.tags.Option;
 import lns.tags.Log;
@@ -407,13 +409,13 @@ fn dumpRoot( rootNode:&Nodes.RootNode, db:DBCtrl.DBCtrl, streamName:str )
 }
 
 pub fn start(
-   db:DBCtrl.DBCtrl, pathList:&List<str>, transCtrlInfo:&Types.TransCtrlInfo )
+   db:DBCtrl.DBCtrl, pathList:&List<str>, transCtrlInfo:&Types.TransCtrlInfo ) __noasync
 {
    let mut set:Set<str> = (@);
    
    Ast.buildAst(
       .Log, pathList, nil, nil, true, transCtrlInfo,
-      fn ( ast: TransUnit.ASTInfo ) {
+      fn ( ast: TransUnit.ASTInfo ) __trans {
          if not set.has( ast.$streamName ) {
             set.add( ast.$streamName );
             if! let rootNode = ast.$node@@@Nodes.RootNode {
