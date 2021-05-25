@@ -415,7 +415,7 @@ pub fn start(
    
    Ast.buildAst(
       .Log, pathList, nil, nil, true, transCtrlInfo,
-      fn ( ast: TransUnit.ASTInfo ) __trans {
+      fn ( ast: TransUnit.ASTInfo ) __noasync {
          if not set.has( ast.$streamName ) {
             set.add( ast.$streamName );
             if! let rootNode = ast.$node@@@Nodes.RootNode {

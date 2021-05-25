@@ -74,7 +74,7 @@ func Analyze_convExp2302(arg1 []LnsAny) LnsInt {
 
 
 // 404: decl @lns.@tags.@Analyze.dumpRoot
-func Analyze_dumpRoot_1090_(_env *LnsEnv, rootNode *Nodes.Nodes_RootNode,db *DBCtrl_DBCtrl,streamName string) {
+func Analyze_dumpRoot_1359_(_env *LnsEnv, rootNode *Nodes.Nodes_RootNode,db *DBCtrl_DBCtrl,streamName string) {
     __func__ := "@lns.@tags.@Analyze.dumpRoot"
     Log_log(_env, Log_Level__Log, __func__, 406, Log_CreateMessage(func(_env *LnsEnv) string {
         return streamName
@@ -98,7 +98,7 @@ func Analyze_start(_env *LnsEnv, db *DBCtrl_DBCtrl,pathList *LnsList,transCtrlIn
                 if !Lns_IsNil( _rootNode ) {
                     rootNode := _rootNode.(*Nodes.Nodes_RootNode)
                     db.FP.Begin(_env)
-                    Analyze_dumpRoot_1090_(_env, rootNode, db, ast.FP.Get_streamName(_env))
+                    Analyze_dumpRoot_1359_(_env, rootNode, db, ast.FP.Get_streamName(_env))
                     db.FP.Commit(_env)
                 }
             }

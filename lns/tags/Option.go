@@ -71,9 +71,9 @@ func Option_Mode__from(_env *LnsEnv, arg1 string) LnsAny{
 func Option_Mode_getTxt(arg1 string) string {
     return Option_ModeMap_[arg1];
 }
-type analyzeArgs__getNextOpNonNilFunc_1076_ func (_env *LnsEnv, arg1 string) string
+type analyzeArgs__getNextOpNonNilFunc_1118_ func (_env *LnsEnv, arg1 string) string
 // 54: decl @lns.@tags.@Option.printUsage
-func Option_printUsage_1068_(_env *LnsEnv, messages LnsAny) {
+func Option_printUsage_1099_(_env *LnsEnv, messages LnsAny) {
     if messages != nil{
         messages_63 := messages.(string)
         Lns_io_stderr.Write(_env, _env.LuaVM.String_format("%s\n", []LnsAny{messages_63}))
@@ -86,8 +86,8 @@ func Option_printUsage_1068_(_env *LnsEnv, messages LnsAny) {
     _env.LuaVM.OS_exit(1)
 }
 
-func analyzeArgs___anonymous_1078_(_env *LnsEnv, mess string) string {
-    Option_printUsage_1068_(_env, "")
+func analyzeArgs___anonymous_1120_(_env *LnsEnv, mess string) string {
+    Option_printUsage_1099_(_env, "")
 // insert a dummy
     return ""
 }
@@ -101,8 +101,8 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
     option = NewOption_Option(_env)
     var index LnsInt
     index = 1
-    var getNextOpNonNil analyzeArgs__getNextOpNonNilFunc_1076_
-    getNextOpNonNil = analyzeArgs__getNextOpNonNilFunc_1076_(analyzeArgs___anonymous_1078_)
+    var getNextOpNonNil analyzeArgs__getNextOpNonNilFunc_1118_
+    getNextOpNonNil = analyzeArgs__getNextOpNonNilFunc_1118_(analyzeArgs___anonymous_1120_)
     
     var getNextOp func(_env *LnsEnv) LnsAny
     getNextOp = func(_env *LnsEnv) LnsAny {
@@ -134,7 +134,7 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
     // insert a dummy
         return nil
     }
-    getNextOpNonNil = analyzeArgs__getNextOpNonNilFunc_1076_(func(_env *LnsEnv, mess string) string {
+    getNextOpNonNil = analyzeArgs__getNextOpNonNilFunc_1118_(func(_env *LnsEnv, mess string) string {
         {
             _arg := getNextOp(_env)
             if !Lns_IsNil( _arg ) {
@@ -142,7 +142,7 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
                 return arg
             }
         }
-        Option_printUsage_1068_(_env, mess)
+        Option_printUsage_1099_(_env, mess)
     // insert a dummy
         return ""
     })
@@ -160,10 +160,10 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
                         return (LnsInt)(num)
                     }
                 }
-                Option_printUsage_1068_(_env, _env.LuaVM.String_format("illegal num -- %s", []LnsAny{arg}))
+                Option_printUsage_1099_(_env, _env.LuaVM.String_format("illegal num -- %s", []LnsAny{arg}))
             }
         }
-        Option_printUsage_1068_(_env, mess)
+        Option_printUsage_1099_(_env, mess)
     // insert a dummy
         return 0
     }
@@ -174,7 +174,7 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
         {
             _nextToken := getNextOp(_env)
             if _nextToken == nil{
-                Option_printUsage_1068_(_env, "illegal inqMod")
+                Option_printUsage_1099_(_env, "illegal inqMod")
             } else {
                 nextToken = _nextToken.(string)
             }
@@ -184,7 +184,7 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
         {
             _inqMode := Option_InqMode__from(_env, nextToken)
             if _inqMode == nil{
-                Option_printUsage_1068_(_env, _env.LuaVM.String_format("illegal inqMod -- %s", []LnsAny{nextToken}))
+                Option_printUsage_1099_(_env, _env.LuaVM.String_format("illegal inqMod -- %s", []LnsAny{nextToken}))
             } else {
                 inqMode = _inqMode.(string)
             }
@@ -231,7 +231,7 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
                         
                     }
                 } else {
-                    Option_printUsage_1068_(_env, _env.LuaVM.String_format("illegal option -- %s", []LnsAny{arg}))
+                    Option_printUsage_1099_(_env, _env.LuaVM.String_format("illegal option -- %s", []LnsAny{arg}))
                 }
             }
         } else { 
@@ -271,7 +271,7 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
         
         return option
     }
-    Option_printUsage_1068_(_env, "none mode")
+    Option_printUsage_1099_(_env, "none mode")
 // insert a dummy
     return nil
 }

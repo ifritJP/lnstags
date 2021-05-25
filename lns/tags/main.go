@@ -6,7 +6,7 @@ var init_main bool
 var main__mod__ string
 var main_dbPath string
 // 15: decl @lns.@tags.@main.inq
-func main_inq_1004_(_env *LnsEnv, inqMode string,pattern string) LnsInt {
+func main_inq_1008_(_env *LnsEnv, inqMode string,pattern string) LnsInt {
     var db *DBCtrl_DBCtrl
     
     {
@@ -30,7 +30,7 @@ func main_inq_1004_(_env *LnsEnv, inqMode string,pattern string) LnsInt {
 }
 
 // 35: decl @lns.@tags.@main.build
-func main_build_1010_(_env *LnsEnv, pathList *LnsList,transCtrlInfo *LnsTypes.Types_TransCtrlInfo) LnsInt {
+func main_build_1024_(_env *LnsEnv, pathList *LnsList,transCtrlInfo *LnsTypes.Types_TransCtrlInfo) LnsInt {
     DBCtrl_initDB(_env, main_dbPath)
     var db *DBCtrl_DBCtrl
     
@@ -50,7 +50,7 @@ func main_build_1010_(_env *LnsEnv, pathList *LnsList,transCtrlInfo *LnsTypes.Ty
 }
 
 
-func __main___anonymous_1025_(_env *LnsEnv, item *DBCtrl_ItemNamespace) bool {
+func __main___anonymous_1076_(_env *LnsEnv, item *DBCtrl_ItemNamespace) bool {
     Lns_print([]LnsAny{item.FP.Get_name(_env)})
     return true
 }
@@ -62,7 +62,7 @@ func Main___main(_env *LnsEnv, args *LnsList) LnsInt {
     if _switch594 := option.FP.Get_mode(_env); _switch594 == Option_Mode__Init {
         DBCtrl_initDB(_env, main_dbPath)
     } else if _switch594 == Option_Mode__Build {
-        return main_build_1010_(_env, option.FP.Get_pathList(_env), option.FP.Get_transCtrlInfo(_env))
+        return main_build_1024_(_env, option.FP.Get_pathList(_env), option.FP.Get_transCtrlInfo(_env))
     } else if _switch594 == Option_Mode__Update {
         var db *DBCtrl_DBCtrl
         
@@ -88,7 +88,7 @@ func Main___main(_env *LnsEnv, args *LnsList) LnsInt {
             return true
         }))
         db.FP.Close(_env)
-        return main_build_1010_(_env, pathList, option.FP.Get_transCtrlInfo(_env))
+        return main_build_1024_(_env, pathList, option.FP.Get_transCtrlInfo(_env))
     } else if _switch594 == Option_Mode__Suffix {
         var db *DBCtrl_DBCtrl
         
@@ -101,10 +101,10 @@ func Main___main(_env *LnsEnv, args *LnsList) LnsInt {
                 db = _db.(*DBCtrl_DBCtrl)
             }
         }
-        db.FP.MapNamespaceSuffix(_env, option.FP.Get_pattern(_env), DBCtrl_NameSpaceCallback(__main___anonymous_1025_))
+        db.FP.MapNamespaceSuffix(_env, option.FP.Get_pattern(_env), DBCtrl_NameSpaceCallback(__main___anonymous_1076_))
         db.FP.Close(_env)
     } else if _switch594 == Option_Mode__Inq {
-        main_inq_1004_(_env, option.FP.Get_inqMode(_env), option.FP.Get_pattern(_env))
+        main_inq_1008_(_env, option.FP.Get_inqMode(_env), option.FP.Get_pattern(_env))
     } else if _switch594 == Option_Mode__InqAt {
         var analyzeFileInfo *Option_AnalyzeFileInfo
         analyzeFileInfo = option.FP.Get_analyzeFileInfo(_env)
@@ -132,7 +132,7 @@ func Main___main(_env *LnsEnv, args *LnsList) LnsInt {
             }
         }
         db.FP.Close(_env)
-        main_inq_1004_(_env, option.FP.Get_inqMode(_env), pattern)
+        main_inq_1008_(_env, option.FP.Get_inqMode(_env), pattern)
     } else if _switch594 == Option_Mode__Dump {
         var db *DBCtrl_DBCtrl
         
