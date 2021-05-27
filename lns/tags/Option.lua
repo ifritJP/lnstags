@@ -99,6 +99,15 @@ InqMode.__allList[2] = InqMode.Ref
 InqMode.Set = 'set'
 InqMode._val2NameMap['set'] = 'Set'
 InqMode.__allList[3] = InqMode.Set
+InqMode.AllMut = 'allmut'
+InqMode._val2NameMap['allmut'] = 'AllMut'
+InqMode.__allList[4] = InqMode.AllMut
+InqMode.Async = 'async'
+InqMode._val2NameMap['async'] = 'Async'
+InqMode.__allList[5] = InqMode.Async
+InqMode.Noasync = 'noasync'
+InqMode._val2NameMap['noasync'] = 'Noasync'
+InqMode.__allList[6] = InqMode.Noasync
 
 
 local Mode = {}
@@ -231,8 +240,8 @@ local function printUsage( messages )
    
    print( "usage: lnstags init [option]" )
    print( "usage: lnstags build [option] filepath" )
-   print( "usage: lnstags inq <def|ref> pattern" )
-   print( "usage: lnstags inq-at <def|ref> filepath lineno column" )
+   print( "usage: lnstags inq <def|ref|set|allmut> pattern" )
+   print( "usage: lnstags inq-at <def|ref|set> filepath lineno column" )
    print( "usage: lnstags test [option]" )
    os.exit( 1 )
 end
@@ -351,7 +360,15 @@ local function analyzeArgs( argList )
                   local _switchExp = mode
                   if _switchExp == Mode.Inq then
                      option.inqMode = getInqMode(  )
-                     option.pattern = getNextOpNonNil( "none pattern" )
+                     do
+                        local _switchExp = option.inqMode
+                        if _switchExp == InqMode.AllMut or _switchExp == InqMode.Async or _switchExp == InqMode.Noasync then
+                        else 
+                           
+                              option.pattern = getNextOpNonNil( "none pattern" )
+                        end
+                     end
+                     
                      Log.setLevel( Log.Level.Warn )
                   elseif _switchExp == Mode.InqAt then
                      option.inqMode = getInqMode(  )

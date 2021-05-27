@@ -67,7 +67,7 @@ class SyntaxFilter extend Nodes.Filter<str> {
             case .Ref {
                return Ast.getFullNameSym( self, workNode.$symbolInfo );
             }
-            case .Set {
+            case .Set, .AllMut, .Async, .Noasync {
             }
          }
          return nil;

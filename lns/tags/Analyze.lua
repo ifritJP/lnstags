@@ -444,6 +444,7 @@ function tagFilter:registerDecl( nodeManager )
          registDeclTypeOp( altType, pos )
       end
       
+      self.db:addAsyncMode( nsId, methodType:get_asyncMode() )
       return nsId
    end
    for __index, workNode in pairs( nodeManager:getDeclMethodNodeList(  ) ) do
@@ -530,6 +531,10 @@ function tagFilter:registerDecl( nodeManager )
          self:addSymbolRef( mbrNsId, pos, false )
       end
       
+      if workNode:get_refType():get_mutMode() == LnsAst.MutMode.AllMut then
+         self.db:addAllmutDecl( mbrNsId )
+      end
+      
    end
    
 end
@@ -551,7 +556,7 @@ function tagFilter:registerRefs( nodeManager )
       
       local nsId, added = self:registerSymbol( symbolInfo )
       if added and not LnsAst.isBuiltin( symbolInfo:get_namespaceTypeInfo():get_typeId().id ) then
-         Log.log( Log.Level.Err, __func__, 260, function (  )
+         Log.log( Log.Level.Err, __func__, 264, function (  )
          
             return string.format( "no register sym -- %d:%d:%s", pos.lineNo, pos.column, Ast.getFullNameSym( self, symbolInfo ))
          end )
@@ -566,7 +571,7 @@ function tagFilter:registerRefs( nodeManager )
    
       local nsId, added = self:registerType( typeInfo )
       if added and not LnsAst.isBuiltin( typeInfo:get_typeId().id ) then
-         Log.log( Log.Level.Err, __func__, 269, function (  )
+         Log.log( Log.Level.Err, __func__, 273, function (  )
          
             return string.format( "no register type -- %d:%d:%s", pos.lineNo, pos.column, self:getFull( typeInfo, false ))
          end )
@@ -655,7 +660,7 @@ function tagFilter:registerRefs( nodeManager )
             registerRefSym( _exp, workNode:get_pos(), false )
          else
             if not workNode:get_macroArgFlag() then
-               Log.log( Log.Level.Warn, __func__, 354, function (  )
+               Log.log( Log.Level.Warn, __func__, 358, function (  )
                
                   return string.format( "no symbolInfo -- %s, %s:%d:%d", workNode:get_field().txt, workNode:get_pos().streamName, workNode:get_pos().lineNo, workNode:get_pos().column)
                end )
@@ -730,7 +735,7 @@ end
 local function dumpRoot( rootNode, db, streamName )
    local __func__ = '@lns.@tags.@Analyze.dumpRoot'
 
-   Log.log( Log.Level.Log, __func__, 406, function (  )
+   Log.log( Log.Level.Log, __func__, 410, function (  )
    
       return streamName
    end )

@@ -8,6 +8,7 @@ import lns.tags.Inq;
 import lns.tags.Log;
 import lns.tags.Pattern;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Types as LnsTypes;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Ast as LnsAst;
 
 
 let dbPath = "lnstags.sqlite3";
@@ -26,6 +27,15 @@ fn inq( inqMode:Option.InqMode, pattern:str ) : int {
       }
       case .Set {
          Inq.InqRef( db, pattern, true );
+      }
+      case .AllMut {
+         Inq.InqAllmut( db );
+      }
+      case .Async {
+         Inq.InqAsync( db, .Async );
+      }
+      case .Noasync {
+         Inq.InqAsync( db, .Noasync );
       }
    }
    db.close();
@@ -118,8 +128,9 @@ pub fn __main( args:&List<str> ) : int {
             print( "error" );
             return 1;
          };
-         db.dumpAll();
+         //db.dumpAll();
          //db.dumpFile();
+         db.dumpAsync();
 
          db.close();
       }

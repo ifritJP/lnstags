@@ -1,5 +1,6 @@
 import lns.tags.DBCtrl;
 import lns.tags.Util;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Ast as LnsAst;
 
 pub fn InqDef( db:DBCtrl.DBCtrl, pattern:str ) {
    let mut factory = new Util.SourceCodeLineAccessorFactory();
@@ -24,6 +25,35 @@ pub fn InqRef( db:DBCtrl.DBCtrl, pattern:str, onlySet:bool ) {
          };
          Util.outputLocate(
             io.stdout, pattern, path,
+            factory.create( path## ), item.$line );
+         return true;
+      });
+}
+
+pub fn InqAllmut( db:DBCtrl.DBCtrl ) {
+   let mut factory = new Util.SourceCodeLineAccessorFactory();
+   db.mapAllmutDecl(
+      fn (item:&DBCtrl.ItemAllmutDecl):bool {
+         let! path = db.getFilePath( item.$fileId ) {
+            error( "file id is illegal -- %d" (item.$fileId) );
+         };
+         Util.outputLocate(
+            io.stdout, "allmut", path,
+            factory.create( path## ), item.$line );
+         return true;
+      });
+}
+
+pub fn InqAsync( db:DBCtrl.DBCtrl, asyncMode:LnsAst.Async ) {
+   let mut factory = new Util.SourceCodeLineAccessorFactory();
+   db.mapAsyncMode(
+      asyncMode,
+      fn (item:&DBCtrl.ItemAsyncMode):bool {
+         let! path = db.getFilePath( item.$fileId ) {
+            error( "file id is illegal -- %d" (item.$fileId) );
+         };
+         Util.outputLocate(
+            io.stdout, "%d" (asyncMode), path,
             factory.create( path## ), item.$line );
          return true;
       });

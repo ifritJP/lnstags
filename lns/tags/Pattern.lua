@@ -209,7 +209,7 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
                return self:getFull( workNode:get_expType(), false )
             elseif _switchExp == Option.InqMode.Ref then
                return Ast.getFullNameSym( self, workNode:get_symbolInfo() )
-            elseif _switchExp == Option.InqMode.Set then
+            elseif _switchExp == Option.InqMode.Set or _switchExp == Option.InqMode.AllMut or _switchExp == Option.InqMode.Async or _switchExp == Option.InqMode.Noasync then
             end
          end
          

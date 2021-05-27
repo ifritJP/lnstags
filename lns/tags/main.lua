@@ -73,6 +73,7 @@ local Inq = _lune.loadModule( 'lns.tags.Inq' )
 local Log = _lune.loadModule( 'lns.tags.Log' )
 local Pattern = _lune.loadModule( 'lns.tags.Pattern' )
 local LnsTypes = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Types' )
+local LnsAst = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Ast' )
 
 local dbPath = "lnstags.sqlite3"
 
@@ -94,6 +95,12 @@ local function inq( inqMode, pattern )
          Inq.InqRef( db, pattern, false )
       elseif _switchExp == Option.InqMode.Set then
          Inq.InqRef( db, pattern, true )
+      elseif _switchExp == Option.InqMode.AllMut then
+         Inq.InqAllmut( db )
+      elseif _switchExp == Option.InqMode.Async then
+         Inq.InqAsync( db, LnsAst.Async.Async )
+      elseif _switchExp == Option.InqMode.Noasync then
+         Inq.InqAsync( db, LnsAst.Async.Noasync )
       end
    end
    
@@ -204,7 +211,8 @@ local function __main( args )
             return 1
          end
          
-         db:dumpAll(  )
+         db:dumpAsync(  )
+         
          db:close(  )
       elseif _switchExp == Option.Mode.Test then
          DBCtrl.test(  )

@@ -63,3 +63,8 @@ print( hoge.$val );
    let val = new Sub.Gen<int>( 0 );
    func( val, 2 );
 }
+{
+   class Hoge {
+      let val:allmut List<int>;
+   }
+}

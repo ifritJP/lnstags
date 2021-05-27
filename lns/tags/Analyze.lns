@@ -183,6 +183,7 @@ fn tagFilter.registerDecl(
       foreach altType in methodType.$itemTypeInfoList {
          registDeclTypeOp( altType, pos );
       }
+      self.db.addAsyncMode( nsId, methodType.$asyncMode );
       return nsId;
    }
    foreach workNode in nodeManager.getDeclMethodNodeList() {
@@ -243,6 +244,9 @@ fn tagFilter.registerDecl(
             unwrap workNode.$classType.$scope$.getTypeInfoChild$( name ), pos );
          // setter に、メンバー参照を追加
          self.addSymbolRef( mbrNsId, pos, false );
+      }
+      if workNode.$refType.$mutMode == .AllMut {
+         self.db.addAllmutDecl( mbrNsId );
       }
    }
 }

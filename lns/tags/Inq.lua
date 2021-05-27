@@ -67,6 +67,7 @@ if not _lune3 then
 end
 local DBCtrl = _lune.loadModule( 'lns.tags.DBCtrl' )
 local Util = _lune.loadModule( 'lns.tags.Util' )
+local LnsAst = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Ast' )
 
 local function InqDef( db, pattern )
 
@@ -103,5 +104,41 @@ local function InqRef( db, pattern, onlySet )
    end )
 end
 _moduleObj.InqRef = InqRef
+
+local function InqAllmut( db )
+
+   local factory = Util.SourceCodeLineAccessorFactory.new()
+   db:mapAllmutDecl( function ( item )
+   
+      local path = db:getFilePath( item:get_fileId() )
+      if  nil == path then
+         local _path = path
+      
+         error( string.format( "file id is illegal -- %d", item:get_fileId()) )
+      end
+      
+      Util.outputLocate( io.stdout, "allmut", path, factory:create( path ), item:get_line() )
+      return true
+   end )
+end
+_moduleObj.InqAllmut = InqAllmut
+
+local function InqAsync( db, asyncMode )
+
+   local factory = Util.SourceCodeLineAccessorFactory.new()
+   db:mapAsyncMode( asyncMode, function ( item )
+   
+      local path = db:getFilePath( item:get_fileId() )
+      if  nil == path then
+         local _path = path
+      
+         error( string.format( "file id is illegal -- %d", item:get_fileId()) )
+      end
+      
+      Util.outputLocate( io.stdout, string.format( "%d", asyncMode), path, factory:create( path ), item:get_line() )
+      return true
+   end )
+end
+_moduleObj.InqAsync = InqAsync
 
 return _moduleObj

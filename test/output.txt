@@ -441,8 +441,30 @@ Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 @Sub.HogeHoge.__init   46 Sub.lns                super();
 @Sub.HogeHoge.__init   10 main.lns         let hogehoge = new Sub.HogeHoge();
+(cd test; ../lnstags --simpleLog --log debug inq allmut)
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+allmut             68 main.lns               let val:allmut List<int>;
+(cd test; ../lnstags --simpleLog --log debug inq async)
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+1                  17 Sub.lns             pub let mut val:int{pub,pub};
+1                  17 Sub.lns             pub let mut val:int{pub,pub};
+1                  63 Sub.lns             let mut val:int{pub,pub};
+1                  63 Sub.lns             let mut val:int{pub,pub};
+(cd test; ../lnstags --simpleLog --log debug inq noasync)
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+0                  21 Sub.lns             pub fn func(val:Foo);
+0                  31 Sub.lns          pub fn Hoge.func(val:Foo) {
+0                  13 Sub.lns             pub fn func(val:Foo);
+0                  22 Sub.lns             pub static fn sub(val:Bar) {
+0                  40 Sub.lns             pub override fn func( val:Foo ) {
+0                  48 Sub.lns             pub override fn func( val:Foo ) {
+0                  78 Sub.lns             pub fn sub<T2>( val:T, val2:T2 ) {
 (cd test/; ../lnstags --simpleLog suffix val --log debug)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 @Sub.Hoge.val
 @Sub.SubSub.val
 @Sub.Gen.val
+@main.Hoge.val

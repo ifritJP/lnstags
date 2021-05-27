@@ -4,6 +4,7 @@ _lune_control default_async_all;
 
 
 import go/github:com.ifritJP.lnssqlite3.src.lns.sqlite3.base;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Ast as LnsAst;
 import lns.tags.DBAccess;
 import lns.tags.Log;
 import lns.tags.Depend;
@@ -11,7 +12,7 @@ import lns.tags.Depend;
 pub let rootNsId = 1;
 let userNsId = 2;
 let systemFileId = 1;
-let DB_VERSION = 9.0;
+let DB_VERSION = 10.0;
 
 class IdMgr {
    let mut idNum:int;
@@ -30,9 +31,6 @@ class IdMgr {
 pub class DBCtrl {
    let mut access:DBAccess.DBAccess;
    
-   local let mut individualTypeFlag:bool {pub};
-   local let mut individualStructFlag:bool {pub};
-   local let mut individualMacroFlag:bool {pub};
    local let mut projDir:str {pub};
 
    let mut idMgrNamespace:IdMgr;
@@ -59,9 +57,6 @@ pub class DBCtrl {
    
    local fn __init( access:DBAccess.DBAccess, readonly:bool ) {
       self.access = access;
-      self.individualTypeFlag = false;
-      self.individualStructFlag = false;
-      self.individualMacroFlag = false;
       self.projDir = Depend.getCurDir();
 
       self.idMgrNamespace = new IdMgr(
@@ -130,6 +125,15 @@ pub class DBCtrl {
 		          return true;
                        }, errHandle );
       return rows;
+   }
+
+   fn mapJoin(
+      tableName:str, otherTable:str, on:str, condition:str!,
+      limit:int!, attrib:str!, func:base.queryMapForm,
+      errHandle:base.errHandleForm! ) : bool
+   {
+      return self.access.mapJoin(
+         tableName, otherTable, on, condition, limit, attrib, func, errHandle );
    }
    
    pub fn getRow( tableName:str, condition:str!, attrib:str!,
@@ -212,9 +216,6 @@ pub fn open( path:str, readonly:bool ) : DBCtrl!
       error( "db is killed now" );
    }
 
-   dbCtrl.individualTypeFlag = dbCtrl.equalsEtc( "individualTypeFlag", "1" );
-   dbCtrl.individualStructFlag = dbCtrl.equalsEtc( "individualStructFlag", "1" );
-   dbCtrl.individualMacroFlag = dbCtrl.equalsEtc( "individualMacroFlag", "1" );
 
    return dbCtrl;
 }
@@ -225,9 +226,6 @@ BEGIN;
 CREATE TABLE etc ( keyName VARCHAR UNIQUE COLLATE binary PRIMARY KEY, val VARCHAR);
 INSERT INTO etc VALUES( 'version', '%d' );
 INSERT INTO etc VALUES( 'projDir', '' );
-INSERT INTO etc VALUES( 'individualStructFlag', '0' );
-INSERT INTO etc VALUES( 'individualTypeFlag', '0' );
-INSERT INTO etc VALUES( 'individualMacroFlag', '0' );
 INSERT INTO etc VALUES( 'killFlag', '0' );
 CREATE TABLE namespace ( id INTEGER PRIMARY KEY, snameId INTEGER, parentId INTEGER, digest CHAR(32), name VARCHAR UNIQUE COLLATE binary, otherName VARCHAR COLLATE binary, virtual INTEGER);
 INSERT INTO namespace VALUES( NULL, 1, 0, '', '', '', 0 );
@@ -247,6 +245,11 @@ CREATE TABLE symbolRef ( nsId INTEGER, snameId INTEGER, fileId INTEGER, line INT
 CREATE TABLE symbolSet ( nsId INTEGER, snameId INTEGER, fileId INTEGER, line INTEGER, column INTEGER, belongNsId INTEGER, PRIMARY KEY( nsId, fileId, line, column ) );
 
 CREATE TABLE funcCall ( nsId INTEGER, snameId INTEGER, belongNsId INTEGER, fileId INTEGER, line INTEGER, column INTEGER, endLine INTEGER, endColumn INTEGER, charSize INTEGER, PRIMARY KEY( nsId, belongNsId ) );
+
+CREATE TABLE allmutDecl ( nsId INTEGER PRIMARY KEY );
+CREATE TABLE asyncMode ( nsId INTEGER PRIMARY KEY, mode INTEGER );
+
+
 CREATE TABLE incRef ( id INTEGER, baseFileId INTEGER, line INTEGER );
 CREATE TABLE incCache ( id INTEGER, baseFileId INTEGER, incFlag INTEGER, PRIMARY KEY( id, baseFileId ) );
 CREATE TABLE incBelong ( id INTEGER, baseFileId INTEGER, nsId INTEGER, PRIMARY KEY ( id, nsId ) );
@@ -284,6 +287,19 @@ pub class ItemNamespace extend (Mapping) {
    let parentId:int {pub};
    // 完全限定名 ( e.g. @hoge.@foo.bar)
    let name:str {pub};
+}
+
+pub class ItemAllmutDecl extend (Mapping) {
+   let nsId:int {pub};
+   let fileId:int {pub};
+   let line:int {pub};
+}
+
+pub class ItemAsyncMode extend (Mapping) {
+   let nsId:int {pub};
+   let mode:LnsAst.Async {pub};
+   let fileId:int {pub};
+   let line:int {pub};
 }
 
 pub class ItemSymbolDecl extend (Mapping) {
@@ -535,6 +551,45 @@ pub fn DBCtrl.addOverride( nsId:int, superNsId:int ) mut
    self.insert( "override", "%d, %d" (nsId, superNsId ) );
 }
 
+pub fn DBCtrl.addAsyncMode(  nsId:int, asyncMode:LnsAst.Async ) mut {
+   self.insert( "asyncMode", "%d, %d" ( nsId, asyncMode ) );
+}
+
+pub form callbackAsyncMode( item:&ItemAsyncMode ):bool;
+pub fn DBCtrl.mapAsyncMode( asyncMode:LnsAst.Async, callback:callbackAsyncMode ) {
+   self.mapJoin(
+      "asyncMode", "symbolDecl",
+      "asyncMode.nsId = symbolDecl.nsId AND asyncMode.mode = %d" (asyncMode),
+      nil, nil, "asyncMode.nsId, asyncMode.mode, symbolDecl.fileId, symbolDecl.line",
+      fn (items:&Map<str,&stem>): bool
+      {
+         if! let item = ItemAsyncMode._fromStem( items ) {
+            return callback( item );
+         }
+         return true;
+      }##);
+}
+
+
+pub fn DBCtrl.addAllmutDecl( nsId:int ) mut {
+   self.insert( "allmutDecl", "%d" ( nsId ) );
+}
+
+pub form callbackAllmutDecl( item:&ItemAllmutDecl ):bool;
+pub fn DBCtrl.mapAllmutDecl( callback:callbackAllmutDecl ) {
+   self.mapJoin(
+      "allmutDecl", "symbolDecl", "allmutDecl.nsId = symbolDecl.nsId",
+      nil, nil, "allmutDecl.nsId, symbolDecl.fileId, symbolDecl.line",
+      fn (items:&Map<str,&stem>): bool
+      {
+         if! let item = ItemAllmutDecl._fromStem( items ) {
+            return callback( item );
+         }
+         return true;
+      }##);
+}
+
+
 pub fn DBCtrl.addSymbolDecl(
    nsId:int, fileId:int, lineNo:int, column:int ) mut
 {
@@ -588,10 +643,6 @@ fn create( dbPath:str ) : DBCtrl!
    
    dbCtrl.begin();
    
-   dbCtrl.setEtc( "individualTypeFlag", "1" );
-   dbCtrl.setEtc( "individualStructFlag", "1" );
-   dbCtrl.setEtc( "individualMacroFlag", "1" );
-
    return dbCtrl;
 }
 
@@ -693,6 +744,18 @@ pub fn DBCtrl.dumpFile() {
       fn (items:&Map<str,&stem>): bool
       {
          print( items.mainId, items.subId );
+         return true;
+      }##);
+}
+
+pub fn DBCtrl.dumpAsync() {
+   print( "async" );
+
+   self.mapRowList(
+      "asyncMode", nil, nil, nil,
+      fn (items:&Map<str,&stem>): bool
+      {
+         print( items.nsId, items.mode );
          return true;
       }##);
 }

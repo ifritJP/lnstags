@@ -85,7 +85,12 @@ inq: build
 	$(call inq-test,inq ref @Sub.Hoge.func)
 	$(call inq-test,inq ref @Sub.HogeHoge.__init)
 
+	$(call inq-test,inq allmut)
+	$(call inq-test,inq async)
+	$(call inq-test,inq noasync)
+
 	(cd test/; ../lnstags --simpleLog suffix val --log debug)
+
 
 check: build
 	(cd test;../lnstags init)

@@ -5,6 +5,9 @@ pub enum InqMode {
    Def = "def",
    Ref = "ref",
    Set = "set",
+   AllMut = "allmut",
+   Async = "async",
+   Noasync = "noasync",
 }
 
 pub enum Mode {
@@ -57,8 +60,8 @@ fn printUsage( messages:str! ) : __ {
    }
    print( "usage: lnstags init [option]" );
    print( "usage: lnstags build [option] filepath" );
-   print( "usage: lnstags inq <def|ref> pattern" );
-   print( "usage: lnstags inq-at <def|ref> filepath lineno column" );
+   print( "usage: lnstags inq <def|ref|set|allmut> pattern" );
+   print( "usage: lnstags inq-at <def|ref|set> filepath lineno column" );
    print( "usage: lnstags test [option]" );
    os.exit( 1 );
 }
@@ -142,7 +145,13 @@ pub fn analyzeArgs( argList:&List<str> ) : &Option {
             switch mode {
                case .Inq {
                   option.inqMode = getInqMode();
-                  option.pattern = getNextOpNonNil( "none pattern" );
+                  switch option.inqMode {
+                     case .AllMut, .Async, .Noasync {
+                     }
+                     default {
+                        option.pattern = getNextOpNonNil( "none pattern" );
+                     }
+                  }
                   Log.setLevel( .Warn );
                }
                case .InqAt {

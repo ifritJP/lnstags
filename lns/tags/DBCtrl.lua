@@ -192,6 +192,7 @@ end
 
 
 local base = _lune.loadModule( 'go/github:com.ifritJP.lnssqlite3.src.lns.sqlite3.base' )
+local LnsAst = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Ast' )
 local DBAccess = _lune.loadModule( 'lns.tags.DBAccess' )
 local Log = _lune.loadModule( 'lns.tags.Log' )
 local Depend = _lune.loadModule( 'lns.tags.Depend' )
@@ -201,7 +202,7 @@ _moduleObj.rootNsId = rootNsId
 
 local userNsId = 2
 local systemFileId = 1
-local DB_VERSION = 9.0
+local DB_VERSION = 10.0
 
 local IdMgr = {}
 function IdMgr.new( idNum )
@@ -250,9 +251,6 @@ function DBCtrl.new( access, readonly )
 end
 function DBCtrl:__init(access, readonly) 
    self.access = access
-   self.individualTypeFlag = false
-   self.individualStructFlag = false
-   self.individualMacroFlag = false
    self.projDir = Depend.getCurDir(  )
    
    self.idMgrNamespace = IdMgr.new(DBCtrl.getMaxId( access, "namespace", userNsId ))
@@ -306,6 +304,10 @@ function DBCtrl:getRowList( tableName, condition, limit, attrib, errHandle )
       return true
    end, errHandle )
    return rows
+end
+function DBCtrl:mapJoin( tableName, otherTable, on, condition, limit, attrib, func, errHandle )
+
+   return self.access:mapJoin( tableName, otherTable, on, condition, limit, attrib, func, errHandle )
 end
 function DBCtrl:getRow( tableName, condition, attrib, errHandle )
 
@@ -365,15 +367,6 @@ end
 function DBCtrl.setmeta( obj )
   setmetatable( obj, { __index = DBCtrl  } )
 end
-function DBCtrl:get_individualTypeFlag()
-   return self.individualTypeFlag
-end
-function DBCtrl:get_individualStructFlag()
-   return self.individualStructFlag
-end
-function DBCtrl:get_individualMacroFlag()
-   return self.individualMacroFlag
-end
 function DBCtrl:get_projDir()
    return self.projDir
 end
@@ -432,7 +425,7 @@ end
 local function open( path, readonly )
    local __func__ = '@lns.@tags.@DBCtrl.open'
 
-   Log.log( Log.Level.Log, __func__, 186, function (  )
+   Log.log( Log.Level.Log, __func__, 190, function (  )
    
       return "open"
    end )
@@ -458,7 +451,7 @@ local function open( path, readonly )
    if  nil == item then
       local _item = item
    
-      Log.log( Log.Level.Err, __func__, 200, function (  )
+      Log.log( Log.Level.Err, __func__, 204, function (  )
       
          return "unknown version"
       end )
@@ -468,7 +461,7 @@ local function open( path, readonly )
    end
    
    if tonumber( item:get_val() ) ~= DB_VERSION then
-      Log.log( Log.Level.Err, __func__, 205, function (  )
+      Log.log( Log.Level.Err, __func__, 209, function (  )
       
          return string.format( "not support version. -- %s", item:get_val())
       end )
@@ -483,10 +476,6 @@ local function open( path, readonly )
    end
    
    
-   dbCtrl.individualTypeFlag = dbCtrl:equalsEtc( "individualTypeFlag", "1" )
-   dbCtrl.individualStructFlag = dbCtrl:equalsEtc( "individualStructFlag", "1" )
-   dbCtrl.individualMacroFlag = dbCtrl:equalsEtc( "individualMacroFlag", "1" )
-   
    return dbCtrl
 end
 _moduleObj.open = open
@@ -498,9 +487,6 @@ BEGIN;
 CREATE TABLE etc ( keyName VARCHAR UNIQUE COLLATE binary PRIMARY KEY, val VARCHAR);
 INSERT INTO etc VALUES( 'version', '%d' );
 INSERT INTO etc VALUES( 'projDir', '' );
-INSERT INTO etc VALUES( 'individualStructFlag', '0' );
-INSERT INTO etc VALUES( 'individualTypeFlag', '0' );
-INSERT INTO etc VALUES( 'individualMacroFlag', '0' );
 INSERT INTO etc VALUES( 'killFlag', '0' );
 CREATE TABLE namespace ( id INTEGER PRIMARY KEY, snameId INTEGER, parentId INTEGER, digest CHAR(32), name VARCHAR UNIQUE COLLATE binary, otherName VARCHAR COLLATE binary, virtual INTEGER);
 INSERT INTO namespace VALUES( NULL, 1, 0, '', '', '', 0 );
@@ -520,6 +506,11 @@ CREATE TABLE symbolRef ( nsId INTEGER, snameId INTEGER, fileId INTEGER, line INT
 CREATE TABLE symbolSet ( nsId INTEGER, snameId INTEGER, fileId INTEGER, line INTEGER, column INTEGER, belongNsId INTEGER, PRIMARY KEY( nsId, fileId, line, column ) );
 
 CREATE TABLE funcCall ( nsId INTEGER, snameId INTEGER, belongNsId INTEGER, fileId INTEGER, line INTEGER, column INTEGER, endLine INTEGER, endColumn INTEGER, charSize INTEGER, PRIMARY KEY( nsId, belongNsId ) );
+
+CREATE TABLE allmutDecl ( nsId INTEGER PRIMARY KEY );
+CREATE TABLE asyncMode ( nsId INTEGER PRIMARY KEY, mode INTEGER );
+
+
 CREATE TABLE incRef ( id INTEGER, baseFileId INTEGER, line INTEGER );
 CREATE TABLE incCache ( id INTEGER, baseFileId INTEGER, incFlag INTEGER, PRIMARY KEY( id, baseFileId ) );
 CREATE TABLE incBelong ( id INTEGER, baseFileId INTEGER, nsId INTEGER, PRIMARY KEY ( id, nsId ) );
@@ -702,6 +693,123 @@ function ItemNamespace._fromMapSub( obj, val )
    table.insert( memInfo, { name = "snameId", func = _lune._toInt, nilable = false, child = {} } )
    table.insert( memInfo, { name = "parentId", func = _lune._toInt, nilable = false, child = {} } )
    table.insert( memInfo, { name = "name", func = _lune._toStr, nilable = false, child = {} } )
+   local result, mess = _lune._fromMap( obj, val, memInfo )
+   if not result then
+      return nil, mess
+   end
+   return obj
+end
+
+
+local ItemAllmutDecl = {}
+setmetatable( ItemAllmutDecl, { ifList = {Mapping,} } )
+_moduleObj.ItemAllmutDecl = ItemAllmutDecl
+function ItemAllmutDecl.setmeta( obj )
+  setmetatable( obj, { __index = ItemAllmutDecl  } )
+end
+function ItemAllmutDecl.new( nsId, fileId, line )
+   local obj = {}
+   ItemAllmutDecl.setmeta( obj )
+   if obj.__init then
+      obj:__init( nsId, fileId, line )
+   end
+   return obj
+end
+function ItemAllmutDecl:__init( nsId, fileId, line )
+
+   self.nsId = nsId
+   self.fileId = fileId
+   self.line = line
+end
+function ItemAllmutDecl:get_nsId()
+   return self.nsId
+end
+function ItemAllmutDecl:get_fileId()
+   return self.fileId
+end
+function ItemAllmutDecl:get_line()
+   return self.line
+end
+function ItemAllmutDecl:_toMap()
+  return self
+end
+function ItemAllmutDecl._fromMap( val )
+  local obj, mes = ItemAllmutDecl._fromMapSub( {}, val )
+  if obj then
+     ItemAllmutDecl.setmeta( obj )
+  end
+  return obj, mes
+end
+function ItemAllmutDecl._fromStem( val )
+  return ItemAllmutDecl._fromMap( val )
+end
+
+function ItemAllmutDecl._fromMapSub( obj, val )
+   local memInfo = {}
+   table.insert( memInfo, { name = "nsId", func = _lune._toInt, nilable = false, child = {} } )
+   table.insert( memInfo, { name = "fileId", func = _lune._toInt, nilable = false, child = {} } )
+   table.insert( memInfo, { name = "line", func = _lune._toInt, nilable = false, child = {} } )
+   local result, mess = _lune._fromMap( obj, val, memInfo )
+   if not result then
+      return nil, mess
+   end
+   return obj
+end
+
+
+local ItemAsyncMode = {}
+setmetatable( ItemAsyncMode, { ifList = {Mapping,} } )
+_moduleObj.ItemAsyncMode = ItemAsyncMode
+function ItemAsyncMode.setmeta( obj )
+  setmetatable( obj, { __index = ItemAsyncMode  } )
+end
+function ItemAsyncMode.new( nsId, mode, fileId, line )
+   local obj = {}
+   ItemAsyncMode.setmeta( obj )
+   if obj.__init then
+      obj:__init( nsId, mode, fileId, line )
+   end
+   return obj
+end
+function ItemAsyncMode:__init( nsId, mode, fileId, line )
+
+   self.nsId = nsId
+   self.mode = mode
+   self.fileId = fileId
+   self.line = line
+end
+function ItemAsyncMode:get_nsId()
+   return self.nsId
+end
+function ItemAsyncMode:get_mode()
+   return self.mode
+end
+function ItemAsyncMode:get_fileId()
+   return self.fileId
+end
+function ItemAsyncMode:get_line()
+   return self.line
+end
+function ItemAsyncMode:_toMap()
+  return self
+end
+function ItemAsyncMode._fromMap( val )
+  local obj, mes = ItemAsyncMode._fromMapSub( {}, val )
+  if obj then
+     ItemAsyncMode.setmeta( obj )
+  end
+  return obj, mes
+end
+function ItemAsyncMode._fromStem( val )
+  return ItemAsyncMode._fromMap( val )
+end
+
+function ItemAsyncMode._fromMapSub( obj, val )
+   local memInfo = {}
+   table.insert( memInfo, { name = "nsId", func = _lune._toInt, nilable = false, child = {} } )
+   table.insert( memInfo, { name = "mode", func = LnsAst.Async._from, nilable = false, child = {} } )
+   table.insert( memInfo, { name = "fileId", func = _lune._toInt, nilable = false, child = {} } )
+   table.insert( memInfo, { name = "line", func = _lune._toInt, nilable = false, child = {} } )
    local result, mess = _lune._fromMap( obj, val, memInfo )
    if not result then
       return nil, mess
@@ -1008,7 +1116,7 @@ function DBCtrl:getFileIdFromPath( path )
       return fileId
    end
    
-   Log.log( Log.Level.Err, __func__, 422, function (  )
+   Log.log( Log.Level.Err, __func__, 438, function (  )
    
       return string.format( "not found file -- %s", path)
    end )
@@ -1156,6 +1264,52 @@ function DBCtrl:addOverride( nsId, superNsId )
 end
 
 
+function DBCtrl:addAsyncMode( nsId, asyncMode )
+
+   self:insert( "asyncMode", string.format( "%d, %d", nsId, asyncMode) )
+end
+
+
+
+function DBCtrl:mapAsyncMode( asyncMode, callback )
+
+   self:mapJoin( "asyncMode", "symbolDecl", string.format( "asyncMode.nsId = symbolDecl.nsId AND asyncMode.mode = %d", asyncMode), nil, nil, "asyncMode.nsId, asyncMode.mode, symbolDecl.fileId, symbolDecl.line", function ( items )
+   
+      do
+         local item = ItemAsyncMode._fromStem( items )
+         if item ~= nil then
+            return callback( item )
+         end
+      end
+      
+      return true
+   end )
+end
+
+
+function DBCtrl:addAllmutDecl( nsId )
+
+   self:insert( "allmutDecl", string.format( "%d", nsId) )
+end
+
+
+
+function DBCtrl:mapAllmutDecl( callback )
+
+   self:mapJoin( "allmutDecl", "symbolDecl", "allmutDecl.nsId = symbolDecl.nsId", nil, nil, "allmutDecl.nsId, symbolDecl.fileId, symbolDecl.line", function ( items )
+   
+      do
+         local item = ItemAllmutDecl._fromStem( items )
+         if item ~= nil then
+            return callback( item )
+         end
+      end
+      
+      return true
+   end )
+end
+
+
 function DBCtrl:addSymbolDecl( nsId, fileId, lineNo, column )
 
    local kind = 0
@@ -1192,7 +1346,7 @@ end
 local function create( dbPath )
    local __func__ = '@lns.@tags.@DBCtrl.create'
 
-   Log.log( Log.Level.Log, __func__, 580, function (  )
+   Log.log( Log.Level.Log, __func__, 635, function (  )
    
       return "create"
    end )
@@ -1210,10 +1364,6 @@ local function create( dbPath )
    dbCtrl:creataTables(  )
    
    dbCtrl:begin(  )
-   
-   dbCtrl:setEtc( "individualTypeFlag", "1" )
-   dbCtrl:setEtc( "individualStructFlag", "1" )
-   dbCtrl:setEtc( "individualMacroFlag", "1" )
    
    return dbCtrl
 end
@@ -1338,6 +1488,18 @@ function DBCtrl:dumpFile(  )
 end
 
 
+function DBCtrl:dumpAsync(  )
+
+   print( "async" )
+   
+   self:mapRowList( "asyncMode", nil, nil, nil, function ( items )
+   
+      print( items['nsId'], items['mode'] )
+      return true
+   end )
+end
+
+
 function DBCtrl:dumpAll(  )
 
    self:dumpFile(  )
@@ -1415,7 +1577,7 @@ local function test(  )
    
    do
       local _
-      local _587, added = db:addNamespace( "@hoge", _moduleObj.rootNsId )
+      local _661, added = db:addNamespace( "@hoge", _moduleObj.rootNsId )
       print( "added", added )
    end
    
