@@ -509,7 +509,8 @@ CREATE TABLE funcCall ( nsId INTEGER, snameId INTEGER, belongNsId INTEGER, fileI
 
 CREATE TABLE allmutDecl ( nsId INTEGER PRIMARY KEY );
 CREATE TABLE asyncMode ( nsId INTEGER PRIMARY KEY, mode INTEGER );
-
+CREATE TABLE luavalRef ( fileId INTEGER, line INTEGER, column INTEGER, PRIMARY KEY( fileId, line, column ) );
+CREATE TABLE asyncLock ( fileId INTEGER, line INTEGER, column INTEGER, PRIMARY KEY( fileId, line, column ) );
 
 CREATE TABLE incRef ( id INTEGER, baseFileId INTEGER, line INTEGER );
 CREATE TABLE incCache ( id INTEGER, baseFileId INTEGER, incFlag INTEGER, PRIMARY KEY( id, baseFileId ) );
@@ -996,6 +997,108 @@ function ItemOverride._fromMapSub( obj, val )
 end
 
 
+local ItemLuavalRef = {}
+setmetatable( ItemLuavalRef, { ifList = {Mapping,} } )
+_moduleObj.ItemLuavalRef = ItemLuavalRef
+function ItemLuavalRef.setmeta( obj )
+  setmetatable( obj, { __index = ItemLuavalRef  } )
+end
+function ItemLuavalRef.new( fileId, line )
+   local obj = {}
+   ItemLuavalRef.setmeta( obj )
+   if obj.__init then
+      obj:__init( fileId, line )
+   end
+   return obj
+end
+function ItemLuavalRef:__init( fileId, line )
+
+   self.fileId = fileId
+   self.line = line
+end
+function ItemLuavalRef:get_fileId()
+   return self.fileId
+end
+function ItemLuavalRef:get_line()
+   return self.line
+end
+function ItemLuavalRef:_toMap()
+  return self
+end
+function ItemLuavalRef._fromMap( val )
+  local obj, mes = ItemLuavalRef._fromMapSub( {}, val )
+  if obj then
+     ItemLuavalRef.setmeta( obj )
+  end
+  return obj, mes
+end
+function ItemLuavalRef._fromStem( val )
+  return ItemLuavalRef._fromMap( val )
+end
+
+function ItemLuavalRef._fromMapSub( obj, val )
+   local memInfo = {}
+   table.insert( memInfo, { name = "fileId", func = _lune._toInt, nilable = false, child = {} } )
+   table.insert( memInfo, { name = "line", func = _lune._toInt, nilable = false, child = {} } )
+   local result, mess = _lune._fromMap( obj, val, memInfo )
+   if not result then
+      return nil, mess
+   end
+   return obj
+end
+
+
+local ItemAsyncLock = {}
+setmetatable( ItemAsyncLock, { ifList = {Mapping,} } )
+_moduleObj.ItemAsyncLock = ItemAsyncLock
+function ItemAsyncLock.setmeta( obj )
+  setmetatable( obj, { __index = ItemAsyncLock  } )
+end
+function ItemAsyncLock.new( fileId, line )
+   local obj = {}
+   ItemAsyncLock.setmeta( obj )
+   if obj.__init then
+      obj:__init( fileId, line )
+   end
+   return obj
+end
+function ItemAsyncLock:__init( fileId, line )
+
+   self.fileId = fileId
+   self.line = line
+end
+function ItemAsyncLock:get_fileId()
+   return self.fileId
+end
+function ItemAsyncLock:get_line()
+   return self.line
+end
+function ItemAsyncLock:_toMap()
+  return self
+end
+function ItemAsyncLock._fromMap( val )
+  local obj, mes = ItemAsyncLock._fromMapSub( {}, val )
+  if obj then
+     ItemAsyncLock.setmeta( obj )
+  end
+  return obj, mes
+end
+function ItemAsyncLock._fromStem( val )
+  return ItemAsyncLock._fromMap( val )
+end
+
+function ItemAsyncLock._fromMapSub( obj, val )
+   local memInfo = {}
+   table.insert( memInfo, { name = "fileId", func = _lune._toInt, nilable = false, child = {} } )
+   table.insert( memInfo, { name = "line", func = _lune._toInt, nilable = false, child = {} } )
+   local result, mess = _lune._fromMap( obj, val, memInfo )
+   if not result then
+      return nil, mess
+   end
+   return obj
+end
+
+
 function DBCtrl:getProjId( path )
 
    local projId = nil
@@ -1116,7 +1219,7 @@ function DBCtrl:getFileIdFromPath( path )
       return fileId
    end
    
-   Log.log( Log.Level.Err, __func__, 438, function (  )
+   Log.log( Log.Level.Err, __func__, 450, function (  )
    
       return string.format( "not found file -- %s", path)
    end )
@@ -1346,7 +1449,7 @@ end
 local function create( dbPath )
    local __func__ = '@lns.@tags.@DBCtrl.create'
 
-   Log.log( Log.Level.Log, __func__, 635, function (  )
+   Log.log( Log.Level.Log, __func__, 647, function (  )
    
       return "create"
    end )
@@ -1383,6 +1486,52 @@ local function initDB( dbPath )
    db:close(  )
 end
 _moduleObj.initDB = initDB
+
+
+function DBCtrl:mapLuavalRef( callback )
+
+   self:mapRowListSort( "luavalRef", nil, nil, nil, "fileId, line", function ( items )
+   
+      do
+         local item = ItemLuavalRef._fromStem( items )
+         if item ~= nil then
+            return callback( item )
+         end
+      end
+      
+      return false
+   end )
+end
+
+
+function DBCtrl:addLuavalRef( fileId, lineNo, column )
+
+   self:insert( "luavalRef", string.format( "%d, %d, %d", fileId, lineNo, column) )
+end
+
+
+
+function DBCtrl:mapAsyncLock( callback )
+
+   self:mapRowListSort( "asyncLock", nil, nil, nil, "fileId, line", function ( items )
+   
+      do
+         local item = ItemAsyncLock._fromStem( items )
+         if item ~= nil then
+            return callback( item )
+         end
+      end
+      
+      return false
+   end )
+end
+
+
+function DBCtrl:addAsyncLock( fileId, lineNo, column )
+
+   self:insert( "asyncLock", string.format( "%d, %d, %d", fileId, lineNo, column) )
+end
+
 
 
 function DBCtrl:mapSymbolDecl( name, callback )
@@ -1577,7 +1726,7 @@ local function test(  )
    
    do
       local _
-      local _661, added = db:addNamespace( "@hoge", _moduleObj.rootNsId )
+      local _717, added = db:addNamespace( "@hoge", _moduleObj.rootNsId )
       print( "added", added )
    end
    

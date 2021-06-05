@@ -88,6 +88,48 @@ func Inq_InqAsync(_env *LnsEnv, db *DBCtrl_DBCtrl,asyncMode LnsInt) {
     }))
 }
 
+
+// 62: decl @lns.@tags.@Inq.InqLuaval
+func Inq_InqLuaval(_env *LnsEnv, db *DBCtrl_DBCtrl) {
+    var factory *Util_SourceCodeLineAccessorFactory
+    factory = NewUtil_SourceCodeLineAccessorFactory(_env)
+    db.FP.MapLuavalRef(_env, DBCtrl_callbackLuavalRef(func(_env *LnsEnv, item *DBCtrl_ItemLuavalRef) bool {
+        var path string
+        
+        {
+            _path := db.FP.GetFilePath(_env, item.FP.Get_fileId(_env))
+            if _path == nil{
+                panic(_env.LuaVM.String_format("file id is illegal -- %d", []LnsAny{item.FP.Get_fileId(_env)}))
+            } else {
+                path = _path.(string)
+            }
+        }
+        Util_outputLocate(_env, Lns_io_stdout, "luaval", path, factory.FP.Create(_env, path, nil), item.FP.Get_line(_env))
+        return true
+    }))
+}
+
+
+// 75: decl @lns.@tags.@Inq.InqAsyncLock
+func Inq_InqAsyncLock(_env *LnsEnv, db *DBCtrl_DBCtrl) {
+    var factory *Util_SourceCodeLineAccessorFactory
+    factory = NewUtil_SourceCodeLineAccessorFactory(_env)
+    db.FP.MapAsyncLock(_env, DBCtrl_callbackAsyncLock(func(_env *LnsEnv, item *DBCtrl_ItemAsyncLock) bool {
+        var path string
+        
+        {
+            _path := db.FP.GetFilePath(_env, item.FP.Get_fileId(_env))
+            if _path == nil{
+                panic(_env.LuaVM.String_format("file id is illegal -- %d", []LnsAny{item.FP.Get_fileId(_env)}))
+            } else {
+                path = _path.(string)
+            }
+        }
+        Util_outputLocate(_env, Lns_io_stdout, "luaval", path, factory.FP.Create(_env, path, nil), item.FP.Get_line(_env))
+        return true
+    }))
+}
+
 func Lns_Inq_init(_env *LnsEnv) {
     if init_Inq { return }
     init_Inq = true

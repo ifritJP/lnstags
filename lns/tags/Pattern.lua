@@ -208,8 +208,8 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
             if _switchExp == Option.InqMode.Def then
                return self:getFull( workNode:get_expType(), false )
             elseif _switchExp == Option.InqMode.Ref then
-               return Ast.getFullNameSym( self, workNode:get_symbolInfo() )
-            elseif _switchExp == Option.InqMode.Set or _switchExp == Option.InqMode.AllMut or _switchExp == Option.InqMode.Async or _switchExp == Option.InqMode.Noasync then
+               return Ast.getFullNameSym( self, workNode:get_info():get_symbolInfo() )
+            elseif _switchExp == Option.InqMode.Set or _switchExp == Option.InqMode.AllMut or _switchExp == Option.InqMode.Async or _switchExp == Option.InqMode.Noasync or _switchExp == Option.InqMode.Luaval or _switchExp == Option.InqMode.AsyncLock then
             end
          end
          

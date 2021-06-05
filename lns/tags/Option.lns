@@ -8,6 +8,8 @@ pub enum InqMode {
    AllMut = "allmut",
    Async = "async",
    Noasync = "noasync",
+   Luaval = "luaval",
+   AsyncLock = "asyncLock",
 }
 
 pub enum Mode {
@@ -146,7 +148,7 @@ pub fn analyzeArgs( argList:&List<str> ) : &Option {
                case .Inq {
                   option.inqMode = getInqMode();
                   switch option.inqMode {
-                     case .AllMut, .Async, .Noasync {
+                     case .AllMut, .Async, .Noasync, .Luaval, .AsyncLock {
                      }
                      default {
                         option.pattern = getNextOpNonNil( "none pattern" );

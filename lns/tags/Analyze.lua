@@ -285,6 +285,10 @@ function tagFilter:registerType( typeInfo )
    local __func__ = '@lns.@tags.@Analyze.tagFilter.registerType'
 
    typeInfo = typeInfo:get_nonnilableType():get_srcTypeInfo():get_genSrcTypeInfo()
+   if not LnsAst.TypeInfo.hasParent( typeInfo ) then
+      return DBCtrl.rootNsId, false
+   end
+   
    do
       local _exp = self.type2nsid[typeInfo]
       if _exp ~= nil then
@@ -292,10 +296,11 @@ function tagFilter:registerType( typeInfo )
       end
    end
    
+   
    local parentNsId = self:registerType( typeInfo:get_parentInfo() )
    local name = self:getFull( typeInfo, false )
    local nsId, added = self.db:addNamespace( name, parentNsId )
-   Log.log( Log.Level.Debug, __func__, 74, function (  )
+   Log.log( Log.Level.Debug, __func__, 78, function (  )
    
       return string.format( "%s %s %d", name, added, nsId)
    end )
@@ -319,7 +324,7 @@ function tagFilter:registerSymbol( symbolInfo )
    local parentNsId = self:registerType( symbolInfo:get_namespaceTypeInfo() )
    local name = Ast.getFullNameSym( self, symbolInfo )
    local nsId, added = self.db:addNamespace( name, parentNsId )
-   Log.log( Log.Level.Debug, __func__, 88, function (  )
+   Log.log( Log.Level.Debug, __func__, 92, function (  )
    
       return string.format( "%s %s %d", name, added, nsId)
    end )
@@ -336,7 +341,7 @@ function tagFilter:registDeclSym( symbolInfo )
    local pos = _lune.unwrap( _lune.nilacc( symbolInfo:get_pos(), 'get_orgPos', 'callmtd' ))
    local fileId = self:getFileId( pos.streamName )
    self.db:addSymbolDecl( symNsId, fileId, pos.lineNo, pos.column )
-   Log.log( Log.Level.Debug, __func__, 98, function (  )
+   Log.log( Log.Level.Debug, __func__, 102, function (  )
    
       return symbolInfo:get_name()
    end )
@@ -476,7 +481,7 @@ function tagFilter:registerDecl( nodeManager )
          end
          table.sort( __sorted )
          for __index, name in ipairs( __sorted ) do
-            local _168 = __map[ name ]
+            local _174 = __map[ name ]
             do
                do
                   local _exp = _lune.nilacc( workNode:get_algeType():get_scope(), 'getSymbolInfoChild', 'callmtd' , name )
@@ -501,7 +506,7 @@ function tagFilter:registerDecl( nodeManager )
    end
    
    for __index, workNode in pairs( nodeManager:getImportNodeList(  ) ) do
-      self:registDeclSym( workNode:get_symbolInfo() )
+      self:registDeclSym( workNode:get_info():get_symbolInfo() )
    end
    
    
@@ -556,7 +561,7 @@ function tagFilter:registerRefs( nodeManager )
       
       local nsId, added = self:registerSymbol( symbolInfo )
       if added and not LnsAst.isBuiltin( symbolInfo:get_namespaceTypeInfo():get_typeId().id ) then
-         Log.log( Log.Level.Err, __func__, 264, function (  )
+         Log.log( Log.Level.Err, __func__, 268, function (  )
          
             return string.format( "no register sym -- %d:%d:%s", pos.lineNo, pos.column, Ast.getFullNameSym( self, symbolInfo ))
          end )
@@ -571,7 +576,7 @@ function tagFilter:registerRefs( nodeManager )
    
       local nsId, added = self:registerType( typeInfo )
       if added and not LnsAst.isBuiltin( typeInfo:get_typeId().id ) then
-         Log.log( Log.Level.Err, __func__, 273, function (  )
+         Log.log( Log.Level.Err, __func__, 277, function (  )
          
             return string.format( "no register type -- %d:%d:%s", pos.lineNo, pos.column, self:getFull( typeInfo, false ))
          end )
@@ -615,6 +620,14 @@ function tagFilter:registerRefs( nodeManager )
       end
       
    end
+   
+   local function addRefLuaval( node )
+   
+      if node:get_expType():get_kind() == LnsAst.TypeInfoKind.Ext then
+         self.db:addLuavalRef( self:getFileId( node:get_pos().streamName ), node:get_pos().lineNo, node:get_pos().column )
+      end
+      
+   end
    for __index, workNode in pairs( nodeManager:getExpSetValNodeList(  ) ) do
       for __index, leftSym in pairs( workNode:get_LeftSymList() ) do
          do
@@ -651,6 +664,7 @@ function tagFilter:registerRefs( nodeManager )
    
    for __index, workNode in pairs( nodeManager:getExpRefNodeList(  ) ) do
       registerRefSym( workNode:get_symbolInfo(), workNode:get_pos(), false )
+      addRefLuaval( workNode )
    end
    
    for __index, workNode in pairs( nodeManager:getRefFieldNodeList(  ) ) do
@@ -660,7 +674,7 @@ function tagFilter:registerRefs( nodeManager )
             registerRefSym( _exp, workNode:get_pos(), false )
          else
             if not workNode:get_macroArgFlag() then
-               Log.log( Log.Level.Warn, __func__, 358, function (  )
+               Log.log( Log.Level.Warn, __func__, 370, function (  )
                
                   return string.format( "no symbolInfo -- %s, %s:%d:%d", workNode:get_field().txt, workNode:get_pos().streamName, workNode:get_pos().lineNo, workNode:get_pos().column)
                end )
@@ -670,6 +684,11 @@ function tagFilter:registerRefs( nodeManager )
          end
       end
       
+      addRefLuaval( workNode )
+   end
+   
+   for __index, workNode in pairs( nodeManager:getExpCallNodeList(  ) ) do
+      addRefLuaval( workNode )
    end
    
    for __index, workNode in pairs( nodeManager:getGetFieldNodeList(  ) ) do
@@ -684,6 +703,10 @@ function tagFilter:registerRefs( nodeManager )
          end
       end
       
+   end
+   
+   for __index, workNode in pairs( nodeManager:getAsyncLockNodeList(  ) ) do
+      self.db:addAsyncLock( self:getFileId( workNode:get_pos().streamName ), workNode:get_pos().lineNo, workNode:get_pos().column )
    end
    
    
@@ -735,7 +758,7 @@ end
 local function dumpRoot( rootNode, db, streamName )
    local __func__ = '@lns.@tags.@Analyze.dumpRoot'
 
-   Log.log( Log.Level.Log, __func__, 410, function (  )
+   Log.log( Log.Level.Log, __func__, 431, function (  )
    
       return streamName
    end )

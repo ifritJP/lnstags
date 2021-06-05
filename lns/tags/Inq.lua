@@ -141,4 +141,40 @@ local function InqAsync( db, asyncMode )
 end
 _moduleObj.InqAsync = InqAsync
 
+local function InqLuaval( db )
+
+   local factory = Util.SourceCodeLineAccessorFactory.new()
+   db:mapLuavalRef( function ( item )
+   
+      local path = db:getFilePath( item:get_fileId() )
+      if  nil == path then
+         local _path = path
+      
+         error( string.format( "file id is illegal -- %d", item:get_fileId()) )
+      end
+      
+      Util.outputLocate( io.stdout, "luaval", path, factory:create( path ), item:get_line() )
+      return true
+   end )
+end
+_moduleObj.InqLuaval = InqLuaval
+
+local function InqAsyncLock( db )
+
+   local factory = Util.SourceCodeLineAccessorFactory.new()
+   db:mapAsyncLock( function ( item )
+   
+      local path = db:getFilePath( item:get_fileId() )
+      if  nil == path then
+         local _path = path
+      
+         error( string.format( "file id is illegal -- %d", item:get_fileId()) )
+      end
+      
+      Util.outputLocate( io.stdout, "luaval", path, factory:create( path ), item:get_line() )
+      return true
+   end )
+end
+_moduleObj.InqAsyncLock = InqAsyncLock
+
 return _moduleObj

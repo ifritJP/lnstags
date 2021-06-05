@@ -23,8 +23,8 @@ macro _logNode( logLevel:Log.Level, node:__exp, mess:__exp ) {
 }
 
 class SyntaxFilter extend Nodes.Filter<str> {
-   let ast: TransUnit.ASTInfo;
-   local fn __init( ast: TransUnit.ASTInfo )
+   let ast: &TransUnit.ASTInfo;
+   local fn __init( ast: &TransUnit.ASTInfo )
    {
       super( true, ast.$exportInfo.$moduleTypeInfo,
              ast.$exportInfo.$moduleTypeInfo.$scope );
@@ -65,9 +65,9 @@ class SyntaxFilter extend Nodes.Filter<str> {
                return self.getFull( workNode.$expType, false );
             }
             case .Ref {
-               return Ast.getFullNameSym( self, workNode.$symbolInfo );
+               return Ast.getFullNameSym( self, workNode.$info.$symbolInfo );
             }
-            case .Set, .AllMut, .Async, .Noasync {
+            case .Set, .AllMut, .Async, .Noasync, .Luaval, .AsyncLock {
             }
          }
          return nil;
@@ -298,7 +298,7 @@ pub fn getPatterAt(
 
    Ast.buildAst(
       .Err, [path], projDir, useStdInMod, false, transCtrlInfo,
-      fn ( ast: TransUnit.ASTInfo ) {
+      fn ( ast: &TransUnit.ASTInfo ) {
          if ast.$streamName == path {
             let mut filter = new SyntaxFilter( ast );
             pattern = filter.getPattern( path, analyzeFileInfo, inqMod );

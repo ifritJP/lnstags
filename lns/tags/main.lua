@@ -101,6 +101,10 @@ local function inq( inqMode, pattern )
          Inq.InqAsync( db, LnsAst.Async.Async )
       elseif _switchExp == Option.InqMode.Noasync then
          Inq.InqAsync( db, LnsAst.Async.Noasync )
+      elseif _switchExp == Option.InqMode.Luaval then
+         Inq.InqLuaval( db )
+      elseif _switchExp == Option.InqMode.AsyncLock then
+         Inq.InqAsyncLock( db )
       end
    end
    
@@ -211,8 +215,7 @@ local function __main( args )
             return 1
          end
          
-         db:dumpAsync(  )
-         
+         db:dumpAll(  )
          db:close(  )
       elseif _switchExp == Option.Mode.Test then
          DBCtrl.test(  )

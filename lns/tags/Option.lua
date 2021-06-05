@@ -108,6 +108,12 @@ InqMode.__allList[5] = InqMode.Async
 InqMode.Noasync = 'noasync'
 InqMode._val2NameMap['noasync'] = 'Noasync'
 InqMode.__allList[6] = InqMode.Noasync
+InqMode.Luaval = 'luaval'
+InqMode._val2NameMap['luaval'] = 'Luaval'
+InqMode.__allList[7] = InqMode.Luaval
+InqMode.AsyncLock = 'asyncLock'
+InqMode._val2NameMap['asyncLock'] = 'AsyncLock'
+InqMode.__allList[8] = InqMode.AsyncLock
 
 
 local Mode = {}
@@ -362,7 +368,7 @@ local function analyzeArgs( argList )
                      option.inqMode = getInqMode(  )
                      do
                         local _switchExp = option.inqMode
-                        if _switchExp == InqMode.AllMut or _switchExp == InqMode.Async or _switchExp == InqMode.Noasync then
+                        if _switchExp == InqMode.AllMut or _switchExp == InqMode.Async or _switchExp == InqMode.Noasync or _switchExp == InqMode.Luaval or _switchExp == InqMode.AsyncLock then
                         else 
                            
                               option.pattern = getNextOpNonNil( "none pattern" )

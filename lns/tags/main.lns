@@ -37,6 +37,12 @@ fn inq( inqMode:Option.InqMode, pattern:str ) : int {
       case .Noasync {
          Inq.InqAsync( db, .Noasync );
       }
+      case .Luaval {
+         Inq.InqLuaval( db );
+      }
+      case .AsyncLock {
+         Inq.InqAsyncLock( db );
+      }
    }
    db.close();
    return 0;
@@ -128,9 +134,9 @@ pub fn __main( args:&List<str> ) : int {
             print( "error" );
             return 1;
          };
-         //db.dumpAll();
-         //db.dumpFile();
-         db.dumpAsync();
+         db.dumpAll();
+         // db.dumpFile();
+         // db.dumpAsync();
 
          db.close();
       }

@@ -14,7 +14,7 @@ import LnsUtil "github.com/ifritJP/LuneScript/src/lune/base"
 var init_Pattern bool
 var Pattern__mod__ string
 // for 288
-func Pattern_convExp1980(arg1 []LnsAny) string {
+func Pattern_convExp1985(arg1 []LnsAny) string {
     return Lns_getFromMulti( arg1, 0 ).(string)
 }
 
@@ -49,7 +49,7 @@ func Pattern_getPatterAt(_env *LnsEnv, db *DBCtrl_DBCtrl,analyzeFileInfo *Option
         _env.SetStackVal( Lns_car(_env.LuaVM.String_find(path,"^%.%.", nil, nil))) ||
         _env.SetStackVal( Lns_car(_env.LuaVM.String_find(path,"^/", nil, nil))) )){
         var dir string
-        dir = Pattern_convExp1980(Lns_2DDD(_env.LuaVM.String_gsub(path,"/[^/]+$", "")))
+        dir = Pattern_convExp1985(Lns_2DDD(_env.LuaVM.String_gsub(path,"/[^/]+$", "")))
         projDir = LnsUtil.Util_searchProjDir(_env, dir)
         
     }
@@ -88,6 +88,7 @@ type Pattern_SyntaxFilterMtd interface {
     ProcessAbbr(_env *LnsEnv, arg1 *Nodes.Nodes_AbbrNode, arg2 LnsAny)
     ProcessAlias(_env *LnsEnv, arg1 *Nodes.Nodes_AliasNode, arg2 LnsAny)
     ProcessApply(_env *LnsEnv, arg1 *Nodes.Nodes_ApplyNode, arg2 LnsAny)
+    ProcessAsyncLock(_env *LnsEnv, arg1 *Nodes.Nodes_AsyncLockNode, arg2 LnsAny)
     ProcessBlankLine(_env *LnsEnv, arg1 *Nodes.Nodes_BlankLineNode, arg2 LnsAny)
     ProcessBlock(_env *LnsEnv, arg1 *Nodes.Nodes_BlockNode, arg2 LnsAny)
     ProcessBlockSub(_env *LnsEnv, arg1 *Nodes.Nodes_BlockNode, arg2 LnsAny)
@@ -108,7 +109,6 @@ type Pattern_SyntaxFilterMtd interface {
     ProcessDeclMember(_env *LnsEnv, arg1 *Nodes.Nodes_DeclMemberNode, arg2 LnsAny)
     ProcessDeclMethod(_env *LnsEnv, arg1 *Nodes.Nodes_DeclMethodNode, arg2 LnsAny)
     ProcessDeclVar(_env *LnsEnv, arg1 *Nodes.Nodes_DeclVarNode, arg2 LnsAny)
-    ProcessEnv(_env *LnsEnv, arg1 *Nodes.Nodes_EnvNode, arg2 LnsAny)
     ProcessExpAccessMRet(_env *LnsEnv, arg1 *Nodes.Nodes_ExpAccessMRetNode, arg2 LnsAny)
     ProcessExpCall(_env *LnsEnv, arg1 *Nodes.Nodes_ExpCallNode, arg2 LnsAny)
     ProcessExpCallSuper(_env *LnsEnv, arg1 *Nodes.Nodes_ExpCallSuperNode, arg2 LnsAny)
@@ -140,6 +140,7 @@ type Pattern_SyntaxFilterMtd interface {
     ProcessIf(_env *LnsEnv, arg1 *Nodes.Nodes_IfNode, arg2 LnsAny)
     ProcessIfUnwrap(_env *LnsEnv, arg1 *Nodes.Nodes_IfUnwrapNode, arg2 LnsAny)
     ProcessImport(_env *LnsEnv, arg1 *Nodes.Nodes_ImportNode, arg2 LnsAny)
+    ProcessJoinRunner(_env *LnsEnv, arg1 *Nodes.Nodes_JoinRunnerNode, arg2 LnsAny)
     ProcessLiteralArray(_env *LnsEnv, arg1 *Nodes.Nodes_LiteralArrayNode, arg2 LnsAny)
     ProcessLiteralBool(_env *LnsEnv, arg1 *Nodes.Nodes_LiteralBoolNode, arg2 LnsAny)
     ProcessLiteralChar(_env *LnsEnv, arg1 *Nodes.Nodes_LiteralCharNode, arg2 LnsAny)
@@ -237,11 +238,11 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(_env *LnsEnv, analyzeFileIn
         _workNode := Nodes.Nodes_ImportNodeDownCastF(nearest.FP)
         if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_ImportNode)
-            if _switch304 := inqMod; _switch304 == Option_InqMode__Def {
+            if _switch309 := inqMod; _switch309 == Option_InqMode__Def {
                 return self.FP.GetFull(_env, workNode.FP.Get_expType(_env), false)
-            } else if _switch304 == Option_InqMode__Ref {
-                return Ast_getFullNameSym(_env, &self.Nodes_Filter, workNode.FP.Get_symbolInfo(_env))
-            } else if _switch304 == Option_InqMode__Set || _switch304 == Option_InqMode__AllMut || _switch304 == Option_InqMode__Async || _switch304 == Option_InqMode__Noasync {
+            } else if _switch309 == Option_InqMode__Ref {
+                return Ast_getFullNameSym(_env, &self.Nodes_Filter, workNode.FP.Get_info(_env).FP.Get_symbolInfo(_env))
+            } else if _switch309 == Option_InqMode__Set || _switch309 == Option_InqMode__AllMut || _switch309 == Option_InqMode__Async || _switch309 == Option_InqMode__Noasync || _switch309 == Option_InqMode__Luaval || _switch309 == Option_InqMode__AsyncLock {
             }
             return nil
         }

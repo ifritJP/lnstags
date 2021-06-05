@@ -30,8 +30,8 @@ func Ast_buildAst(_env *LnsEnv, logLevel LnsInt,pathList *LnsList,projDir LnsAny
     LnsLog.Log_setLevel(_env, logLevel)
     LnsUtil.Util_setDebugFlag(_env, false)
     if useStdInMod != nil{
-        useStdInMod_34 := useStdInMod.(string)
-        Parser.Parser_StreamParser_setStdinStream(_env, useStdInMod_34)
+        useStdInMod_38 := useStdInMod.(string)
+        Parser.Parser_StreamParser_setStdinStream(_env, useStdInMod_38)
     }
     var lnsOpt *LnsOpt.Option_Option
     lnsOpt = LnsOpt.Option_createDefaultOption(_env, pathList, projDir)

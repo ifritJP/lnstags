@@ -58,3 +58,29 @@ pub fn InqAsync( db:DBCtrl.DBCtrl, asyncMode:LnsAst.Async ) {
          return true;
       });
 }
+
+pub fn InqLuaval( db:DBCtrl.DBCtrl ) {
+   let mut factory = new Util.SourceCodeLineAccessorFactory();
+   db.mapLuavalRef(
+      fn (item:&DBCtrl.ItemLuavalRef):bool {
+         let! path = db.getFilePath( item.$fileId ) {
+            error( "file id is illegal -- %d" (item.$fileId) );
+         };
+         Util.outputLocate(
+            io.stdout, "luaval", path, factory.create( path## ), item.$line );
+         return true;
+      });
+}
+
+pub fn InqAsyncLock( db:DBCtrl.DBCtrl ) {
+   let mut factory = new Util.SourceCodeLineAccessorFactory();
+   db.mapAsyncLock(
+      fn (item:&DBCtrl.ItemAsyncLock):bool {
+         let! path = db.getFilePath( item.$fileId ) {
+            error( "file id is illegal -- %d" (item.$fileId) );
+         };
+         Util.outputLocate(
+            io.stdout, "luaval", path, factory.create( path## ), item.$line );
+         return true;
+      });
+}

@@ -15,14 +15,21 @@ local OS = require( "os" )
 
 local function getCurDir(  )
 
+   local path
+   
    do
-      local path = OS.getenv( "PWD" )
-      if path ~= nil then
-         return path
+      do
+         local _exp = OS.getenv( "PWD" )
+         if _exp ~= nil then
+            path = _exp
+         else
+            path = "./"
+         end
       end
+      
    end
    
-   return "./"
+   return path
 end
 _moduleObj.getCurDir = getCurDir
 

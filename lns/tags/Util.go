@@ -130,7 +130,7 @@ func (self *Util_SourceCodeLineAccessorFactory) Create(_env *LnsEnv, filePath st
     if fileContents != nil{
         fileContents_32 := fileContents.(string)
         {
-            _form141, _param141, _prev141 := _env.LuaVM.String_gmatch(fileContents_32, "[^\n]*\n")
+            _form141, _param141, _prev141 := _env.CommonLuaVM.String_gmatch(fileContents_32, "[^\n]*\n")
             for {
                 _work141 := _form141.(*Lns_luaValue).Call( Lns_2DDD( _param141, _prev141 ) )
                 _prev141 = Lns_getFromMulti(_work141,0)

@@ -65,9 +65,13 @@ class tagFilter extend Nodes.Filter<Opt> {
 
 fn tagFilter.registerType( mut typeInfo:&LnsAst.TypeInfo ) mut : int, bool {
    typeInfo = typeInfo.$nonnilableType.$srcTypeInfo.$genSrcTypeInfo;
+   if not LnsAst.TypeInfo.hasParent( typeInfo ) {
+      return DBCtrl.rootNsId, false;
+   }
    if! self.type2nsid[ typeInfo ] {
       return _exp, false;
    }
+   
    let parentNsId = self.registerType( typeInfo.$parentInfo );
    let name = self.getFull( typeInfo, false );
    let nsId, added = self.db.addNamespace( name, parentNsId );
@@ -216,7 +220,7 @@ fn tagFilter.registerDecl(
 
    // ======== シンボルの定義系 ======
    foreach workNode in nodeManager.getImportNodeList() {
-      self.registDeclSym( workNode.$symbolInfo );
+      self.registDeclSym( workNode.$info.$symbolInfo );
    }
    
    foreach workNode in nodeManager.getDeclVarNodeList() {
@@ -313,6 +317,13 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
       }
    }
 
+   fn addRefLuaval( node:&Nodes.Node ) {
+      if node.$expType.$kind == .Ext {
+         self.db.addLuavalRef( self.getFileId( node.$pos.$streamName ),
+                               node.$pos.lineNo, node.$pos.column );
+      }
+   }
+
    // ======== 代入系 ========
    // 代入系を先に設定して、 setOp フラグが更新されないようにする。
    foreach workNode in nodeManager.getExpSetValNodeList() {
@@ -349,6 +360,7 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
 
    foreach workNode in nodeManager.getExpRefNodeList() {
       registerRefSym( workNode.$symbolInfo, workNode.$pos, false );
+      addRefLuaval( workNode );
    }
    foreach workNode in nodeManager.getRefFieldNodeList() {
       if! workNode.$symbolInfo {
@@ -360,6 +372,10 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
                         workNode.$pos.lineNo, workNode.$pos.column ) );
          }
       }
+      addRefLuaval( workNode );
+   }
+   foreach workNode in nodeManager.getExpCallNodeList() {
+      addRefLuaval( workNode );
    }
    foreach workNode in nodeManager.getGetFieldNodeList() {
       registerRefType( workNode.$getterTypeInfo, workNode.$pos );
@@ -369,6 +385,11 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
          registerRefSym( _exp, workNode.$pos, false );
       }
    }
+   foreach workNode in nodeManager.getAsyncLockNodeList() {
+      self.db.addAsyncLock( self.getFileId( workNode.$pos.$streamName ),
+                            workNode.$pos.lineNo, workNode.$pos.column );
+   }
+   
 
    foreach workNode in nodeManager.getMatchNodeList() {
       foreach matchCase in workNode.$caseList {
@@ -419,7 +440,7 @@ pub fn start(
    
    Ast.buildAst(
       .Log, pathList, nil, nil, true, transCtrlInfo,
-      fn ( ast: TransUnit.ASTInfo ) __noasync {
+      fn ( ast: &TransUnit.ASTInfo ) __noasync {
          if not set.has( ast.$streamName ) {
             set.add( ast.$streamName );
             if! let rootNode = ast.$node@@@Nodes.RootNode {

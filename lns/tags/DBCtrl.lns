@@ -248,7 +248,8 @@ CREATE TABLE funcCall ( nsId INTEGER, snameId INTEGER, belongNsId INTEGER, fileI
 
 CREATE TABLE allmutDecl ( nsId INTEGER PRIMARY KEY );
 CREATE TABLE asyncMode ( nsId INTEGER PRIMARY KEY, mode INTEGER );
-
+CREATE TABLE luavalRef ( fileId INTEGER, line INTEGER, column INTEGER, PRIMARY KEY( fileId, line, column ) );
+CREATE TABLE asyncLock ( fileId INTEGER, line INTEGER, column INTEGER, PRIMARY KEY( fileId, line, column ) );
 
 CREATE TABLE incRef ( id INTEGER, baseFileId INTEGER, line INTEGER );
 CREATE TABLE incCache ( id INTEGER, baseFileId INTEGER, incFlag INTEGER, PRIMARY KEY( id, baseFileId ) );
@@ -321,6 +322,17 @@ pub class ItemOverride extend (Mapping) {
    let nsId:int {pub};
    let superNsId:int {pub};
 }
+
+pub class ItemLuavalRef extend (Mapping) {
+   let fileId:int {pub};
+   let line:int {pub};
+}
+
+pub class ItemAsyncLock extend (Mapping) {
+   let fileId:int {pub};
+   let line:int {pub};
+}
+
 
 
 pub fn DBCtrl.getProjId( path:str ) : int!
@@ -655,6 +667,43 @@ pub fn initDB( dbPath:str ) {
    db.commit();
    db.close();
 }
+
+
+pub form callbackLuavalRef( item:&ItemLuavalRef ):bool;
+pub fn DBCtrl.mapLuavalRef( callback:callbackLuavalRef ) {
+   self.mapRowListSort(
+      "luavalRef", nil, nil, nil, "fileId, line",
+      fn (items:&Map<str,&stem>): bool
+      {
+         if! let item = ItemLuavalRef._fromStem( items ) {
+            return callback( item );
+         }
+         return false;
+      }##);
+}
+
+pub fn DBCtrl.addLuavalRef( fileId:int, lineNo:int, column:int ) mut {
+   self.insert( "luavalRef", "%d, %d, %d" ( fileId, lineNo, column ) );
+}
+
+pub form callbackAsyncLock( item:&ItemAsyncLock ):bool;
+pub fn DBCtrl.mapAsyncLock( callback:callbackAsyncLock ) {
+   self.mapRowListSort(
+      "asyncLock", nil, nil, nil, "fileId, line",
+      fn (items:&Map<str,&stem>): bool
+      {
+         if! let item = ItemAsyncLock._fromStem( items ) {
+            return callback( item );
+         }
+         return false;
+      }##);
+}
+
+pub fn DBCtrl.addAsyncLock( fileId:int, lineNo:int, column:int ) mut {
+   self.insert( "asyncLock", "%d, %d, %d" ( fileId, lineNo, column ) );
+}
+
+
 
 pub form callbackSymbolDecl( item:&ItemSymbolDecl ):bool;
 pub fn DBCtrl.mapSymbolDecl( name:str, callback:callbackSymbolDecl ) {
