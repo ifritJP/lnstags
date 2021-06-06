@@ -2,8 +2,8 @@
 local _moduleObj = {}
 local __mod__ = '@lns.@tags.@Analyze'
 local _lune = {}
-if _lune3 then
-   _lune = _lune3
+if _lune4 then
+   _lune = _lune4
 end
 function _lune._Set_or( setObj, otherSet )
    for val in pairs( otherSet ) do
@@ -187,8 +187,8 @@ function _lune.__Cast( obj, kind, class )
    return nil
 end
 
-if not _lune3 then
-   _lune3 = _lune
+if not _lune4 then
+   _lune4 = _lune
 end
 
 
@@ -481,7 +481,7 @@ function tagFilter:registerDecl( nodeManager )
          end
          table.sort( __sorted )
          for __index, name in ipairs( __sorted ) do
-            local _174 = __map[ name ]
+            local _169 = __map[ name ]
             do
                do
                   local _exp = _lune.nilacc( workNode:get_algeType():get_scope(), 'getSymbolInfoChild', 'callmtd' , name )

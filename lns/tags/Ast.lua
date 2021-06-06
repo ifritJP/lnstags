@@ -2,8 +2,8 @@
 local _moduleObj = {}
 local __mod__ = '@lns.@tags.@Ast'
 local _lune = {}
-if _lune3 then
-   _lune = _lune3
+if _lune4 then
+   _lune = _lune4
 end
 function _lune.loadModule( mod )
    if __luneScript then
@@ -12,8 +12,8 @@ function _lune.loadModule( mod )
    return require( mod )
 end
 
-if not _lune3 then
-   _lune3 = _lune
+if not _lune4 then
+   _lune4 = _lune
 end
 
 
@@ -38,7 +38,7 @@ local function getFullNameSym( filter, symbolInfo )
 end
 _moduleObj.getFullNameSym = getFullNameSym
 
-local function buildAst( logLevel, pathList, projDir, useStdInMod, forceAll, transCtrlInfo, astCallback )
+local function buildAst( logLevel, pathList, projDir, stdinFile, forceAll, transCtrlInfo, astCallback )
 
    if #pathList == 0 then
       return 
@@ -48,12 +48,8 @@ local function buildAst( logLevel, pathList, projDir, useStdInMod, forceAll, tra
    LnsLog.setLevel( logLevel )
    LnsUtil.setDebugFlag( false )
    
-   if useStdInMod ~= nil then
-      Parser.StreamParser.setStdinStream( useStdInMod )
-   end
-   
-   
    local lnsOpt = LnsOpt.createDefaultOption( pathList, projDir )
+   lnsOpt:set_stdinFile( stdinFile )
    lnsOpt.targetLuaVer = LuaVer.ver53
    lnsOpt.transCtrlInfo.legacyMutableControl = transCtrlInfo.legacyMutableControl
    if forceAll then

@@ -13,8 +13,8 @@ import LnsLog "github.com/ifritJP/LuneScript/src/lune/base"
 import LnsUtil "github.com/ifritJP/LuneScript/src/lune/base"
 var init_Pattern bool
 var Pattern__mod__ string
-// for 288
-func Pattern_convExp1985(arg1 []LnsAny) string {
+// for 287
+func Pattern_convExp1982(arg1 []LnsAny) string {
     return Lns_getFromMulti( arg1, 0 ).(string)
 }
 
@@ -42,32 +42,24 @@ func Pattern_getPatterAt(_env *LnsEnv, db *DBCtrl_DBCtrl,analyzeFileInfo *Option
     }
     var pattern LnsAny
     pattern = nil
-    var useStdInMod LnsAny
     var projDir LnsAny
     projDir = nil
     if Lns_isCondTrue( _env.PopVal( _env.IncStack() ||
         _env.SetStackVal( Lns_car(_env.LuaVM.String_find(path,"^%.%.", nil, nil))) ||
         _env.SetStackVal( Lns_car(_env.LuaVM.String_find(path,"^/", nil, nil))) )){
         var dir string
-        dir = Pattern_convExp1985(Lns_2DDD(_env.LuaVM.String_gsub(path,"/[^/]+$", "")))
+        dir = Pattern_convExp1982(Lns_2DDD(_env.LuaVM.String_gsub(path,"/[^/]+$", "")))
         projDir = LnsUtil.Util_searchProjDir(_env, dir)
         
     }
-    if analyzeFileInfo.FP.Get_stdinFlag(_env){
-        useStdInMod = LnsUtil.Util_scriptPath2ModuleFromProjDir(_env, analyzeFileInfo.FP.Get_path(_env), projDir)
-        
-    } else { 
-        useStdInMod = nil
-        
-    }
-    Ast_buildAst(_env, LnsLog.Log_Level__Err, NewLnsList([]LnsAny{path}), projDir, useStdInMod, false, transCtrlInfo, front.Front_AstCallback(func(_env *LnsEnv, ast *TransUnit.TransUnit_ASTInfo) {
+    Ast_buildAst(_env, LnsLog.Log_Level__Err, NewLnsList([]LnsAny{path}), projDir, analyzeFileInfo.FP.Get_stdinFile(_env), false, transCtrlInfo, front.Front_AstCallback(func(_env *LnsEnv, ast *TransUnit.TransUnit_ASTInfo) {
         __func__ := "@lns.@tags.@Pattern.getPatterAt.<anonymous>"
         if ast.FP.Get_streamName(_env) == path{
             var filter *Pattern_SyntaxFilter
             filter = NewPattern_SyntaxFilter(_env, ast)
             pattern = filter.FP.GetPattern(_env, path, analyzeFileInfo, inqMod)
             
-            Log_log(_env, Log_Level__Log, __func__, 305, Log_CreateMessage(func(_env *LnsEnv) string {
+            Log_log(_env, Log_Level__Log, __func__, 297, Log_CreateMessage(func(_env *LnsEnv) string {
                 return _env.LuaVM.String_format("pattern -- %s", []LnsAny{pattern})
             }))
             
@@ -140,7 +132,6 @@ type Pattern_SyntaxFilterMtd interface {
     ProcessIf(_env *LnsEnv, arg1 *Nodes.Nodes_IfNode, arg2 LnsAny)
     ProcessIfUnwrap(_env *LnsEnv, arg1 *Nodes.Nodes_IfUnwrapNode, arg2 LnsAny)
     ProcessImport(_env *LnsEnv, arg1 *Nodes.Nodes_ImportNode, arg2 LnsAny)
-    ProcessJoinRunner(_env *LnsEnv, arg1 *Nodes.Nodes_JoinRunnerNode, arg2 LnsAny)
     ProcessLiteralArray(_env *LnsEnv, arg1 *Nodes.Nodes_LiteralArrayNode, arg2 LnsAny)
     ProcessLiteralBool(_env *LnsEnv, arg1 *Nodes.Nodes_LiteralBoolNode, arg2 LnsAny)
     ProcessLiteralChar(_env *LnsEnv, arg1 *Nodes.Nodes_LiteralCharNode, arg2 LnsAny)

@@ -22,9 +22,9 @@ pub fn getFullNameSym<T>( filter:&Nodes.Filter<T>, symbolInfo:&LnsAst.SymbolInfo
 }
 
 pub fn buildAst(
-   logLevel:LnsLog.Level, pathList:&List<str>, projDir:str!, useStdInMod:str!,
-   forceAll:bool, transCtrlInfo:&Types.TransCtrlInfo,
-   astCallback:front.AstCallback ) __noasync
+   logLevel:LnsLog.Level, pathList:&List<str>, projDir:str!,
+   stdinFile:&Types.StdinFile!, forceAll:bool,
+   transCtrlInfo:&Types.TransCtrlInfo, astCallback:front.AstCallback ) __noasync
 {
    if #pathList == 0 {
       return;
@@ -33,12 +33,8 @@ pub fn buildAst(
    LnsLog.setLevel( logLevel );
    LnsUtil.setDebugFlag( false );
 
-   when! useStdInMod {
-      Parser.StreamParser.setStdinStream( useStdInMod );
-   }
-
-   
    let mut lnsOpt = LnsOpt.createDefaultOption( pathList, projDir );
+   lnsOpt.set_stdinFile( stdinFile );
    // ver 51, 52 では構文エラーになるケースがあるので、
    // ここでは 53 として処理する。
    // 本来はオプション指定した方が良いかも。

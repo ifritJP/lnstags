@@ -1,5 +1,6 @@
 import lns.tags.Log;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Types as LnsTypes;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Util as LnsUtil;
 
 pub enum InqMode {
    Def = "def",
@@ -27,12 +28,12 @@ pub class AnalyzeFileInfo {
    local let mut path:str {pub};
    local let mut lineNo:int {pub};
    local let mut column:int {pub};
-   local let mut stdinFlag:bool {pub};
+   local let mut stdinFile:LnsTypes.StdinFile! {pub};
    local fn __init() {
       self.path = "";
       self.lineNo = 0;
       self.column = 0;
-      self.stdinFlag = false;
+      self.stdinFile = nil;
    }
 }
 
@@ -77,19 +78,26 @@ pub fn analyzeArgs( argList:&List<str> ) : &Option {
    getNextOpNonNil = fn ( mess:str ): str {
       printUsage( "" );
    };
+
+   let mut stdinFlag = false;
    
+   fn getNextOpRaw():str! {
+      if #argList <= index {
+         return nil;
+      }
+      index = index + 1;
+      return argList[ index ];
+   }
    fn getNextOp():str! {
       while true {
-         if #argList <= index {
+         let! arg = getNextOpRaw() {
             return nil;
-         }
-         index = index + 1;
-         let arg = argList[ index ];
+         };
          if arg.find( "^-" ## ) {
             // オプション解析
             switch arg {
                case "-i" {
-                  option.analyzeFileInfo.stdinFlag = true;
+                  stdinFlag = true;
                }
                case "--log" {
                   option.logLevel = Log.str2level( getNextOpNonNil( "logLevel" ) );
@@ -192,6 +200,12 @@ pub fn analyzeArgs( argList:&List<str> ) : &Option {
       Log.setLevel( logLevel );
    }
 
+
+   if stdinFlag {
+      option.analyzeFileInfo.stdinFile = new LnsTypes.StdinFile(
+         LnsUtil.scriptPath2Module( option.analyzeFileInfo.$path ),
+         unwrap io.stdin.read( "*a" ) );
+   }
    
    when! mode {
       option.mode = mode;

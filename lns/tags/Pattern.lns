@@ -279,7 +279,6 @@ pub fn getPatterAt(
    };
 
    let mut pattern:str! = nil;
-   let useStdInMod:str!;
 
    let mut projDir:str! = nil;
    if path.find( "^%.%." ## ) or
@@ -289,15 +288,8 @@ pub fn getPatterAt(
       projDir = LnsUtil.searchProjDir( dir );
    }
    
-   if analyzeFileInfo.$stdinFlag {
-      useStdInMod = LnsUtil.scriptPath2ModuleFromProjDir(
-         analyzeFileInfo.$path, projDir );
-   } else {
-      useStdInMod = nil;
-   }
-
    Ast.buildAst(
-      .Err, [path], projDir, useStdInMod, false, transCtrlInfo,
+      .Err, [path], projDir, analyzeFileInfo.$stdinFile, false, transCtrlInfo,
       fn ( ast: &TransUnit.ASTInfo ) {
          if ast.$streamName == path {
             let mut filter = new SyntaxFilter( ast );

@@ -2,8 +2,8 @@
 local _moduleObj = {}
 local __mod__ = '@lns.@tags.@main'
 local _lune = {}
-if _lune3 then
-   _lune = _lune3
+if _lune4 then
+   _lune = _lune4
 end
 function _lune.loadModule( mod )
    if __luneScript then
@@ -62,8 +62,8 @@ function _lune.__Cast( obj, kind, class )
    return nil
 end
 
-if not _lune3 then
-   _lune3 = _lune
+if not _lune4 then
+   _lune4 = _lune
 end
 local DBCtrl = _lune.loadModule( 'lns.tags.DBCtrl' )
 local Analyze = _lune.loadModule( 'lns.tags.Analyze' )

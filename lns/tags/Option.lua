@@ -2,9 +2,22 @@
 local _moduleObj = {}
 local __mod__ = '@lns.@tags.@Option'
 local _lune = {}
-if _lune3 then
-   _lune = _lune3
+if _lune4 then
+   _lune = _lune4
 end
+function _lune.unwrap( val )
+   if val == nil then
+      __luneScript:error( 'unwrap val is nil' )
+   end
+   return val
+end
+function _lune.unwrapDefault( val, defval )
+   if val == nil then
+      return defval
+   end
+   return val
+end
+
 function _lune.loadModule( mod )
    if __luneScript then
       return  __luneScript:loadModule( mod )
@@ -62,11 +75,12 @@ function _lune.__Cast( obj, kind, class )
    return nil
 end
 
-if not _lune3 then
-   _lune3 = _lune
+if not _lune4 then
+   _lune4 = _lune
 end
 local Log = _lune.loadModule( 'lns.tags.Log' )
 local LnsTypes = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Types' )
+local LnsUtil = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Util' )
 
 local InqMode = {}
 _moduleObj.InqMode = InqMode
@@ -176,7 +190,7 @@ function AnalyzeFileInfo:__init()
    self.path = ""
    self.lineNo = 0
    self.column = 0
-   self.stdinFlag = false
+   self.stdinFile = nil
 end
 function AnalyzeFileInfo.setmeta( obj )
   setmetatable( obj, { __index = AnalyzeFileInfo  } )
@@ -190,8 +204,8 @@ end
 function AnalyzeFileInfo:get_column()
    return self.column
 end
-function AnalyzeFileInfo:get_stdinFlag()
-   return self.stdinFlag
+function AnalyzeFileInfo:get_stdinFile()
+   return self.stdinFile
 end
 
 
@@ -265,20 +279,32 @@ local function analyzeArgs( argList )
       printUsage( "" )
    end
    
+   local stdinFlag = false
+   
+   local function getNextOpRaw(  )
+   
+      if #argList <= index then
+         return nil
+      end
+      
+      index = index + 1
+      return argList[index]
+   end
    local function getNextOp(  )
    
       while true do
-         if #argList <= index then
+         local arg = getNextOpRaw(  )
+         if  nil == arg then
+            local _arg = arg
+         
             return nil
          end
          
-         index = index + 1
-         local arg = argList[index]
          if arg:find( "^-" ) then
             do
                local _switchExp = arg
                if _switchExp == "-i" then
-                  option.analyzeFileInfo.stdinFlag = true
+                  stdinFlag = true
                elseif _switchExp == "--log" then
                   option.logLevel = Log.str2level( getNextOpNonNil( "logLevel" ) )
                elseif _switchExp == "--simpleLog" then
@@ -428,6 +454,11 @@ local function analyzeArgs( argList )
       if logLevel ~= nil then
          Log.setLevel( logLevel )
       end
+   end
+   
+   
+   if stdinFlag then
+      option.analyzeFileInfo.stdinFile = LnsTypes.StdinFile.new(LnsUtil.scriptPath2Module( option.analyzeFileInfo:get_path() ), _lune.unwrap( io.stdin:read( "*a" )))
    end
    
    

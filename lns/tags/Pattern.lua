@@ -2,8 +2,8 @@
 local _moduleObj = {}
 local __mod__ = '@lns.@tags.@Pattern'
 local _lune = {}
-if _lune3 then
-   _lune = _lune3
+if _lune4 then
+   _lune = _lune4
 end
 function _lune._Set_or( setObj, otherSet )
    for val in pairs( otherSet ) do
@@ -145,8 +145,8 @@ function _lune.__Cast( obj, kind, class )
    return nil
 end
 
-if not _lune3 then
-   _lune3 = _lune
+if not _lune4 then
+   _lune4 = _lune
 end
 local DBCtrl = _lune.loadModule( 'lns.tags.DBCtrl' )
 local Option = _lune.loadModule( 'lns.tags.Option' )
@@ -644,8 +644,6 @@ local function getPatterAt( db, analyzeFileInfo, inqMod, transCtrlInfo )
    
    
    local pattern = nil
-   local useStdInMod
-   
    
    local projDir = nil
    if path:find( "^%.%." ) or path:find( "^/" ) then
@@ -654,21 +652,13 @@ local function getPatterAt( db, analyzeFileInfo, inqMod, transCtrlInfo )
    end
    
    
-   if analyzeFileInfo:get_stdinFlag() then
-      useStdInMod = LnsUtil.scriptPath2ModuleFromProjDir( analyzeFileInfo:get_path(), projDir )
-   else
-    
-      useStdInMod = nil
-   end
-   
-   
-   Ast.buildAst( LnsLog.Level.Err, {path}, projDir, useStdInMod, false, transCtrlInfo, function ( ast )
+   Ast.buildAst( LnsLog.Level.Err, {path}, projDir, analyzeFileInfo:get_stdinFile(), false, transCtrlInfo, function ( ast )
       local __func__ = '@lns.@tags.@Pattern.getPatterAt.<anonymous>'
    
       if ast:get_streamName() == path then
          local filter = SyntaxFilter.new(ast)
          pattern = filter:getPattern( path, analyzeFileInfo, inqMod )
-         Log.log( Log.Level.Log, __func__, 305, function (  )
+         Log.log( Log.Level.Log, __func__, 297, function (  )
          
             return string.format( "pattern -- %s", pattern)
          end )
