@@ -27,6 +27,8 @@ class tagFilter extend Nodes.Filter<Opt> {
    let mut sym2nsid:Map<&LnsAst.SymbolInfo,int>;
    let mut file2id:Map<str,int>;
    let moduleTypeInfo:&LnsAst.TypeInfo;
+
+   let noDefNsIdList:List<int>;
    
    fn addFileId( path:str, mod:str ) mut : int {
       if! self.file2id[ path ] {
@@ -49,9 +51,10 @@ class tagFilter extend Nodes.Filter<Opt> {
 
    
    local fn __init( rootNode:&Nodes.RootNode,
-                    db:DBCtrl.DBCtrl, streamName:str )
+                    db:DBCtrl.DBCtrl, streamName:str, noDefNsIdList:List<int> )
    {
       super( true, rootNode.$moduleTypeInfo, rootNode.$moduleTypeInfo.$scope );
+      self.noDefNsIdList = noDefNsIdList;
       self.moduleTypeInfo = rootNode.$moduleTypeInfo;
       self.file2id = {};
       self.db = db;
@@ -265,8 +268,10 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
       }
       let nsId, added = self.registerSymbol( symbolInfo );
       if added and not LnsAst.isBuiltin( symbolInfo.$namespaceTypeInfo.$typeId.id ) {
-         Log._log( .Err, "no register sym -- %d:%d:%s"
-                   ( pos.lineNo, pos.column, Ast.getFullNameSym( self, symbolInfo ) ) );
+         self.noDefNsIdList.insert( nsId );
+         // Log._log( .Err, "no register sym -- %s:%d:%d:%s"
+         //           ( self.streamName,
+         //             pos.lineNo, pos.column, Ast.getFullNameSym( self, symbolInfo ) ) );
       }
       self.addSymbolRef( nsId, pos, setOp );
    }
@@ -274,8 +279,10 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
    fn registerRefType( typeInfo:&LnsAst.TypeInfo, pos:&Types.Position ) {
       let nsId, added = self.registerType( typeInfo );
       if added and not LnsAst.isBuiltin( typeInfo.$typeId.id ) {
-         Log._log( .Err, "no register type -- %d:%d:%s"
-                   ( pos.lineNo, pos.column, self.getFull( typeInfo, false ) ) );
+         self.noDefNsIdList.insert( nsId );
+         // Log._log( .Err, "no register type -- %s:%d:%d:%s"
+         //           ( self.streamName,
+         //             pos.lineNo, pos.column, self.getFull( typeInfo, false ) ) );
       }
       self.addSymbolRef( nsId, pos, true );
    }
@@ -426,17 +433,19 @@ pub override fn tagFilter.processRoot(
 };
 
 
-fn dumpRoot( rootNode:&Nodes.RootNode, db:DBCtrl.DBCtrl, streamName:str )
+fn dumpRoot( rootNode:&Nodes.RootNode, db:DBCtrl.DBCtrl,
+             streamName:str, noDefNsIdList:List<int> )
 {
    Log._log( .Log, streamName );
-   let mut filter = new tagFilter( rootNode, db, streamName );
+   let mut filter = new tagFilter( rootNode, db, streamName, noDefNsIdList );
    rootNode.processFilter( filter, new Opt() );
 }
 
 pub fn start(
    db:DBCtrl.DBCtrl, pathList:&List<str>, transCtrlInfo:&Types.TransCtrlInfo ) __noasync
 {
-   let mut set:Set<str> = (@);
+   let set:Set<str> = (@);
+   let noDefNsIdList:List<int> = [];
    
    Ast.buildAst(
       .Log, pathList, nil, nil, true, transCtrlInfo,
@@ -445,9 +454,25 @@ pub fn start(
             set.add( ast.$streamName );
             if! let rootNode = ast.$node@@@Nodes.RootNode {
                db.begin();   
-               dumpRoot( rootNode, db, ast.$streamName );
+               dumpRoot( rootNode, db, ast.$streamName, noDefNsIdList );
                db.commit();  
             }
          }
       });
+
+
+   foreach nsId in noDefNsIdList {
+      let mut find = false;
+      db.mapSymbolDeclForNsId(
+         nsId,
+         fn ( item:&DBCtrl.ItemSymbolDecl ):bool {
+            find = true;
+            return false;
+         });
+      if not find {
+         Log._log(
+            .Err,      
+            "no register the define for the sym -- %s" ( db.getName( nsId ) ) );
+      }
+   }
 }

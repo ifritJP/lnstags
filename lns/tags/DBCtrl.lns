@@ -479,7 +479,7 @@ pub fn DBCtrl.getMainFilePath( subId: int ) : str! {
 }
 
 
-fn DBCtrl.getName( nsId:int ) : str! {
+pub fn DBCtrl.getName( nsId:int ) : str! {
    let mut name:str! = nil;
    self.mapRowList(
       "namespace", "id = %d" (nsId), 1, nil, fn( items: &Map<str,&stem> ) : bool
@@ -725,6 +725,18 @@ pub fn DBCtrl.mapSymbolDecl( name:str, callback:callbackSymbolDecl ) {
    
    self.mapRowListSort(
       "symbolDecl", "nsId IN (%s)" (overrideStr), nil, nil, "fileId, line",
+      fn (items:&Map<str,&stem>): bool
+      {
+         if! let item = ItemSymbolDecl._fromStem( items ) {
+            return callback( item );
+         }
+         return true;
+      }##);
+}
+
+pub fn DBCtrl.mapSymbolDeclForNsId( nsId:int, callback:callbackSymbolDecl ) {
+   self.mapRowListSort(
+      "symbolDecl", "nsId IN (%d)" (nsId), nil, nil, "fileId, line",
       fn (items:&Map<str,&stem>): bool
       {
          if! let item = ItemSymbolDecl._fromStem( items ) {

@@ -35,7 +35,7 @@ pub fn enableDetail( flag:bool ) {
 }
 
 
-pub form CreateMessage(): str;
+pub form CreateMessage() __trans: str;
 
 
 pub fn log( level:Level, funcName:str, lineNo:int, callback: CreateMessage ) {
@@ -55,5 +55,5 @@ pub fn log( level:Level, funcName:str, lineNo:int, callback: CreateMessage ) {
 }
 
 pub macro _log( level:Level, mess : __exp ) {
-   Log.log( ,,level, __func__, __line__, fn ():str { return ,,mess; } );
+   Log.log( ,,level, __func__, __line__, fn () __trans:str { return ,,mess; } );
 }

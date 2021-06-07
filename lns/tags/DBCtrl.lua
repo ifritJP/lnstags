@@ -1570,6 +1570,22 @@ function DBCtrl:mapSymbolDecl( name, callback )
 end
 
 
+function DBCtrl:mapSymbolDeclForNsId( nsId, callback )
+
+   self:mapRowListSort( "symbolDecl", string.format( "nsId IN (%d)", nsId), nil, nil, "fileId, line", function ( items )
+   
+      do
+         local item = ItemSymbolDecl._fromStem( items )
+         if item ~= nil then
+            return callback( item )
+         end
+      end
+      
+      return true
+   end )
+end
+
+
 
 function DBCtrl:mapSymbolRef( name, onlySet, callback )
 
@@ -1726,7 +1742,7 @@ local function test(  )
    
    do
       local _
-      local _717, added = db:addNamespace( "@hoge", _moduleObj.rootNsId )
+      local _728, added = db:addNamespace( "@hoge", _moduleObj.rootNsId )
       print( "added", added )
    end
    

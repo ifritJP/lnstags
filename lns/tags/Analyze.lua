@@ -237,7 +237,7 @@ function tagFilter:addFileId( path, mod )
    end
    
    local fileId = self.db:addFile( path, mod )
-   Log.log( Log.Level.Debug, __func__, 36, function (  )
+   Log.log( Log.Level.Debug, __func__, 38, function (  )
    
       return string.format( "add file -- %d, %s", fileId, path)
    end )
@@ -258,15 +258,16 @@ function tagFilter:getFileId( path )
    self.file2id[path] = fileId
    return fileId
 end
-function tagFilter.new( rootNode, db, streamName )
+function tagFilter.new( rootNode, db, streamName, noDefNsIdList )
    local obj = {}
    tagFilter.setmeta( obj )
-   if obj.__init then obj:__init( rootNode, db, streamName ); end
+   if obj.__init then obj:__init( rootNode, db, streamName, noDefNsIdList ); end
    return obj
 end
-function tagFilter:__init(rootNode, db, streamName) 
+function tagFilter:__init(rootNode, db, streamName, noDefNsIdList) 
    Nodes.Filter.__init( self,true, rootNode:get_moduleTypeInfo(), rootNode:get_moduleTypeInfo():get_scope())
    
+   self.noDefNsIdList = noDefNsIdList
    self.moduleTypeInfo = rootNode:get_moduleTypeInfo()
    self.file2id = {}
    self.db = db
@@ -300,7 +301,7 @@ function tagFilter:registerType( typeInfo )
    local parentNsId = self:registerType( typeInfo:get_parentInfo() )
    local name = self:getFull( typeInfo, false )
    local nsId, added = self.db:addNamespace( name, parentNsId )
-   Log.log( Log.Level.Debug, __func__, 78, function (  )
+   Log.log( Log.Level.Debug, __func__, 81, function (  )
    
       return string.format( "%s %s %d", name, added, nsId)
    end )
@@ -324,7 +325,7 @@ function tagFilter:registerSymbol( symbolInfo )
    local parentNsId = self:registerType( symbolInfo:get_namespaceTypeInfo() )
    local name = Ast.getFullNameSym( self, symbolInfo )
    local nsId, added = self.db:addNamespace( name, parentNsId )
-   Log.log( Log.Level.Debug, __func__, 92, function (  )
+   Log.log( Log.Level.Debug, __func__, 95, function (  )
    
       return string.format( "%s %s %d", name, added, nsId)
    end )
@@ -341,7 +342,7 @@ function tagFilter:registDeclSym( symbolInfo )
    local pos = _lune.unwrap( _lune.nilacc( symbolInfo:get_pos(), 'get_orgPos', 'callmtd' ))
    local fileId = self:getFileId( pos.streamName )
    self.db:addSymbolDecl( symNsId, fileId, pos.lineNo, pos.column )
-   Log.log( Log.Level.Debug, __func__, 102, function (  )
+   Log.log( Log.Level.Debug, __func__, 105, function (  )
    
       return symbolInfo:get_name()
    end )
@@ -481,7 +482,7 @@ function tagFilter:registerDecl( nodeManager )
          end
          table.sort( __sorted )
          for __index, name in ipairs( __sorted ) do
-            local _169 = __map[ name ]
+            local _171 = __map[ name ]
             do
                do
                   local _exp = _lune.nilacc( workNode:get_algeType():get_scope(), 'getSymbolInfoChild', 'callmtd' , name )
@@ -550,7 +551,6 @@ function tagFilter:registerRefs( nodeManager )
 
    
    local function addSymbolRef( symbolInfo, pos, setOp )
-      local __func__ = '@lns.@tags.@Analyze.tagFilter.registerRefs.addSymbolRef'
    
       do
          local _switchExp = symbolInfo:get_name()
@@ -561,10 +561,7 @@ function tagFilter:registerRefs( nodeManager )
       
       local nsId, added = self:registerSymbol( symbolInfo )
       if added and not LnsAst.isBuiltin( symbolInfo:get_namespaceTypeInfo():get_typeId().id ) then
-         Log.log( Log.Level.Err, __func__, 268, function (  )
-         
-            return string.format( "no register sym -- %d:%d:%s", pos.lineNo, pos.column, Ast.getFullNameSym( self, symbolInfo ))
-         end )
+         table.insert( self.noDefNsIdList, nsId )
          
       end
       
@@ -572,14 +569,10 @@ function tagFilter:registerRefs( nodeManager )
    end
    
    local function registerRefType( typeInfo, pos )
-      local __func__ = '@lns.@tags.@Analyze.tagFilter.registerRefs.registerRefType'
    
       local nsId, added = self:registerType( typeInfo )
       if added and not LnsAst.isBuiltin( typeInfo:get_typeId().id ) then
-         Log.log( Log.Level.Err, __func__, 277, function (  )
-         
-            return string.format( "no register type -- %d:%d:%s", pos.lineNo, pos.column, self:getFull( typeInfo, false ))
-         end )
+         table.insert( self.noDefNsIdList, nsId )
          
       end
       
@@ -674,7 +667,7 @@ function tagFilter:registerRefs( nodeManager )
             registerRefSym( _exp, workNode:get_pos(), false )
          else
             if not workNode:get_macroArgFlag() then
-               Log.log( Log.Level.Warn, __func__, 370, function (  )
+               Log.log( Log.Level.Warn, __func__, 377, function (  )
                
                   return string.format( "no symbolInfo -- %s, %s:%d:%d", workNode:get_field().txt, workNode:get_pos().streamName, workNode:get_pos().lineNo, workNode:get_pos().column)
                end )
@@ -755,21 +748,23 @@ end
 
 
 
-local function dumpRoot( rootNode, db, streamName )
+local function dumpRoot( rootNode, db, streamName, noDefNsIdList )
    local __func__ = '@lns.@tags.@Analyze.dumpRoot'
 
-   Log.log( Log.Level.Log, __func__, 431, function (  )
+   Log.log( Log.Level.Log, __func__, 439, function (  )
    
       return streamName
    end )
    
-   local filter = tagFilter.new(rootNode, db, streamName)
+   local filter = tagFilter.new(rootNode, db, streamName, noDefNsIdList)
    rootNode:processFilter( filter, Opt.new() )
 end
 
 local function start( db, pathList, transCtrlInfo )
+   local __func__ = '@lns.@tags.@Analyze.start'
 
    local set = {}
+   local noDefNsIdList = {}
    
    Ast.buildAst( LnsLog.Level.Log, pathList, nil, nil, true, transCtrlInfo, function ( ast )
    
@@ -779,7 +774,7 @@ local function start( db, pathList, transCtrlInfo )
             local rootNode = _lune.__Cast( ast:get_node(), 3, Nodes.RootNode )
             if rootNode ~= nil then
                db:begin(  )
-               dumpRoot( rootNode, db, ast:get_streamName() )
+               dumpRoot( rootNode, db, ast:get_streamName(), noDefNsIdList )
                db:commit(  )
             end
          end
@@ -787,6 +782,24 @@ local function start( db, pathList, transCtrlInfo )
       end
       
    end )
+   
+   for __index, nsId in pairs( noDefNsIdList ) do
+      local find = false
+      db:mapSymbolDeclForNsId( nsId, function ( item )
+      
+         find = true
+         return false
+      end )
+      if not find then
+         Log.log( Log.Level.Err, __func__, 473, function (  )
+         
+            return string.format( "no register the define for the sym -- %s", db:getName( nsId ))
+         end )
+         
+      end
+      
+   end
+   
 end
 _moduleObj.start = start
 
