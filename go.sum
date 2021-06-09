@@ -6,6 +6,10 @@ github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da/go.mod h1:cIg4er
 github.com/ifritJP/LuneScript/src v0.0.0-20210523103925-abab1f785769/go.mod h1:sTuwIYaYJpJzhDSDsiw/yZOlGeOe9oATT905zzpwZwM=
 github.com/ifritJP/LuneScript/src v0.0.0-20210607121039-52df422bfe69 h1:P/Gez6CNFnL3ZsqFPwU++QkdFA5xkvb3XThARB5U0us=
 github.com/ifritJP/LuneScript/src v0.0.0-20210607121039-52df422bfe69/go.mod h1:sTuwIYaYJpJzhDSDsiw/yZOlGeOe9oATT905zzpwZwM=
+github.com/ifritJP/LuneScript/src v0.0.0-20210608140841-b956773c2cd6 h1:lxiWQzRS96IGqSq4rWi7lZUPVDK+hUgkENPSvF3/Ujg=
+github.com/ifritJP/LuneScript/src v0.0.0-20210608140841-b956773c2cd6/go.mod h1:sTuwIYaYJpJzhDSDsiw/yZOlGeOe9oATT905zzpwZwM=
+github.com/ifritJP/LuneScript/src v0.0.0-20210609133427-37b404543391 h1:XdMJMPoqU0xDvyU2IuutmD83qb131jqF3Du+QPmRgs4=
+github.com/ifritJP/LuneScript/src v0.0.0-20210609133427-37b404543391/go.mod h1:sTuwIYaYJpJzhDSDsiw/yZOlGeOe9oATT905zzpwZwM=
 github.com/ifritJP/lnssqlite3/src v0.0.0-20210523141024-7ad875760090 h1:YruSAwJSbu72VK5hHqiIAX0i/OZEbZKEQr3tpFiVFgk=
 github.com/ifritJP/lnssqlite3/src v0.0.0-20210523141024-7ad875760090/go.mod h1:w3Gp9QH7FShOL8eyl1QLYHwMPfimV3FrgQEalAaXxQ0=
 github.com/mattn/go-sqlite3 v1.14.7 h1:fxWBnXkxfM6sRiuH3bqJ4CfzZojMOLVc0UTsTglEghA=

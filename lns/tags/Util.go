@@ -130,12 +130,12 @@ func (self *Util_SourceCodeLineAccessorFactory) Create(_env *LnsEnv, filePath st
     if fileContents != nil{
         fileContents_32 := fileContents.(string)
         {
-            _form141, _param141, _prev141 := _env.CommonLuaVM.String_gmatch(fileContents_32, "[^\n]*\n")
+            _applyForm1, _applyParam1, _applyPrev1 := _env.CommonLuaVM.String_gmatch(fileContents_32, "[^\n]*\n")
             for {
-                _work141 := _form141.(*Lns_luaValue).Call( Lns_2DDD( _param141, _prev141 ) )
-                _prev141 = Lns_getFromMulti(_work141,0)
-                if Lns_IsNil( _prev141 ) { break }
-                line := _prev141.(string)
+                _applyWork1 := _applyForm1.(*Lns_luaValue).Call( Lns_2DDD( _applyParam1, _applyPrev1 ) )
+                _applyPrev1 = Lns_getFromMulti(_applyWork1,0)
+                if Lns_IsNil( _applyPrev1 ) { break }
+                line := _applyPrev1.(string)
                 lineList.Insert(_env.LuaVM.String_sub(line, 1, len(line) - 1))
             }
         }

@@ -73,7 +73,7 @@ func Analyze_convExp2341(arg1 []LnsAny) LnsInt {
 
 
 // 436: decl @lns.@tags.@Analyze.dumpRoot
-func Analyze_dumpRoot_1372_(_env *LnsEnv, rootNode *Nodes.Nodes_RootNode,db *DBCtrl_DBCtrl,streamName string,noDefNsIdList *LnsList) {
+func Analyze_dumpRoot_2_(_env *LnsEnv, rootNode *Nodes.Nodes_RootNode,db *DBCtrl_DBCtrl,streamName string,noDefNsIdList *LnsList) {
     __func__ := "@lns.@tags.@Analyze.dumpRoot"
     Log_log(_env, Log_Level__Log, __func__, 439, Log_CreateMessage(func(_env *LnsEnv) string {
         return streamName
@@ -102,7 +102,7 @@ func Analyze_start(_env *LnsEnv, db *DBCtrl_DBCtrl,pathList *LnsList,transCtrlIn
                 if !Lns_IsNil( _rootNode ) {
                     rootNode := _rootNode.(*Nodes.Nodes_RootNode)
                     db.FP.Begin(_env)
-                    Analyze_dumpRoot_1372_(_env, rootNode, db, ast.FP.Get_streamName(_env), noDefNsIdList)
+                    Analyze_dumpRoot_2_(_env, rootNode, db, ast.FP.Get_streamName(_env), noDefNsIdList)
                     db.FP.Commit(_env)
                 }
             }
@@ -558,10 +558,10 @@ func (self *Analyze_tagFilter) registerDecl(_env *LnsEnv, nodeManager *Nodes.Nod
         workNode := _workNode.(Nodes.Nodes_DeclAlgeNodeDownCast).ToNodes_DeclAlgeNode()
         registDeclType(_env, &workNode.Nodes_Node)
         {
-            __collection1324 := workNode.FP.Get_algeType(_env).FP.Get_valInfoMap(_env)
-            __sorted1324 := __collection1324.CreateKeyListStr()
-            __sorted1324.Sort( LnsItemKindStr, nil )
-            for _, _name := range( __sorted1324.Items ) {
+            __forsortCollection1 := workNode.FP.Get_algeType(_env).FP.Get_valInfoMap(_env)
+            __forsortSorted1 := __forsortCollection1.CreateKeyListStr()
+            __forsortSorted1.Sort( _env, LnsItemKindStr, nil )
+            for _, _name := range( __forsortSorted1.Items ) {
                 name := _name.(string)
                 {
                     __exp := _env.NilAccFin(_env.NilAccPush(workNode.FP.Get_algeType(_env).FP.Get_scope(_env)) && 
@@ -630,7 +630,7 @@ func (self *Analyze_tagFilter) registerRefs(_env *LnsEnv, nodeManager *Nodes.Nod
     __func__ := "@lns.@tags.@Analyze.tagFilter.registerRefs"
     var addSymbolRef func(_env *LnsEnv, symbolInfo *LnsAst.Ast_SymbolInfo,pos *Types.Types_Position,setOp bool)
     addSymbolRef = func(_env *LnsEnv, symbolInfo *LnsAst.Ast_SymbolInfo,pos *Types.Types_Position,setOp bool) {
-        if _switch1591 := symbolInfo.FP.Get_name(_env); _switch1591 == "__func__" || _switch1591 == "__mod__" || _switch1591 == "__line__" {
+        if _switch1 := symbolInfo.FP.Get_name(_env); _switch1 == "__func__" || _switch1 == "__mod__" || _switch1 == "__line__" {
             return 
         }
         var nsId LnsInt
@@ -657,25 +657,25 @@ func (self *Analyze_tagFilter) registerRefs(_env *LnsEnv, nodeManager *Nodes.Nod
     }
     var registerRefSym func(_env *LnsEnv, symbolInfo *LnsAst.Ast_SymbolInfo,pos *Types.Types_Position,setOp bool)
     registerRefSym = func(_env *LnsEnv, symbolInfo *LnsAst.Ast_SymbolInfo,pos *Types.Types_Position,setOp bool) {
-        if _switch1854 := symbolInfo.FP.Get_namespaceTypeInfo(_env).FP.Get_kind(_env); _switch1854 == LnsAst.Ast_TypeInfoKind__Enum || _switch1854 == LnsAst.Ast_TypeInfoKind__Alge {
+        if _switch1 := symbolInfo.FP.Get_namespaceTypeInfo(_env).FP.Get_kind(_env); _switch1 == LnsAst.Ast_TypeInfoKind__Enum || _switch1 == LnsAst.Ast_TypeInfoKind__Alge {
             addSymbolRef(_env, symbolInfo, pos, true)
         } else {
-            if _switch1852 := symbolInfo.FP.Get_kind(_env); _switch1852 == LnsAst.Ast_SymbolKind__Fun || _switch1852 == LnsAst.Ast_SymbolKind__Mac || _switch1852 == LnsAst.Ast_SymbolKind__Mtd {
+            if _switch2 := symbolInfo.FP.Get_kind(_env); _switch2 == LnsAst.Ast_SymbolKind__Fun || _switch2 == LnsAst.Ast_SymbolKind__Mac || _switch2 == LnsAst.Ast_SymbolKind__Mtd {
                 registerRefType(_env, symbolInfo.FP.Get_typeInfo(_env), pos)
-            } else if _switch1852 == LnsAst.Ast_SymbolKind__Typ {
+            } else if _switch2 == LnsAst.Ast_SymbolKind__Typ {
                 if symbolInfo.FP.Get_typeInfo(_env).FP.Get_kind(_env) == LnsAst.Ast_TypeInfoKind__Module{
                     addSymbolRef(_env, symbolInfo, pos, true)
                 }
                 registerRefType(_env, symbolInfo.FP.Get_typeInfo(_env), pos)
-            } else if _switch1852 == LnsAst.Ast_SymbolKind__Mbr {
+            } else if _switch2 == LnsAst.Ast_SymbolKind__Mbr {
                 addSymbolRef(_env, symbolInfo, pos, setOp)
-            } else if _switch1852 == LnsAst.Ast_SymbolKind__Var {
+            } else if _switch2 == LnsAst.Ast_SymbolKind__Var {
                 if _env.PopVal( _env.IncStack() ||
                     _env.SetStackVal( LnsAst.Ast_isPubToExternal(_env, symbolInfo.FP.Get_accessMode(_env))) ||
                     _env.SetStackVal( symbolInfo.FP.Get_scope(_env) == self.moduleTypeInfo.FP.Get_scope(_env)) ).(bool){
                     addSymbolRef(_env, symbolInfo, pos, setOp)
                 }
-            } else if _switch1852 == LnsAst.Ast_SymbolKind__Arg {
+            } else if _switch2 == LnsAst.Ast_SymbolKind__Arg {
             }
         }
     }
@@ -689,9 +689,9 @@ func (self *Analyze_tagFilter) registerRefs(_env *LnsEnv, nodeManager *Nodes.Nod
         workNode := _workNode.(Nodes.Nodes_ExpSetValNodeDownCast).ToNodes_ExpSetValNode()
         for _, _leftSym := range( workNode.FP.Get_LeftSymList(_env).Items ) {
             leftSym := _leftSym.(LnsAst.Ast_SymbolInfoDownCast).ToAst_SymbolInfo()
-            if _switch1960 := leftSym.FP.Get_kind(_env); _switch1960 == LnsAst.Ast_SymbolKind__Mbr {
+            if _switch1 := leftSym.FP.Get_kind(_env); _switch1 == LnsAst.Ast_SymbolKind__Mbr {
                 registerRefSym(_env, leftSym, workNode.FP.Get_pos(_env), true)
-            } else if _switch1960 == LnsAst.Ast_SymbolKind__Var {
+            } else if _switch1 == LnsAst.Ast_SymbolKind__Var {
                 if _env.PopVal( _env.IncStack() ||
                     _env.SetStackVal( LnsAst.Ast_isPubToExternal(_env, leftSym.FP.Get_accessMode(_env))) ||
                     _env.SetStackVal( leftSym.FP.Get_scope(_env) == self.moduleTypeInfo.FP.Get_scope(_env)) ).(bool){

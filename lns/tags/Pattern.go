@@ -229,11 +229,11 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(_env *LnsEnv, analyzeFileIn
         _workNode := Nodes.Nodes_ImportNodeDownCastF(nearest.FP)
         if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_ImportNode)
-            if _switch309 := inqMod; _switch309 == Option_InqMode__Def {
+            if _switch1 := inqMod; _switch1 == Option_InqMode__Def {
                 return self.FP.GetFull(_env, workNode.FP.Get_expType(_env), false)
-            } else if _switch309 == Option_InqMode__Ref {
+            } else if _switch1 == Option_InqMode__Ref {
                 return Ast_getFullNameSym(_env, &self.Nodes_Filter, workNode.FP.Get_info(_env).FP.Get_symbolInfo(_env))
-            } else if _switch309 == Option_InqMode__Set || _switch309 == Option_InqMode__AllMut || _switch309 == Option_InqMode__Async || _switch309 == Option_InqMode__Noasync || _switch309 == Option_InqMode__Luaval || _switch309 == Option_InqMode__AsyncLock {
+            } else if _switch1 == Option_InqMode__Set || _switch1 == Option_InqMode__AllMut || _switch1 == Option_InqMode__Async || _switch1 == Option_InqMode__Noasync || _switch1 == Option_InqMode__Luaval || _switch1 == Option_InqMode__AsyncLock {
             }
             return nil
         }

@@ -87,9 +87,9 @@ func Option_Mode__from(_env *LnsEnv, arg1 string) LnsAny{
 func Option_Mode_getTxt(arg1 string) string {
     return Option_ModeMap_[arg1];
 }
-type analyzeArgs__getNextOpNonNilFunc_1119_ func (_env *LnsEnv, arg1 string) string
+type analyzeArgs__getNextOpNonNilFunc_0_ func (_env *LnsEnv, arg1 string) string
 // 60: decl @lns.@tags.@Option.printUsage
-func Option_printUsage_1100_(_env *LnsEnv, messages LnsAny) {
+func Option_printUsage_4_(_env *LnsEnv, messages LnsAny) {
     if messages != nil{
         messages_69 := messages.(string)
         Lns_io_stderr.Write(_env, _env.LuaVM.String_format("%s\n", []LnsAny{messages_69}))
@@ -102,8 +102,8 @@ func Option_printUsage_1100_(_env *LnsEnv, messages LnsAny) {
     _env.LuaVM.OS_exit(1)
 }
 
-func analyzeArgs___anonymous_1121_(_env *LnsEnv, mess string) string {
-    Option_printUsage_1100_(_env, "")
+func analyzeArgs___anonymous_1_(_env *LnsEnv, mess string) string {
+    Option_printUsage_4_(_env, "")
 // insert a dummy
     return ""
 }
@@ -118,8 +118,8 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
     option = NewOption_Option(_env)
     var index LnsInt
     index = 1
-    var getNextOpNonNil analyzeArgs__getNextOpNonNilFunc_1119_
-    getNextOpNonNil = analyzeArgs__getNextOpNonNilFunc_1119_(analyzeArgs___anonymous_1121_)
+    var getNextOpNonNil analyzeArgs__getNextOpNonNilFunc_0_
+    getNextOpNonNil = analyzeArgs__getNextOpNonNilFunc_0_(analyzeArgs___anonymous_1_)
     
     var stdinFlag bool
     stdinFlag = false
@@ -146,15 +146,15 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
                 }
             }
             if Lns_isCondTrue( Lns_car(_env.LuaVM.String_find(arg,"^-", nil, nil))){
-                if _switch445 := arg; _switch445 == "-i" {
+                if _switch1 := arg; _switch1 == "-i" {
                     stdinFlag = true
                     
-                } else if _switch445 == "--log" {
+                } else if _switch1 == "--log" {
                     option.logLevel = Log_str2level(_env, getNextOpNonNil(_env, "logLevel"))
                     
-                } else if _switch445 == "--simpleLog" {
+                } else if _switch1 == "--simpleLog" {
                     Log_enableDetail(_env, false)
-                } else if _switch445 == "--legacy-mutable-control" {
+                } else if _switch1 == "--legacy-mutable-control" {
                     option.transCtrlInfo.LegacyMutableControl = true
                     
                 }
@@ -165,7 +165,7 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
     // insert a dummy
         return nil
     }
-    getNextOpNonNil = analyzeArgs__getNextOpNonNilFunc_1119_(func(_env *LnsEnv, mess string) string {
+    getNextOpNonNil = analyzeArgs__getNextOpNonNilFunc_0_(func(_env *LnsEnv, mess string) string {
         {
             _arg := getNextOp(_env)
             if !Lns_IsNil( _arg ) {
@@ -173,7 +173,7 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
                 return arg
             }
         }
-        Option_printUsage_1100_(_env, mess)
+        Option_printUsage_4_(_env, mess)
     // insert a dummy
         return ""
     })
@@ -191,10 +191,10 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
                         return (LnsInt)(num)
                     }
                 }
-                Option_printUsage_1100_(_env, _env.LuaVM.String_format("illegal num -- %s", []LnsAny{arg}))
+                Option_printUsage_4_(_env, _env.LuaVM.String_format("illegal num -- %s", []LnsAny{arg}))
             }
         }
-        Option_printUsage_1100_(_env, mess)
+        Option_printUsage_4_(_env, mess)
     // insert a dummy
         return 0
     }
@@ -205,7 +205,7 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
         {
             _nextToken := getNextOp(_env)
             if _nextToken == nil{
-                Option_printUsage_1100_(_env, "illegal inqMod")
+                Option_printUsage_4_(_env, "illegal inqMod")
             } else {
                 nextToken = _nextToken.(string)
             }
@@ -215,7 +215,7 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
         {
             _inqMode := Option_InqMode__from(_env, nextToken)
             if _inqMode == nil{
-                Option_printUsage_1100_(_env, _env.LuaVM.String_format("illegal inqMod -- %s", []LnsAny{nextToken}))
+                Option_printUsage_4_(_env, _env.LuaVM.String_format("illegal inqMod -- %s", []LnsAny{nextToken}))
             } else {
                 inqMode = _inqMode.(string)
             }
@@ -242,16 +242,16 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
                     work := _work.(string)
                     mode = work
                     
-                    if _switch744 := mode; _switch744 == Option_Mode__Inq {
+                    if _switch1 := mode; _switch1 == Option_Mode__Inq {
                         option.inqMode = getInqMode(_env)
                         
-                        if _switch666 := option.inqMode; _switch666 == Option_InqMode__AllMut || _switch666 == Option_InqMode__Async || _switch666 == Option_InqMode__Noasync || _switch666 == Option_InqMode__Luaval || _switch666 == Option_InqMode__AsyncLock {
+                        if _switch2 := option.inqMode; _switch2 == Option_InqMode__AllMut || _switch2 == Option_InqMode__Async || _switch2 == Option_InqMode__Noasync || _switch2 == Option_InqMode__Luaval || _switch2 == Option_InqMode__AsyncLock {
                         } else {
                             option.pattern = getNextOpNonNil(_env, "none pattern")
                             
                         }
                         Log_setLevel(_env, Log_Level__Warn)
-                    } else if _switch744 == Option_Mode__InqAt {
+                    } else if _switch1 == Option_Mode__InqAt {
                         option.inqMode = getInqMode(_env)
                         
                         option.analyzeFileInfo.path = getNextOpNonNil(_env, "none path")
@@ -260,16 +260,16 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
                         
                         option.analyzeFileInfo.column = getNextOpInt(_env, "none column")
                         
-                    } else if _switch744 == Option_Mode__Suffix {
+                    } else if _switch1 == Option_Mode__Suffix {
                         option.pattern = getNextOpNonNil(_env, "none pattern")
                         
                     }
                 } else {
-                    Option_printUsage_1100_(_env, _env.LuaVM.String_format("illegal option -- %s", []LnsAny{arg}))
+                    Option_printUsage_4_(_env, _env.LuaVM.String_format("illegal option -- %s", []LnsAny{arg}))
                 }
             }
         } else { 
-            if _switch827 := mode; _switch827 == Option_Mode__Build {
+            if _switch3 := mode; _switch3 == Option_Mode__Build {
                 if arg == "@-"{
                     for  {
                         var line string
@@ -309,7 +309,7 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
         
         return option
     }
-    Option_printUsage_1100_(_env, "none mode")
+    Option_printUsage_4_(_env, "none mode")
 // insert a dummy
     return nil
 }

@@ -1742,7 +1742,7 @@ local function test(  )
    
    do
       local _
-      local _728, added = db:addNamespace( "@hoge", _moduleObj.rootNsId )
+      local _1, added = db:addNamespace( "@hoge", _moduleObj.rootNsId )
       print( "added", added )
    end
    

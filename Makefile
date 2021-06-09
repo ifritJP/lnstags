@@ -8,6 +8,7 @@ help:
 	@echo make build [LNS_OPT=opt]
 	@echo make buildDB
 	@echo make check
+	@echo make update_lns
 
 build: lnstags
 
@@ -18,6 +19,9 @@ ifndef ONLY_GO
 	$(LNSC) lns/tags/main.lns mkmain entry.go
 endif
 	go build -tags gopherlua -o lnstags
+
+update_lns:
+	go get github.com/ifritJP/LuneScript/src@latest
 
 
 buildDB: build
