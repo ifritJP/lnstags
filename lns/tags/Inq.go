@@ -1,10 +1,9 @@
 // This code is transcompiled by LuneScript.
 package tags
 import . "github.com/ifritJP/LuneScript/src/lune/base/runtime_go"
-import LnsAst "github.com/ifritJP/LuneScript/src/lune/base"
+import LuneAst "github.com/ifritJP/LuneScript/src/lune/base"
 var init_Inq bool
 var Inq__mod__ string
-
 // 5: decl @lns.@tags.@Inq.InqDef
 func Inq_InqDef(_env *LnsEnv, db *DBCtrl_DBCtrl,pattern string) {
     var factory *Util_SourceCodeLineAccessorFactory
@@ -24,7 +23,6 @@ func Inq_InqDef(_env *LnsEnv, db *DBCtrl_DBCtrl,pattern string) {
         return true
     }))
 }
-
 
 // 19: decl @lns.@tags.@Inq.InqRef
 func Inq_InqRef(_env *LnsEnv, db *DBCtrl_DBCtrl,pattern string,onlySet bool) {
@@ -46,7 +44,6 @@ func Inq_InqRef(_env *LnsEnv, db *DBCtrl_DBCtrl,pattern string,onlySet bool) {
     }))
 }
 
-
 // 33: decl @lns.@tags.@Inq.InqAllmut
 func Inq_InqAllmut(_env *LnsEnv, db *DBCtrl_DBCtrl) {
     var factory *Util_SourceCodeLineAccessorFactory
@@ -66,7 +63,6 @@ func Inq_InqAllmut(_env *LnsEnv, db *DBCtrl_DBCtrl) {
         return true
     }))
 }
-
 
 // 47: decl @lns.@tags.@Inq.InqAsync
 func Inq_InqAsync(_env *LnsEnv, db *DBCtrl_DBCtrl,asyncMode LnsInt) {
@@ -88,7 +84,6 @@ func Inq_InqAsync(_env *LnsEnv, db *DBCtrl_DBCtrl,asyncMode LnsInt) {
     }))
 }
 
-
 // 62: decl @lns.@tags.@Inq.InqLuaval
 func Inq_InqLuaval(_env *LnsEnv, db *DBCtrl_DBCtrl) {
     var factory *Util_SourceCodeLineAccessorFactory
@@ -108,7 +103,6 @@ func Inq_InqLuaval(_env *LnsEnv, db *DBCtrl_DBCtrl) {
         return true
     }))
 }
-
 
 // 75: decl @lns.@tags.@Inq.InqAsyncLock
 func Inq_InqAsyncLock(_env *LnsEnv, db *DBCtrl_DBCtrl) {
@@ -130,6 +124,12 @@ func Inq_InqAsyncLock(_env *LnsEnv, db *DBCtrl_DBCtrl) {
     }))
 }
 
+
+
+
+
+
+
 func Lns_Inq_init(_env *LnsEnv) {
     if init_Inq { return }
     init_Inq = true
@@ -137,7 +137,7 @@ func Lns_Inq_init(_env *LnsEnv) {
     Lns_InitMod()
     Lns_DBCtrl_init(_env)
     Lns_Util_init(_env)
-    LnsAst.Lns_Ast_init(_env)
+    LuneAst.Lns_Ast_init(_env)
 }
 func init() {
     init_Inq = false

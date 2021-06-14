@@ -4,7 +4,7 @@ _lune_control default_async_all;
 
 
 import go/github:com.ifritJP.lnssqlite3.src.lns.sqlite3.base;
-import go/github:com.ifritJP.LuneScript.src.lune.base.Ast as LnsAst;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Ast as LuneAst;
 import lns.tags.DBAccess;
 import lns.tags.Log;
 import lns.tags.Depend;
@@ -249,7 +249,7 @@ CREATE TABLE funcCall ( nsId INTEGER, snameId INTEGER, belongNsId INTEGER, fileI
 CREATE TABLE allmutDecl ( nsId INTEGER PRIMARY KEY );
 CREATE TABLE asyncMode ( nsId INTEGER PRIMARY KEY, mode INTEGER );
 CREATE TABLE luavalRef ( fileId INTEGER, line INTEGER, column INTEGER, PRIMARY KEY( fileId, line, column ) );
-CREATE TABLE asyncLock ( fileId INTEGER, line INTEGER, column INTEGER, PRIMARY KEY( fileId, line, column ) );
+CREATE TABLE asyncLock ( fileId INTEGER, line INTEGER, column INTEGER, kind INTEGER, PRIMARY KEY( fileId, line, column, kind ) );
 
 CREATE TABLE incRef ( id INTEGER, baseFileId INTEGER, line INTEGER );
 CREATE TABLE incCache ( id INTEGER, baseFileId INTEGER, incFlag INTEGER, PRIMARY KEY( id, baseFileId ) );
@@ -298,7 +298,7 @@ pub class ItemAllmutDecl extend (Mapping) {
 
 pub class ItemAsyncMode extend (Mapping) {
    let nsId:int {pub};
-   let mode:LnsAst.Async {pub};
+   let mode:LuneAst.Async {pub};
    let fileId:int {pub};
    let line:int {pub};
 }
@@ -331,6 +331,7 @@ pub class ItemLuavalRef extend (Mapping) {
 pub class ItemAsyncLock extend (Mapping) {
    let fileId:int {pub};
    let line:int {pub};
+   let kind:int {pub};
 }
 
 
@@ -563,12 +564,12 @@ pub fn DBCtrl.addOverride( nsId:int, superNsId:int ) mut
    self.insert( "override", "%d, %d" (nsId, superNsId ) );
 }
 
-pub fn DBCtrl.addAsyncMode(  nsId:int, asyncMode:LnsAst.Async ) mut {
+pub fn DBCtrl.addAsyncMode(  nsId:int, asyncMode:LuneAst.Async ) mut {
    self.insert( "asyncMode", "%d, %d" ( nsId, asyncMode ) );
 }
 
 pub form callbackAsyncMode( item:&ItemAsyncMode ):bool;
-pub fn DBCtrl.mapAsyncMode( asyncMode:LnsAst.Async, callback:callbackAsyncMode ) {
+pub fn DBCtrl.mapAsyncMode( asyncMode:LuneAst.Async, callback:callbackAsyncMode ) {
    self.mapJoin(
       "asyncMode", "symbolDecl",
       "asyncMode.nsId = symbolDecl.nsId AND asyncMode.mode = %d" (asyncMode),
@@ -699,8 +700,8 @@ pub fn DBCtrl.mapAsyncLock( callback:callbackAsyncLock ) {
       }##);
 }
 
-pub fn DBCtrl.addAsyncLock( fileId:int, lineNo:int, column:int ) mut {
-   self.insert( "asyncLock", "%d, %d, %d" ( fileId, lineNo, column ) );
+pub fn DBCtrl.addAsyncLock( fileId:int, lineNo:int, column:int, kind:int ) mut {
+   self.insert( "asyncLock", "%d, %d, %d, %d" ( fileId, lineNo, column, kind ) );
 }
 
 

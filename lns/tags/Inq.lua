@@ -67,7 +67,7 @@ if not _lune4 then
 end
 local DBCtrl = _lune.loadModule( 'lns.tags.DBCtrl' )
 local Util = _lune.loadModule( 'lns.tags.Util' )
-local LnsAst = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Ast' )
+local LuneAst = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Ast' )
 
 local function InqDef( db, pattern )
 

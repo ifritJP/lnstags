@@ -153,8 +153,11 @@ function SourceCodeLineAccessorFactory:create( filePath, fileContents )
    
    local lineList = {}
    if fileContents ~= nil then
-      for line in string.gmatch( fileContents, "[^\n]*\n" ) do
-         table.insert( lineList, string.sub( line, 1, #line - 1 ) )
+      do
+         for line in string.gmatch( fileContents, "[^\n]*\n" ) do
+            table.insert( lineList, string.sub( line, 1, #line - 1 ) )
+         end
+         
       end
       
    else

@@ -5,7 +5,7 @@ import base "github.com/ifritJP/lnssqlite3/src/lns/sqlite3"
 var init_DBAccess bool
 var DBAccess__mod__ string
 // for 31
-func DBAccess_convExp139(arg1 []LnsAny) (LnsAny, string) {
+func DBAccess_convExp333(arg1 []LnsAny) (LnsAny, string) {
     return Lns_getFromMulti( arg1, 0 ), Lns_getFromMulti( arg1, 1 ).(string)
 }
 // 29: decl @lns.@tags.@DBAccess.open
@@ -169,13 +169,13 @@ func (self *DBAccess_DBAccess) MapJoin(_env *LnsEnv, tableName string,otherTable
         _env.SetStackVal( attrib) ||
         _env.SetStackVal( "*") ).(string), tableName, otherTable, on})
     if condition != nil{
-        condition_84 := condition.(string)
-        query = _env.LuaVM.String_format("%s WHERE %s", []LnsAny{query, condition_84})
+        condition_137 := condition.(string)
+        query = _env.LuaVM.String_format("%s WHERE %s", []LnsAny{query, condition_137})
         
     }
     if limit != nil{
-        limit_86 := limit.(LnsInt)
-        query = _env.LuaVM.String_format("%s LIMIT %d", []LnsAny{query, limit_86})
+        limit_139 := limit.(LnsInt)
+        query = _env.LuaVM.String_format("%s LIMIT %d", []LnsAny{query, limit_139})
         
     }
     return self.db.MapQueryAsMap(_env, query, _func, errHandle)
@@ -188,13 +188,13 @@ func (self *DBAccess_DBAccess) MapJoin2(_env *LnsEnv, tableName string,otherTabl
         _env.SetStackVal( attrib) ||
         _env.SetStackVal( "*") ).(string), tableName, otherTable, on, otherTable2, on2})
     if condition != nil{
-        condition_103 := condition.(string)
-        query = _env.LuaVM.String_format("%s WHERE %s", []LnsAny{query, condition_103})
+        condition_143 := condition.(string)
+        query = _env.LuaVM.String_format("%s WHERE %s", []LnsAny{query, condition_143})
         
     }
     if limit != nil{
-        limit_105 := limit.(LnsInt)
-        query = _env.LuaVM.String_format("%s LIMIT %d", []LnsAny{query, limit_105})
+        limit_145 := limit.(LnsInt)
+        query = _env.LuaVM.String_format("%s LIMIT %d", []LnsAny{query, limit_145})
         
     }
     return self.db.MapQueryAsMap(_env, query, _func, errHandle)
@@ -207,13 +207,13 @@ func (self *DBAccess_DBAccess) MapJoin3(_env *LnsEnv, tableName string,otherTabl
         _env.SetStackVal( attrib) ||
         _env.SetStackVal( "*") ).(string), tableName, otherTable, on, otherTable2, on2, otherTable3, on3})
     if condition != nil{
-        condition_124 := condition.(string)
-        query = _env.LuaVM.String_format("%s WHERE %s", []LnsAny{query, condition_124})
+        condition_149 := condition.(string)
+        query = _env.LuaVM.String_format("%s WHERE %s", []LnsAny{query, condition_149})
         
     }
     if limit != nil{
-        limit_126 := limit.(LnsInt)
-        query = _env.LuaVM.String_format("%s LIMIT %d", []LnsAny{query, limit_126})
+        limit_151 := limit.(LnsInt)
+        query = _env.LuaVM.String_format("%s LIMIT %d", []LnsAny{query, limit_151})
         
     }
     return self.db.MapQueryAsMap(_env, query, _func, errHandle)
@@ -225,21 +225,21 @@ func (self *DBAccess_DBAccess) MapRowList(_env *LnsEnv, tableName string,conditi
     var ATTRIB string
     ATTRIB = Lns_unwrapDefault( attrib, "*").(string)
     if condition != nil{
-        condition_141 := condition.(string)
-        query = _env.LuaVM.String_format("SELECT %s FROM %s WHERE %s", []LnsAny{ATTRIB, tableName, condition_141})
+        condition_156 := condition.(string)
+        query = _env.LuaVM.String_format("SELECT %s FROM %s WHERE %s", []LnsAny{ATTRIB, tableName, condition_156})
         
     } else {
         query = _env.LuaVM.String_format("SELECT %s FROM %s", []LnsAny{ATTRIB, tableName})
         
     }
     if order != nil{
-        order_144 := order.(string)
-        query = _env.LuaVM.String_format("%s ORDER BY %s", []LnsAny{query, order_144})
+        order_159 := order.(string)
+        query = _env.LuaVM.String_format("%s ORDER BY %s", []LnsAny{query, order_159})
         
     }
     if limit != nil{
-        limit_146 := limit.(LnsInt)
-        query = _env.LuaVM.String_format("%s LIMIT %d", []LnsAny{query, limit_146})
+        limit_161 := limit.(LnsInt)
+        query = _env.LuaVM.String_format("%s LIMIT %d", []LnsAny{query, limit_161})
         
     }
     return self.db.MapQueryAsMap(_env, query, _func, errHandle)

@@ -136,7 +136,6 @@ end
 
 function DBAccess:outputLog( message )
 
-   
 end
 
 
@@ -160,8 +159,8 @@ function DBAccess:begin(  )
    
    
    self.beginFlag = true
-   self.db:Begin(  )
    
+   self.db:Begin(  )
 end
 
 

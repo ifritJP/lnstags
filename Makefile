@@ -57,6 +57,12 @@ inq: build
 	$(call inq-test,inq-at def main.lns 52 28)
 	$(call inq-test,inq-at def main.lns 57 17)
 
+	$(call inq-test,inq def @main.Al2)
+	$(call inq-test,inq ref @main.Al2)
+	$(call inq-test,inq def @main.Al2.Val)
+	$(call inq-test,inq ref @main.Al2.Val)
+
+
 	$(call inq-test,inq-at def mainSub.lns 3 6)
 	(cd test; cat mainSub.lns | ../lnstags --simpleLog inq-at def -i mainSub.lns 3 5 --log debug)
 

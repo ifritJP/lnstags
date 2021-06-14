@@ -68,3 +68,15 @@ print( hoge.$val );
       let val:allmut List<int>;
    }
 }
+{
+   alge Al2 {
+      Val,
+   }
+   fn func( al:Al2 ) {
+      match al {
+         case .Val {
+         }
+      }
+   }
+   func( .Val );
+}

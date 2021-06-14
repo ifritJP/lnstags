@@ -192,7 +192,7 @@ end
 
 
 local base = _lune.loadModule( 'go/github:com.ifritJP.lnssqlite3.src.lns.sqlite3.base' )
-local LnsAst = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Ast' )
+local LuneAst = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Ast' )
 local DBAccess = _lune.loadModule( 'lns.tags.DBAccess' )
 local Log = _lune.loadModule( 'lns.tags.Log' )
 local Depend = _lune.loadModule( 'lns.tags.Depend' )
@@ -510,7 +510,7 @@ CREATE TABLE funcCall ( nsId INTEGER, snameId INTEGER, belongNsId INTEGER, fileI
 CREATE TABLE allmutDecl ( nsId INTEGER PRIMARY KEY );
 CREATE TABLE asyncMode ( nsId INTEGER PRIMARY KEY, mode INTEGER );
 CREATE TABLE luavalRef ( fileId INTEGER, line INTEGER, column INTEGER, PRIMARY KEY( fileId, line, column ) );
-CREATE TABLE asyncLock ( fileId INTEGER, line INTEGER, column INTEGER, PRIMARY KEY( fileId, line, column ) );
+CREATE TABLE asyncLock ( fileId INTEGER, line INTEGER, column INTEGER, kind INTEGER, PRIMARY KEY( fileId, line, column, kind ) );
 
 CREATE TABLE incRef ( id INTEGER, baseFileId INTEGER, line INTEGER );
 CREATE TABLE incCache ( id INTEGER, baseFileId INTEGER, incFlag INTEGER, PRIMARY KEY( id, baseFileId ) );
@@ -808,7 +808,7 @@ end
 function ItemAsyncMode._fromMapSub( obj, val )
    local memInfo = {}
    table.insert( memInfo, { name = "nsId", func = _lune._toInt, nilable = false, child = {} } )
-   table.insert( memInfo, { name = "mode", func = LnsAst.Async._from, nilable = false, child = {} } )
+   table.insert( memInfo, { name = "mode", func = LuneAst.Async._from, nilable = false, child = {} } )
    table.insert( memInfo, { name = "fileId", func = _lune._toInt, nilable = false, child = {} } )
    table.insert( memInfo, { name = "line", func = _lune._toInt, nilable = false, child = {} } )
    local result, mess = _lune._fromMap( obj, val, memInfo )
@@ -1054,24 +1054,28 @@ _moduleObj.ItemAsyncLock = ItemAsyncLock
 function ItemAsyncLock.setmeta( obj )
   setmetatable( obj, { __index = ItemAsyncLock  } )
 end
-function ItemAsyncLock.new( fileId, line )
+function ItemAsyncLock.new( fileId, line, kind )
    local obj = {}
    ItemAsyncLock.setmeta( obj )
    if obj.__init then
-      obj:__init( fileId, line )
+      obj:__init( fileId, line, kind )
    end
    return obj
 end
-function ItemAsyncLock:__init( fileId, line )
+function ItemAsyncLock:__init( fileId, line, kind )
 
    self.fileId = fileId
    self.line = line
+   self.kind = kind
 end
 function ItemAsyncLock:get_fileId()
    return self.fileId
 end
 function ItemAsyncLock:get_line()
    return self.line
+end
+function ItemAsyncLock:get_kind()
+   return self.kind
 end
 function ItemAsyncLock:_toMap()
   return self
@@ -1091,6 +1095,7 @@ function ItemAsyncLock._fromMapSub( obj, val )
    local memInfo = {}
    table.insert( memInfo, { name = "fileId", func = _lune._toInt, nilable = false, child = {} } )
    table.insert( memInfo, { name = "line", func = _lune._toInt, nilable = false, child = {} } )
+   table.insert( memInfo, { name = "kind", func = _lune._toInt, nilable = false, child = {} } )
    local result, mess = _lune._fromMap( obj, val, memInfo )
    if not result then
       return nil, mess
@@ -1219,7 +1224,7 @@ function DBCtrl:getFileIdFromPath( path )
       return fileId
    end
    
-   Log.log( Log.Level.Err, __func__, 450, function (  )
+   Log.log( Log.Level.Err, __func__, 451, function (  )
    
       return string.format( "not found file -- %s", path)
    end )
@@ -1449,7 +1454,7 @@ end
 local function create( dbPath )
    local __func__ = '@lns.@tags.@DBCtrl.create'
 
-   Log.log( Log.Level.Log, __func__, 647, function (  )
+   Log.log( Log.Level.Log, __func__, 648, function (  )
    
       return "create"
    end )
@@ -1527,10 +1532,11 @@ function DBCtrl:mapAsyncLock( callback )
 end
 
 
-function DBCtrl:addAsyncLock( fileId, lineNo, column )
+function DBCtrl:addAsyncLock( fileId, lineNo, column, kind )
 
-   self:insert( "asyncLock", string.format( "%d, %d, %d", fileId, lineNo, column) )
+   self:insert( "asyncLock", string.format( "%d, %d, %d, %d", fileId, lineNo, column, kind) )
 end
+
 
 
 
@@ -1542,6 +1548,7 @@ function DBCtrl:mapSymbolDecl( name, callback )
    
       return 
    end
+   
    
    local overrideStr = string.format( "%d", nsId)
    self:mapRowList( "override", string.format( "superNsId = %d", nsId), nil, nil, function ( items )
@@ -1587,6 +1594,7 @@ end
 
 
 
+
 function DBCtrl:mapSymbolRef( name, onlySet, callback )
 
    local nsId = self:getNsId( name )
@@ -1595,6 +1603,7 @@ function DBCtrl:mapSymbolRef( name, onlySet, callback )
    
       return 
    end
+   
    
    local overrideStr = string.format( "%d", nsId)
    self:mapRowList( "override", string.format( "nsId = %d", nsId), nil, nil, function ( items )

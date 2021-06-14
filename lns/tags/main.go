@@ -1,8 +1,8 @@
 // This code is transcompiled by LuneScript.
 package tags
 import . "github.com/ifritJP/LuneScript/src/lune/base/runtime_go"
-import LnsTypes "github.com/ifritJP/LuneScript/src/lune/base"
-import LnsAst "github.com/ifritJP/LuneScript/src/lune/base"
+import LuneTypes "github.com/ifritJP/LuneScript/src/lune/base"
+import LuneAst "github.com/ifritJP/LuneScript/src/lune/base"
 var init_main bool
 var main__mod__ string
 var main_dbPath string
@@ -28,9 +28,9 @@ func main_inq_0_(_env *LnsEnv, inqMode string,pattern string) LnsInt {
     } else if _switch1 == Option_InqMode__AllMut {
         Inq_InqAllmut(_env, db)
     } else if _switch1 == Option_InqMode__Async {
-        Inq_InqAsync(_env, db, LnsAst.Ast_Async__Async)
+        Inq_InqAsync(_env, db, LuneAst.Ast_Async__Async)
     } else if _switch1 == Option_InqMode__Noasync {
-        Inq_InqAsync(_env, db, LnsAst.Ast_Async__Noasync)
+        Inq_InqAsync(_env, db, LuneAst.Ast_Async__Noasync)
     } else if _switch1 == Option_InqMode__Luaval {
         Inq_InqLuaval(_env, db)
     } else if _switch1 == Option_InqMode__AsyncLock {
@@ -41,7 +41,7 @@ func main_inq_0_(_env *LnsEnv, inqMode string,pattern string) LnsInt {
 }
 
 // 51: decl @lns.@tags.@main.build
-func main_build_1_(_env *LnsEnv, pathList *LnsList,transCtrlInfo *LnsTypes.Types_TransCtrlInfo) LnsInt {
+func main_build_1_(_env *LnsEnv, pathList *LnsList,transCtrlInfo *LuneTypes.Types_TransCtrlInfo) LnsInt {
     DBCtrl_initDB(_env, main_dbPath)
     var db *DBCtrl_DBCtrl
     
@@ -60,11 +60,6 @@ func main_build_1_(_env *LnsEnv, pathList *LnsList,transCtrlInfo *LnsTypes.Types
     return 0
 }
 
-
-func __main___anonymous_1_(_env *LnsEnv, item *DBCtrl_ItemNamespace) bool {
-    Lns_print([]LnsAny{item.FP.Get_name(_env)})
-    return true
-}
 // 65: decl @lns.@tags.@main.__main
 func Main___main(_env *LnsEnv, args *LnsList) LnsInt {
     Lns_main_init( _env )
@@ -164,6 +159,11 @@ func Main___main(_env *LnsEnv, args *LnsList) LnsInt {
     return 0
 }
 
+
+func __main___anonymous_1_(_env *LnsEnv, item *DBCtrl_ItemNamespace) bool {
+    Lns_print([]LnsAny{item.FP.Get_name(_env)})
+    return true
+}
 func Lns_main_init(_env *LnsEnv) {
     if init_main { return }
     init_main = true
@@ -176,8 +176,8 @@ func Lns_main_init(_env *LnsEnv) {
     Lns_Inq_init(_env)
     Lns_Log_init(_env)
     Lns_Pattern_init(_env)
-    LnsTypes.Lns_Types_init(_env)
-    LnsAst.Lns_Ast_init(_env)
+    LuneTypes.Lns_Types_init(_env)
+    LuneAst.Lns_Ast_init(_env)
     main_dbPath = "lnstags.sqlite3"
 }
 func init() {

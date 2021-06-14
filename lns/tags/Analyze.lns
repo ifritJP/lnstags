@@ -6,16 +6,17 @@ import lns.tags.DBCtrl;
 import lns.tags.Option;
 import lns.tags.Log;
 import lns.tags.Ast;
-import go/github:com.ifritJP.LuneScript.src.lune.base.Option as LnsOpt;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Option as LuneOpt;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Nodes;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Parser;
 import go/github:com.ifritJP.LuneScript.src.lune.base.TransUnit;
 import go/github:com.ifritJP.LuneScript.src.lune.base.front;
-import go/github:com.ifritJP.LuneScript.src.lune.base.Ast as LnsAst;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Ast as LuneAst;
+import go/github:com.ifritJP.LuneScript.src.lune.base.AstInfo;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Types;
 import go/github:com.ifritJP.LuneScript.src.lune.base.LuaVer;
-import go/github:com.ifritJP.LuneScript.src.lune.base.Log as LnsLog;
-import go/github:com.ifritJP.LuneScript.src.lune.base.Util as LnsUtil;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Log as LuneLog;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Util as LuneUtil;
 
 class Opt {
 }
@@ -23,10 +24,10 @@ class Opt {
 class tagFilter extend Nodes.Filter<Opt> {
    let mut db:DBCtrl.DBCtrl;
    let streamName:str;
-   let mut type2nsid:Map<&LnsAst.TypeInfo,int>;
-   let mut sym2nsid:Map<&LnsAst.SymbolInfo,int>;
+   let mut type2nsid:Map<&LuneAst.TypeInfo,int>;
+   let mut sym2nsid:Map<&LuneAst.SymbolInfo,int>;
    let mut file2id:Map<str,int>;
-   let moduleTypeInfo:&LnsAst.TypeInfo;
+   let moduleTypeInfo:&LuneAst.TypeInfo;
 
    let noDefNsIdList:List<int>;
    
@@ -66,9 +67,9 @@ class tagFilter extend Nodes.Filter<Opt> {
    }
 }
 
-fn tagFilter.registerType( mut typeInfo:&LnsAst.TypeInfo ) mut : int, bool {
+fn tagFilter.registerType( mut typeInfo:&LuneAst.TypeInfo ) mut : int, bool {
    typeInfo = typeInfo.$nonnilableType.$srcTypeInfo.$genSrcTypeInfo;
-   if not LnsAst.TypeInfo.hasParent( typeInfo ) {
+   if not LuneAst.TypeInfo.hasParent( typeInfo ) {
       return DBCtrl.rootNsId, false;
    }
    if! self.type2nsid[ typeInfo ] {
@@ -83,7 +84,7 @@ fn tagFilter.registerType( mut typeInfo:&LnsAst.TypeInfo ) mut : int, bool {
    return nsId, added;
 }
 
-fn tagFilter.registerSymbol( mut symbolInfo:&LnsAst.SymbolInfo ) mut : int, bool
+fn tagFilter.registerSymbol( mut symbolInfo:&LuneAst.SymbolInfo ) mut : int, bool
 {
    symbolInfo = symbolInfo.getOrg();
    if! self.sym2nsid[ symbolInfo ] {
@@ -97,7 +98,7 @@ fn tagFilter.registerSymbol( mut symbolInfo:&LnsAst.SymbolInfo ) mut : int, bool
    return nsId, added;
 }
 
-fn tagFilter.registDeclSym( symbolInfo:&LnsAst.SymbolInfo ) mut : int {
+fn tagFilter.registDeclSym( symbolInfo:&LuneAst.SymbolInfo ) mut : int {
    let symNsId = self.registerSymbol( symbolInfo );
    let pos = unwrap symbolInfo.$pos$.$orgPos;
    let fileId = self.getFileId( pos.streamName );
@@ -118,7 +119,7 @@ fn tagFilter.addSymbolRef( mbrNsId:int, mut pos:&Types.Position, setOp:bool ) mu
 fn tagFilter.registerDecl(
    nodeManager:&Nodes.NodeManager ) mut
 {
-   fn registDeclTypeOp( typeInfo:&LnsAst.TypeInfo, mut pos:&Types.Position ) : int {
+   fn registDeclTypeOp( typeInfo:&LuneAst.TypeInfo, mut pos:&Types.Position ) : int {
       let nsId = self.registerType( typeInfo );
       pos = pos.$orgPos;
       self.db.addSymbolDecl( nsId, self.getFileId( pos.$streamName ),
@@ -129,7 +130,7 @@ fn tagFilter.registerDecl(
       return registDeclTypeOp( workNode.$expType, workNode.$pos );
    }
 
-   fn registerAutoMethod( parentInfo:&LnsAst.TypeInfo, pos:&Types.Position ) {
+   fn registerAutoMethod( parentInfo:&LuneAst.TypeInfo, pos:&Types.Position ) {
       foreach symbolInfo in unwrap parentInfo.$scope$.$symbol2SymbolInfoMap {
          let typeInfo = symbolInfo.$typeInfo;
          if typeInfo.$autoFlag {
@@ -172,13 +173,13 @@ fn tagFilter.registerDecl(
       registDeclType( workNode );
    }
 
-   fn addMethod( methodType:&LnsAst.TypeInfo, pos:&Types.Position ) : int {
+   fn addMethod( methodType:&LuneAst.TypeInfo, pos:&Types.Position ) : int {
       let nsId = registDeclTypeOp( methodType, pos );
       if not methodType.$staticFlag {
          if! let scope = methodType.$parentInfo.$scope {
             scope.filterTypeInfoFieldAndIF(
                false, scope, .Normal,
-               fn ( symbolInfo:&LnsAst.SymbolInfo ) : bool {
+               fn ( symbolInfo:&LuneAst.SymbolInfo ) : bool {
                   if symbolInfo.$name == methodType.$rawTxt {
                      let superNsId = self.registerType( symbolInfo.$typeInfo );
                      self.db.addOverride( nsId, superNsId );
@@ -260,14 +261,14 @@ fn tagFilter.registerDecl(
 
 fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
 
-   fn addSymbolRef( symbolInfo:&LnsAst.SymbolInfo, pos:&Types.Position, setOp:bool ) {
+   fn addSymbolRef( symbolInfo:&LuneAst.SymbolInfo, pos:&Types.Position, setOp:bool ) {
       switch symbolInfo.$name {
          case "__func__", "__mod__", "__line__" {
             return;
          }
       }
       let nsId, added = self.registerSymbol( symbolInfo );
-      if added and not LnsAst.isBuiltin( symbolInfo.$namespaceTypeInfo.$typeId.id ) {
+      if added and not LuneAst.isBuiltin( symbolInfo.$namespaceTypeInfo.$typeId.id ) {
          self.noDefNsIdList.insert( nsId );
          // Log._log( .Err, "no register sym -- %s:%d:%d:%s"
          //           ( self.streamName,
@@ -276,9 +277,9 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
       self.addSymbolRef( nsId, pos, setOp );
    }
 
-   fn registerRefType( typeInfo:&LnsAst.TypeInfo, pos:&Types.Position ) {
+   fn registerRefType( typeInfo:&LuneAst.TypeInfo, pos:&Types.Position ) {
       let nsId, added = self.registerType( typeInfo );
-      if added and not LnsAst.isBuiltin( typeInfo.$typeId.id ) {
+      if added and not LuneAst.isBuiltin( typeInfo.$typeId.id ) {
          self.noDefNsIdList.insert( nsId );
          // Log._log( .Err, "no register type -- %s:%d:%d:%s"
          //           ( self.streamName,
@@ -289,7 +290,7 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
 
    
    fn registerRefSym(
-      symbolInfo:&LnsAst.SymbolInfo, pos:&Types.Position, setOp:bool )
+      symbolInfo:&LuneAst.SymbolInfo, pos:&Types.Position, setOp:bool )
    {
       switch symbolInfo.$namespaceTypeInfo.$kind {
          case .Enum, .Alge {
@@ -310,7 +311,7 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
                   addSymbolRef( symbolInfo, pos, setOp );
                }
                case .Var {
-                  if LnsAst.isPubToExternal( symbolInfo.$accessMode ) or
+                  if LuneAst.isPubToExternal( symbolInfo.$accessMode ) or
                      symbolInfo.$scope == self.moduleTypeInfo.$scope
                   {
                      addSymbolRef( symbolInfo, pos, setOp );
@@ -340,7 +341,7 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
                registerRefSym( leftSym, workNode.$pos, true );
             }
             case .Var {
-               if LnsAst.isPubToExternal( leftSym.$accessMode ) or
+               if LuneAst.isPubToExternal( leftSym.$accessMode ) or
                   leftSym.$scope == self.moduleTypeInfo.$scope
                {
                   registerRefSym( leftSym, workNode.$pos, true );
@@ -393,8 +394,9 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
       }
    }
    foreach workNode in nodeManager.getAsyncLockNodeList() {
-      self.db.addAsyncLock( self.getFileId( workNode.$pos.$streamName ),
-                            workNode.$pos.lineNo, workNode.$pos.column );
+      self.db.addAsyncLock(
+         self.getFileId( workNode.$pos.$streamName ),
+         workNode.$pos.lineNo, workNode.$pos.column, workNode.$lockKind );
    }
    
 
@@ -406,12 +408,19 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
          }
       }
    }
+   foreach workNode in nodeManager.getNewAlgeValNodeList() {
+      let valInfo = workNode.$valInfo;
+      if! valInfo.$algeTpye.$scope$.getSymbolInfoChild$( valInfo.$name ) {
+         registerRefSym( _exp, workNode.$pos, false );
+      }
+   }
+
 }
 
 pub override fn tagFilter.processRoot(
    node: &Nodes.RootNode, opt:Opt ) mut
 {
-   self.type2nsid[ LnsAst.headTypeInfo ] = DBCtrl.rootNsId;
+   self.type2nsid[ LuneAst.headTypeInfo ] = DBCtrl.rootNsId;
    let modNsId = self.registerType( node.$moduleTypeInfo );
 
    let fileId = self.getFileId( self.streamName );
@@ -421,7 +430,7 @@ pub override fn tagFilter.processRoot(
       self.streamName, self.getFull( node.$moduleTypeInfo, false ) );
    foreach workNode in node.$nodeManager.getSubfileNodeList() {
       if! let usePath = workNode.$usePath {
-         let subPath = LnsUtil.pathJoin( projDir, usePath.gsub( "%.", "/" ) .. ".lns" );
+         let subPath = LuneUtil.pathJoin( projDir, usePath.gsub( "%.", "/" ) .. ".lns" );
          let subId = self.addFileId( subPath, usePath );
          self.db.addSubfile( fileId, subId );
       }
@@ -449,7 +458,7 @@ pub fn start(
    
    Ast.buildAst(
       .Log, pathList, nil, nil, true, transCtrlInfo,
-      fn ( ast: &TransUnit.ASTInfo ) __noasync {
+      fn ( ast: &AstInfo.ASTInfo ) __noasync {
          if not set.has( ast.$streamName ) {
             set.add( ast.$streamName );
             if! let rootNode = ast.$node@@@Nodes.RootNode {

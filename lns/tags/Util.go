@@ -3,17 +3,17 @@ package tags
 import . "github.com/ifritJP/LuneScript/src/lune/base/runtime_go"
 var init_Util bool
 var Util__mod__ string
-// for 31
-func Util_convExp160(arg1 []LnsAny) LnsAny {
+// for 33
+func Util_convExp183(arg1 []LnsAny) LnsAny {
     return Lns_getFromMulti( arg1, 0 )
 }
-// 47: decl @lns.@tags.@Util.outputLocate
+// 49: decl @lns.@tags.@Util.outputLocate
 func Util_outputLocate(_env *LnsEnv, stream Lns_oStream,symbol string,path string,lineAccessor LnsAny,lineNo LnsInt) {
     var line string
     
     {
         _line := _env.NilAccFin(_env.NilAccPush(lineAccessor) && 
-        Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(*Util_SourceCodeLineAccessor).FP.GetLine(_env, lineNo)})/* 51:16 */)
+        Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(*Util_SourceCodeLineAccessor).FP.GetLine(_env, lineNo)})/* 53:16 */)
         if _line == nil{
             line = ""
             
@@ -128,22 +128,22 @@ func (self *Util_SourceCodeLineAccessorFactory) Create(_env *LnsEnv, filePath st
     var lineList *LnsList
     lineList = NewLnsList([]LnsAny{})
     if fileContents != nil{
-        fileContents_32 := fileContents.(string)
-        {
-            _applyForm1, _applyParam1, _applyPrev1 := _env.CommonLuaVM.String_gmatch(fileContents_32, "[^\n]*\n")
-            for {
-                _applyWork1 := _applyForm1.(*Lns_luaValue).Call( Lns_2DDD( _applyParam1, _applyPrev1 ) )
-                _applyPrev1 = Lns_getFromMulti(_applyWork1,0)
-                if Lns_IsNil( _applyPrev1 ) { break }
-                line := _applyPrev1.(string)
-                lineList.Insert(_env.LuaVM.String_sub(line, 1, len(line) - 1))
+        fileContents_39 := fileContents.(string)
+            {
+                _applyForm1, _applyParam1, _applyPrev1 := _env.GetVM().String_gmatch(fileContents_39, "[^\n]*\n")
+                for {
+                    _applyWork1 := _applyForm1.(*Lns_luaValue).Call( Lns_2DDD( _applyParam1, _applyPrev1 ) )
+                    _applyPrev1 = Lns_getFromMulti(_applyWork1,0)
+                    if Lns_IsNil( _applyPrev1 ) { break }
+                    line := _applyPrev1.(string)
+                    lineList.Insert(_env.LuaVM.String_sub(line, 1, len(line) - 1))
+                }
             }
-        }
     } else {
         var handle Lns_luaStream
         
         {
-            _handle := Util_convExp160(Lns_2DDD(Lns_io_open(filePath, "r")))
+            _handle := Util_convExp183(Lns_2DDD(Lns_io_open(filePath, "r")))
             if _handle == nil{
                 return nil
             } else {

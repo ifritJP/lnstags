@@ -4,16 +4,17 @@ import lns.tags.DBCtrl;
 import lns.tags.Option;
 import lns.tags.Log;
 import lns.tags.Ast;
-import go/github:com.ifritJP.LuneScript.src.lune.base.Option as LnsOpt;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Option as LuneOpt;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Nodes;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Parser;
 import go/github:com.ifritJP.LuneScript.src.lune.base.TransUnit;
 import go/github:com.ifritJP.LuneScript.src.lune.base.front;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Types;
-import go/github:com.ifritJP.LuneScript.src.lune.base.Ast as LnsAst;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Ast as LuneAst;
+import go/github:com.ifritJP.LuneScript.src.lune.base.AstInfo;
 import go/github:com.ifritJP.LuneScript.src.lune.base.LuaVer;
-import go/github:com.ifritJP.LuneScript.src.lune.base.Log as LnsLog;
-import go/github:com.ifritJP.LuneScript.src.lune.base.Util as LnsUtil;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Log as LuneLog;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Util as LuneUtil;
 
 macro _logNode( logLevel:Log.Level, node:__exp, mess:__exp ) {
    Log._log( ,,logLevel, "%s %s:%4d:%3d -- %s"
@@ -23,8 +24,8 @@ macro _logNode( logLevel:Log.Level, node:__exp, mess:__exp ) {
 }
 
 class SyntaxFilter extend Nodes.Filter<str> {
-   let ast: &TransUnit.ASTInfo;
-   local fn __init( ast: &TransUnit.ASTInfo )
+   let ast: &AstInfo.ASTInfo;
+   local fn __init( ast: &AstInfo.ASTInfo )
    {
       super( true, ast.$exportInfo.$moduleTypeInfo,
              ast.$exportInfo.$moduleTypeInfo.$scope );
@@ -285,12 +286,12 @@ pub fn getPatterAt(
       path.find( "^/" ## )
    {
       let dir = path.gsub( "/[^/]+$", "" );
-      projDir = LnsUtil.searchProjDir( dir );
+      projDir = LuneUtil.searchProjDir( dir );
    }
    
    Ast.buildAst(
       .Err, [path], projDir, analyzeFileInfo.$stdinFile, false, transCtrlInfo,
-      fn ( ast: &TransUnit.ASTInfo ) {
+      fn ( ast: &AstInfo.ASTInfo ) {
          if ast.$streamName == path {
             let mut filter = new SyntaxFilter( ast );
             pattern = filter.getPattern( path, analyzeFileInfo, inqMod );

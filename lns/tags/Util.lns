@@ -24,8 +24,10 @@ pub class SourceCodeLineAccessorFactory {
       }
       let mut lineList:List<str> = [];
       when! fileContents {
-         apply line of string.gmatch( fileContents, "[^\n]*\n" ) {
-            lineList.insert( string.sub( line, 1, #line - 1 ) );
+         __luago {
+            apply line of string.gmatch( fileContents, "[^\n]*\n" ) {
+               lineList.insert( string.sub( line, 1, #line - 1 ) );
+            }
          }
       } else {
          let! mut handle = io.open( filePath, "r" ) {

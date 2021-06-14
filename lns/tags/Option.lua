@@ -79,8 +79,8 @@ if not _lune4 then
    _lune4 = _lune
 end
 local Log = _lune.loadModule( 'lns.tags.Log' )
-local LnsTypes = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Types' )
-local LnsUtil = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Util' )
+local LuneTypes = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Types' )
+local LuneUtil = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Util' )
 
 local InqMode = {}
 _moduleObj.InqMode = InqMode
@@ -224,7 +224,7 @@ function Option:__init()
    self.inqMode = InqMode.Def
    self.pattern = ""
    self.analyzeFileInfo = AnalyzeFileInfo.new()
-   self.transCtrlInfo = LnsTypes.TransCtrlInfo.create_normal(  )
+   self.transCtrlInfo = LuneTypes.TransCtrlInfo.create_normal(  )
 end
 function Option.setmeta( obj )
   setmetatable( obj, { __index = Option  } )
@@ -301,6 +301,7 @@ local function analyzeArgs( argList )
          end
          
          if arg:find( "^-" ) then
+            
             do
                local _switchExp = arg
                if _switchExp == "-i" then
@@ -458,7 +459,7 @@ local function analyzeArgs( argList )
    
    
    if stdinFlag then
-      option.analyzeFileInfo.stdinFile = LnsTypes.StdinFile.new(LnsUtil.scriptPath2Module( option.analyzeFileInfo:get_path() ), _lune.unwrap( io.stdin:read( "*a" )))
+      option.analyzeFileInfo.stdinFile = LuneTypes.StdinFile.new(LuneUtil.scriptPath2Module( option.analyzeFileInfo:get_path() ), _lune.unwrap( io.stdin:read( "*a" )))
    end
    
    

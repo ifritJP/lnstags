@@ -2,18 +2,18 @@
 
 _lune_control default_async_all;
 
-import go/github:com.ifritJP.LuneScript.src.lune.base.Option as LnsOpt;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Option as LuneOpt;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Types;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Parser;
 import go/github:com.ifritJP.LuneScript.src.lune.base.front;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Nodes;
-import go/github:com.ifritJP.LuneScript.src.lune.base.Ast as LnsAst;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Ast as LuneAst;
 import go/github:com.ifritJP.LuneScript.src.lune.base.LuaVer;
-import go/github:com.ifritJP.LuneScript.src.lune.base.Log as LnsLog;
-import go/github:com.ifritJP.LuneScript.src.lune.base.Util as LnsUtil;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Log as LuneLog;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Util as LuneUtil;
 
-pub fn getFullNameSym<T>( filter:&Nodes.Filter<T>, symbolInfo:&LnsAst.SymbolInfo ) : str {
-   if symbolInfo.$namespaceTypeInfo == LnsAst.headTypeInfo {
+pub fn getFullNameSym<T>( filter:&Nodes.Filter<T>, symbolInfo:&LuneAst.SymbolInfo ) : str {
+   if symbolInfo.$namespaceTypeInfo == LuneAst.headTypeInfo {
       return symbolInfo.$name;
    }
    let name = "%s.%s"
@@ -22,7 +22,7 @@ pub fn getFullNameSym<T>( filter:&Nodes.Filter<T>, symbolInfo:&LnsAst.SymbolInfo
 }
 
 pub fn buildAst(
-   logLevel:LnsLog.Level, pathList:&List<str>, projDir:str!,
+   logLevel:LuneLog.Level, pathList:&List<str>, projDir:str!,
    stdinFile:&Types.StdinFile!, forceAll:bool,
    transCtrlInfo:&Types.TransCtrlInfo, astCallback:front.AstCallback ) __noasync
 {
@@ -30,10 +30,10 @@ pub fn buildAst(
       return;
    }
    
-   LnsLog.setLevel( logLevel );
-   LnsUtil.setDebugFlag( false );
+   LuneLog.setLevel( logLevel );
+   LuneUtil.setDebugFlag( false );
 
-   let mut lnsOpt = LnsOpt.createDefaultOption( pathList, projDir );
+   let mut lnsOpt = LuneOpt.createDefaultOption( pathList, projDir );
    lnsOpt.set_stdinFile( stdinFile );
    // ver 51, 52 では構文エラーになるケースがあるので、
    // ここでは 53 として処理する。
@@ -45,7 +45,7 @@ pub fn buildAst(
       lnsOpt.transCtrlInfo.uptodateMode = .ForceAll;
    } else {
       lnsOpt.transCtrlInfo.uptodateMode = .Force1(
-         LnsUtil.scriptPath2Module( pathList[ 1 ] ) );
+         LuneUtil.scriptPath2Module( pathList[ 1 ] ) );
    }
       
    front.build( lnsOpt, astCallback );

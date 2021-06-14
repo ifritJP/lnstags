@@ -190,6 +190,24 @@ Level.Log:@lns.@tags.@Pattern.getPatterAt.<anonymous>:pattern -- @Sub.Hoge.val
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
 @Sub.Hoge.val      17 Sub.lns             pub let mut val:int{pub,pub};
+(cd test; ../lnstags --simpleLog --log debug inq def @main.Al2)
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+@main.Al2          72 main.lns            alge Al2 {
+(cd test; ../lnstags --simpleLog --log debug inq ref @main.Al2)
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+@main.Al2          75 main.lns            fn func( al:Al2 ) {
+(cd test; ../lnstags --simpleLog --log debug inq def @main.Al2.Val)
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+@main.Al2.Val      73 main.lns               Val,
+(cd test; ../lnstags --simpleLog --log debug inq ref @main.Al2.Val)
+Level.Log:@lns.@tags.@DBCtrl.open:open
+Level.Log:@lns.@tags.@DBAccess.DBAccess.begin:start
+@main.Al2.Val      77 main.lns                  case .Val {
+@main.Al2.Val      77 main.lns                  case .Val {
+@main.Al2.Val      81 main.lns            func( .Val );
 (cd test; ../lnstags --simpleLog --log debug inq-at def mainSub.lns 3 6)
 Level.Log:@lns.@tags.@DBCtrl.open:open
 Level.Log:@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode:nearestNode --  mainSub.lns:   3:  5 -- RefField

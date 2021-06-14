@@ -1,8 +1,8 @@
 // This code is transcompiled by LuneScript.
 package tags
 import . "github.com/ifritJP/LuneScript/src/lune/base/runtime_go"
-import LnsTypes "github.com/ifritJP/LuneScript/src/lune/base"
-import LnsUtil "github.com/ifritJP/LuneScript/src/lune/base"
+import LuneTypes "github.com/ifritJP/LuneScript/src/lune/base"
+import LuneUtil "github.com/ifritJP/LuneScript/src/lune/base"
 var init_Option bool
 var Option__mod__ string
 // decl enum -- InqMode 
@@ -91,8 +91,8 @@ type analyzeArgs__getNextOpNonNilFunc_0_ func (_env *LnsEnv, arg1 string) string
 // 60: decl @lns.@tags.@Option.printUsage
 func Option_printUsage_4_(_env *LnsEnv, messages LnsAny) {
     if messages != nil{
-        messages_69 := messages.(string)
-        Lns_io_stderr.Write(_env, _env.LuaVM.String_format("%s\n", []LnsAny{messages_69}))
+        messages_72 := messages.(string)
+        Lns_io_stderr.Write(_env, _env.LuaVM.String_format("%s\n", []LnsAny{messages_72}))
     }
     Lns_print([]LnsAny{"usage: lnstags init [option]"})
     Lns_print([]LnsAny{"usage: lnstags build [option] filepath"})
@@ -101,16 +101,6 @@ func Option_printUsage_4_(_env *LnsEnv, messages LnsAny) {
     Lns_print([]LnsAny{"usage: lnstags test [option]"})
     _env.LuaVM.OS_exit(1)
 }
-
-func analyzeArgs___anonymous_1_(_env *LnsEnv, mess string) string {
-    Option_printUsage_4_(_env, "")
-// insert a dummy
-    return ""
-}
-
-
-
-
 
 // 72: decl @lns.@tags.@Option.analyzeArgs
 func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
@@ -300,7 +290,7 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
         }
     }
     if stdinFlag{
-        option.analyzeFileInfo.stdinFile = LnsTypes.NewTypes_StdinFile(_env, LnsUtil.Util_scriptPath2Module(_env, option.analyzeFileInfo.FP.Get_path(_env)), Lns_unwrap( Lns_io_stdin.Read(_env, "*a")).(string))
+        option.analyzeFileInfo.stdinFile = LuneTypes.NewTypes_StdinFile(_env, LuneUtil.Util_scriptPath2Module(_env, option.analyzeFileInfo.FP.Get_path(_env)), Lns_unwrap( Lns_io_stdin.Read(_env, "*a")).(string))
         
     }
     if mode != nil{
@@ -313,6 +303,16 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
 // insert a dummy
     return nil
 }
+
+func analyzeArgs___anonymous_1_(_env *LnsEnv, mess string) string {
+    Option_printUsage_4_(_env, "")
+// insert a dummy
+    return ""
+}
+
+
+
+
 
 // declaration Class -- AnalyzeFileInfo
 type Option_AnalyzeFileInfoMtd interface {
@@ -379,7 +379,7 @@ type Option_OptionMtd interface {
     Get_mode(_env *LnsEnv) string
     Get_pathList(_env *LnsEnv) *LnsList
     Get_pattern(_env *LnsEnv) string
-    Get_transCtrlInfo(_env *LnsEnv) *LnsTypes.Types_TransCtrlInfo
+    Get_transCtrlInfo(_env *LnsEnv) *LuneTypes.Types_TransCtrlInfo
 }
 type Option_Option struct {
     pathList *LnsList
@@ -388,7 +388,7 @@ type Option_Option struct {
     pattern string
     analyzeFileInfo *Option_AnalyzeFileInfo
     logLevel LnsAny
-    transCtrlInfo *LnsTypes.Types_TransCtrlInfo
+    transCtrlInfo *LuneTypes.Types_TransCtrlInfo
     FP Option_OptionMtd
 }
 func Option_Option2Stem( obj LnsAny ) LnsAny {
@@ -423,7 +423,7 @@ func (self *Option_Option) Get_inqMode(_env *LnsEnv) string{ return self.inqMode
 func (self *Option_Option) Get_pattern(_env *LnsEnv) string{ return self.pattern }
 func (self *Option_Option) Get_analyzeFileInfo(_env *LnsEnv) *Option_AnalyzeFileInfo{ return self.analyzeFileInfo }
 func (self *Option_Option) Get_logLevel(_env *LnsEnv) LnsAny{ return self.logLevel }
-func (self *Option_Option) Get_transCtrlInfo(_env *LnsEnv) *LnsTypes.Types_TransCtrlInfo{ return self.transCtrlInfo }
+func (self *Option_Option) Get_transCtrlInfo(_env *LnsEnv) *LuneTypes.Types_TransCtrlInfo{ return self.transCtrlInfo }
 // 49: DeclConstr
 func (self *Option_Option) InitOption_Option(_env *LnsEnv) {
     self.logLevel = nil
@@ -438,7 +438,7 @@ func (self *Option_Option) InitOption_Option(_env *LnsEnv) {
     
     self.analyzeFileInfo = NewOption_AnalyzeFileInfo(_env)
     
-    self.transCtrlInfo = LnsTypes.Types_TransCtrlInfo_create_normal(_env)
+    self.transCtrlInfo = LuneTypes.Types_TransCtrlInfo_create_normal(_env)
     
 }
 
@@ -449,8 +449,8 @@ func Lns_Option_init(_env *LnsEnv) {
     Option__mod__ = "@lns.@tags.@Option"
     Lns_InitMod()
     Lns_Log_init(_env)
-    LnsTypes.Lns_Types_init(_env)
-    LnsUtil.Lns_Util_init(_env)
+    LuneTypes.Lns_Types_init(_env)
+    LuneUtil.Lns_Util_init(_env)
 }
 func init() {
     init_Option = false

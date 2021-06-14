@@ -7,8 +7,8 @@ import lns.tags.Util;
 import lns.tags.Inq;
 import lns.tags.Log;
 import lns.tags.Pattern;
-import go/github:com.ifritJP.LuneScript.src.lune.base.Types as LnsTypes;
-import go/github:com.ifritJP.LuneScript.src.lune.base.Ast as LnsAst;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Types as LuneTypes;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Ast as LuneAst;
 
 
 let dbPath = "lnstags.sqlite3";
@@ -48,7 +48,7 @@ fn inq( inqMode:Option.InqMode, pattern:str ) : int {
    return 0;
 }
 
-fn build( pathList:&List<str>, transCtrlInfo:&LnsTypes.TransCtrlInfo ) : int {
+fn build( pathList:&List<str>, transCtrlInfo:&LuneTypes.TransCtrlInfo ) : int {
    // 現状は build 時に init する
    DBCtrl.initDB( dbPath );
    let! mut db = DBCtrl.open( dbPath, false ) {

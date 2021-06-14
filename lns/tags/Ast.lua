@@ -17,19 +17,19 @@ if not _lune4 then
 end
 
 
-local LnsOpt = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Option' )
+local LuneOpt = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Option' )
 local Types = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Types' )
 local Parser = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Parser' )
 local front = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.front' )
 local Nodes = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Nodes' )
-local LnsAst = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Ast' )
+local LuneAst = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Ast' )
 local LuaVer = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.LuaVer' )
-local LnsLog = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Log' )
-local LnsUtil = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Util' )
+local LuneLog = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Log' )
+local LuneUtil = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Util' )
 
 local function getFullNameSym( filter, symbolInfo )
 
-   if symbolInfo:get_namespaceTypeInfo() == LnsAst.headTypeInfo then
+   if symbolInfo:get_namespaceTypeInfo() == LuneAst.headTypeInfo then
       return symbolInfo:get_name()
    end
    
@@ -45,18 +45,20 @@ local function buildAst( logLevel, pathList, projDir, stdinFile, forceAll, trans
    end
    
    
-   LnsLog.setLevel( logLevel )
-   LnsUtil.setDebugFlag( false )
+   LuneLog.setLevel( logLevel )
+   LuneUtil.setDebugFlag( false )
    
-   local lnsOpt = LnsOpt.createDefaultOption( pathList, projDir )
+   local lnsOpt = LuneOpt.createDefaultOption( pathList, projDir )
    lnsOpt:set_stdinFile( stdinFile )
+   
    lnsOpt.targetLuaVer = LuaVer.ver53
    lnsOpt.transCtrlInfo.legacyMutableControl = transCtrlInfo.legacyMutableControl
+   
    if forceAll then
       lnsOpt.transCtrlInfo.uptodateMode = _lune.newAlge( Types.CheckingUptodateMode.ForceAll)
    else
     
-      lnsOpt.transCtrlInfo.uptodateMode = _lune.newAlge( Types.CheckingUptodateMode.Force1, {LnsUtil.scriptPath2Module( pathList[1] )})
+      lnsOpt.transCtrlInfo.uptodateMode = _lune.newAlge( Types.CheckingUptodateMode.Force1, {LuneUtil.scriptPath2Module( pathList[1] )})
    end
    
    

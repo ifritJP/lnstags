@@ -1,6 +1,6 @@
 import lns.tags.DBCtrl;
 import lns.tags.Util;
-import go/github:com.ifritJP.LuneScript.src.lune.base.Ast as LnsAst;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Ast as LuneAst;
 
 pub fn InqDef( db:DBCtrl.DBCtrl, pattern:str ) {
    let mut factory = new Util.SourceCodeLineAccessorFactory();
@@ -44,7 +44,7 @@ pub fn InqAllmut( db:DBCtrl.DBCtrl ) {
       });
 }
 
-pub fn InqAsync( db:DBCtrl.DBCtrl, asyncMode:LnsAst.Async ) {
+pub fn InqAsync( db:DBCtrl.DBCtrl, asyncMode:LuneAst.Async ) {
    let mut factory = new Util.SourceCodeLineAccessorFactory();
    db.mapAsyncMode(
       asyncMode,
