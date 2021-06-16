@@ -28,7 +28,6 @@ func Pattern_getPatterAt(_env *LnsEnv, db *DBCtrl_DBCtrl,analyzeFileInfo *Option
         _path := db.FP.GetMainFilePath(_env, fileId)
         if _path == nil{
             path = analyzeFileInfo.FP.Get_path(_env)
-            
         } else {
             path = _path.(string)
         }
@@ -43,7 +42,6 @@ func Pattern_getPatterAt(_env *LnsEnv, db *DBCtrl_DBCtrl,analyzeFileInfo *Option
         var dir string
         dir = Pattern_convExp1986(Lns_2DDD(_env.LuaVM.String_gsub(path,"/[^/]+$", "")))
         projDir = LuneUtil.Util_searchProjDir(_env, dir)
-        
     }
     Ast_buildAst(_env, LuneLog.Log_Level__Err, NewLnsList([]LnsAny{path}), projDir, analyzeFileInfo.FP.Get_stdinFile(_env), false, transCtrlInfo, front.Front_AstCallback(func(_env *LnsEnv, ast *AstInfo.AstInfo_ASTInfo) {
         __func__ := "@lns.@tags.@Pattern.getPatterAt.<anonymous>"
@@ -51,7 +49,6 @@ func Pattern_getPatterAt(_env *LnsEnv, db *DBCtrl_DBCtrl,analyzeFileInfo *Option
             var filter *Pattern_SyntaxFilter
             filter = NewPattern_SyntaxFilter(_env, ast)
             pattern = filter.FP.GetPattern(_env, path, analyzeFileInfo, inqMod)
-            
             Log_log(_env, Log_Level__Log, __func__, 298, Log_CreateMessage(func(_env *LnsEnv) string {
                 return _env.LuaVM.String_format("pattern -- %s", []LnsAny{pattern})
             }))
@@ -205,7 +202,6 @@ func NewPattern_SyntaxFilter(_env *LnsEnv, arg1 *AstInfo.AstInfo_ASTInfo) *Patte
 func (self *Pattern_SyntaxFilter) InitPattern_SyntaxFilter(_env *LnsEnv, ast *AstInfo.AstInfo_ASTInfo) {
     self.InitNodes_Filter(_env, true, ast.FP.Get_exportInfo(_env).FP.Get_moduleTypeInfo(_env), ast.FP.Get_exportInfo(_env).FP.Get_moduleTypeInfo(_env).FP.Get_scope(_env))
     self.ast = ast
-    
 }
 
 // 35: decl @lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode
@@ -559,7 +555,6 @@ func (self *Pattern_SyntaxFilter) GetPattern(_env *LnsEnv, path string,analyzeFi
                                     token := _token.(*Types.Types_Token)
                                     if isInner(_env, token.Pos, token.Txt){
                                         nearestNode = node
-                                        
                                         return Nodes.Nodes_NodeVisitMode__End
                                     }
                                 }
@@ -570,7 +565,6 @@ func (self *Pattern_SyntaxFilter) GetPattern(_env *LnsEnv, path string,analyzeFi
                                     token := _token.(*Types.Types_Token)
                                     if isInner(_env, token.Pos, token.Txt){
                                         nearestNode = node
-                                        
                                         return Nodes.Nodes_NodeVisitMode__End
                                     }
                                 }
@@ -583,18 +577,14 @@ func (self *Pattern_SyntaxFilter) GetPattern(_env *LnsEnv, path string,analyzeFi
                             nearest := _nearest.(*Nodes.Nodes_Node)
                             if nearest.FP.Get_effectivePos(_env).LineNo != analyzeFileInfo.FP.Get_lineNo(_env){
                                 nearestNode = node
-                                
                             }
                             if nearest.FP.Get_effectivePos(_env).Column < node.FP.Get_effectivePos(_env).Column{
                                 nearestNode = node
-                                
                             } else if nearest.FP.Get_effectivePos(_env).Column == node.FP.Get_effectivePos(_env).Column{
                                 nearestNode = node
-                                
                             }
                         } else {
                             nearestNode = node
-                            
                         }
                     }
                 } else { 
@@ -606,11 +596,9 @@ func (self *Pattern_SyntaxFilter) GetPattern(_env *LnsEnv, path string,analyzeFi
                                 _env.SetStackVal( nearest.FP.Get_effectivePos(_env).LineNo < node.FP.Get_effectivePos(_env).LineNo) &&
                                 _env.SetStackVal( node.FP.Get_effectivePos(_env).LineNo < analyzeFileInfo.FP.Get_lineNo(_env)) ).(bool)){
                                 nearestNode = node
-                                
                             }
                         } else {
                             nearestNode = node
-                            
                         }
                     }
                 }
@@ -628,7 +616,6 @@ func (self *Pattern_SyntaxFilter) GetPattern(_env *LnsEnv, path string,analyzeFi
             if !Lns_IsNil( _nearest ) {
                 nearest := _nearest.(*Nodes.Nodes_Node)
                 pattern = self.FP.getPatternFromNode(_env, analyzeFileInfo, inqMod, nearest)
-                
             }
         }
     }

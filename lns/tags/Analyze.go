@@ -97,7 +97,6 @@ func Analyze_start(_env *LnsEnv, db *DBCtrl_DBCtrl,pathList *LnsList,transCtrlIn
         find = false
         db.FP.MapSymbolDeclForNsId(_env, nsId, DBCtrl_callbackSymbolDecl(func(_env *LnsEnv, item *DBCtrl_ItemSymbolDecl) bool {
             find = true
-            
             return false
         }))
         if Lns_op_not(find){
@@ -345,19 +344,12 @@ func (self *Analyze_tagFilter) getFileId(_env *LnsEnv, path string) LnsInt {
 func (self *Analyze_tagFilter) InitAnalyze_tagFilter(_env *LnsEnv, rootNode *Nodes.Nodes_RootNode,db *DBCtrl_DBCtrl,streamName string,noDefNsIdList *LnsList) {
     self.InitNodes_Filter(_env, true, rootNode.FP.Get_moduleTypeInfo(_env), rootNode.FP.Get_moduleTypeInfo(_env).FP.Get_scope(_env))
     self.noDefNsIdList = noDefNsIdList
-    
     self.moduleTypeInfo = rootNode.FP.Get_moduleTypeInfo(_env)
-    
     self.file2id = NewLnsMap( map[LnsAny]LnsAny{})
-    
     self.db = db
-    
     self.streamName = streamName
-    
     self.type2nsid = NewLnsMap( map[LnsAny]LnsAny{})
-    
     self.sym2nsid = NewLnsMap( map[LnsAny]LnsAny{})
-    
     var mod string
     mod = self.FP.GetFull(_env, rootNode.FP.Get_moduleTypeInfo(_env), false)
     self.FP.addFileId(_env, streamName, mod)
@@ -367,7 +359,6 @@ func (self *Analyze_tagFilter) InitAnalyze_tagFilter(_env *LnsEnv, rootNode *Nod
 func (self *Analyze_tagFilter) registerType(_env *LnsEnv, typeInfo *LuneAst.Ast_TypeInfo)(LnsInt, bool) {
     __func__ := "@lns.@tags.@Analyze.tagFilter.registerType"
     typeInfo = typeInfo.FP.Get_nonnilableType(_env).FP.Get_srcTypeInfo(_env).FP.Get_genSrcTypeInfo(_env)
-    
     if Lns_op_not(LuneAst.Ast_TypeInfo_hasParent(_env, typeInfo)){
         return DBCtrl_rootNsId, false
     }
@@ -397,7 +388,6 @@ func (self *Analyze_tagFilter) registerType(_env *LnsEnv, typeInfo *LuneAst.Ast_
 func (self *Analyze_tagFilter) registerSymbol(_env *LnsEnv, symbolInfo *LuneAst.Ast_SymbolInfo)(LnsInt, bool) {
     __func__ := "@lns.@tags.@Analyze.tagFilter.registerSymbol"
     symbolInfo = symbolInfo.FP.GetOrg(_env)
-    
     {
         __exp := self.sym2nsid.Get(symbolInfo)
         if !Lns_IsNil( __exp ) {
@@ -441,7 +431,6 @@ func (self *Analyze_tagFilter) registDeclSym(_env *LnsEnv, symbolInfo *LuneAst.A
 // 110: decl @lns.@tags.@Analyze.tagFilter.addSymbolRef
 func (self *Analyze_tagFilter) addSymbolRef(_env *LnsEnv, mbrNsId LnsInt,pos *Types.Types_Position,setOp bool) {
     pos = pos.FP.Get_orgPos(_env)
-    
     self.db.FP.AddSymbolRef(_env, mbrNsId, self.FP.getFileId(_env, pos.StreamName), pos.LineNo, pos.Column, setOp)
 }
 
@@ -452,7 +441,6 @@ func (self *Analyze_tagFilter) registerDecl(_env *LnsEnv, nodeManager *Nodes.Nod
         var nsId LnsInt
         nsId = Analyze_convExp896(Lns_2DDD(self.FP.registerType(_env, typeInfo)))
         pos = pos.FP.Get_orgPos(_env)
-        
         self.db.FP.AddSymbolDecl(_env, nsId, self.FP.getFileId(_env, pos.StreamName), pos.LineNo, pos.Column)
         return nsId
     }

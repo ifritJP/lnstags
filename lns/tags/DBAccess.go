@@ -100,13 +100,9 @@ func (self *DBAccess_DBAccess) Get_beginFlag(_env *LnsEnv) bool{ return self.beg
 // 16: DeclConstr
 func (self *DBAccess_DBAccess) InitDBAccess_DBAccess(_env *LnsEnv, db base.Base_DB,path string,readonlyFlag bool) {
     self.db = db
-    
     self.path = path
-    
     self.beginFlag = false
-    
     self.readonlyFlag = readonlyFlag
-    
 }
 
 // 23: decl @lns.@tags.@DBAccess.DBAccess.errorExit
@@ -135,7 +131,6 @@ func (self *DBAccess_DBAccess) Begin(_env *LnsEnv) {
         _env.LuaVM.OS_exit(1)
     }
     self.beginFlag = true
-    
     self.db.Begin(_env)
 }
 
@@ -149,7 +144,6 @@ func (self *DBAccess_DBAccess) Commit(_env *LnsEnv) {
         return 
     }
     self.beginFlag = false
-    
     Log_log(_env, Log_Level__Log, __func__, 81, Log_CreateMessage(DBAccess_commit___anonymous_0_))
     
     self.db.Commit(_env)
@@ -171,12 +165,10 @@ func (self *DBAccess_DBAccess) MapJoin(_env *LnsEnv, tableName string,otherTable
     if condition != nil{
         condition_137 := condition.(string)
         query = _env.LuaVM.String_format("%s WHERE %s", []LnsAny{query, condition_137})
-        
     }
     if limit != nil{
         limit_139 := limit.(LnsInt)
         query = _env.LuaVM.String_format("%s LIMIT %d", []LnsAny{query, limit_139})
-        
     }
     return self.db.MapQueryAsMap(_env, query, _func, errHandle)
 }
@@ -190,12 +182,10 @@ func (self *DBAccess_DBAccess) MapJoin2(_env *LnsEnv, tableName string,otherTabl
     if condition != nil{
         condition_143 := condition.(string)
         query = _env.LuaVM.String_format("%s WHERE %s", []LnsAny{query, condition_143})
-        
     }
     if limit != nil{
         limit_145 := limit.(LnsInt)
         query = _env.LuaVM.String_format("%s LIMIT %d", []LnsAny{query, limit_145})
-        
     }
     return self.db.MapQueryAsMap(_env, query, _func, errHandle)
 }
@@ -209,12 +199,10 @@ func (self *DBAccess_DBAccess) MapJoin3(_env *LnsEnv, tableName string,otherTabl
     if condition != nil{
         condition_149 := condition.(string)
         query = _env.LuaVM.String_format("%s WHERE %s", []LnsAny{query, condition_149})
-        
     }
     if limit != nil{
         limit_151 := limit.(LnsInt)
         query = _env.LuaVM.String_format("%s LIMIT %d", []LnsAny{query, limit_151})
-        
     }
     return self.db.MapQueryAsMap(_env, query, _func, errHandle)
 }
@@ -227,20 +215,16 @@ func (self *DBAccess_DBAccess) MapRowList(_env *LnsEnv, tableName string,conditi
     if condition != nil{
         condition_156 := condition.(string)
         query = _env.LuaVM.String_format("SELECT %s FROM %s WHERE %s", []LnsAny{ATTRIB, tableName, condition_156})
-        
     } else {
         query = _env.LuaVM.String_format("SELECT %s FROM %s", []LnsAny{ATTRIB, tableName})
-        
     }
     if order != nil{
         order_159 := order.(string)
         query = _env.LuaVM.String_format("%s ORDER BY %s", []LnsAny{query, order_159})
-        
     }
     if limit != nil{
         limit_161 := limit.(LnsInt)
         query = _env.LuaVM.String_format("%s LIMIT %d", []LnsAny{query, limit_161})
-        
     }
     return self.db.MapQueryAsMap(_env, query, _func, errHandle)
 }
@@ -267,7 +251,6 @@ func (self *DBAccess_DBAccess) Update(_env *LnsEnv, tableName string,set string,
     sql = _env.LuaVM.String_format("UPDATE %s SET %s", []LnsAny{tableName, set})
     if Lns_isCondTrue( condition){
         sql = _env.LuaVM.String_format("%s WHERE %s", []LnsAny{sql, condition})
-        
     }
     self.FP.Exec(_env, sql, nil)
 }

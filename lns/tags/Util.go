@@ -16,7 +16,6 @@ func Util_outputLocate(_env *LnsEnv, stream Lns_oStream,symbol string,path strin
         Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(*Util_SourceCodeLineAccessor).FP.GetLine(_env, lineNo)})/* 53:16 */)
         if _line == nil{
             line = ""
-            
         } else {
             line = _line.(string)
         }
@@ -113,7 +112,6 @@ func NewUtil_SourceCodeLineAccessorFactory(_env *LnsEnv) *Util_SourceCodeLineAcc
 // 16: DeclConstr
 func (self *Util_SourceCodeLineAccessorFactory) InitUtil_SourceCodeLineAccessorFactory(_env *LnsEnv) {
     self.path2accessor = NewLnsMap( map[LnsAny]LnsAny{})
-    
 }
 
 // 20: decl @lns.@tags.@Util.SourceCodeLineAccessorFactory.create

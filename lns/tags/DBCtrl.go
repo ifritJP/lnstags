@@ -175,7 +175,6 @@ func DBCtrl_getProjDir(_env *LnsEnv, path string,mod string) string {
         _env.SetStackVal( len(mod) != 0) &&
         _env.SetStackVal( len(projDir) == 0) ).(bool)){
         projDir = "./"
-        
     }
     return projDir
 }
@@ -248,7 +247,6 @@ func DBCtrl_test(_env *LnsEnv) bool {
     for _, _path := range( NewLnsList([]LnsAny{"aa.lns", "bb.lns", "cc.lns"}).Items ) {
         path := _path.(string)
         fileId = DBCtrl_convExp4456(Lns_2DDD(db.FP.AddFile(_env, path, Lns_car(_env.LuaVM.String_gsub(path,"%.lns", "")).(string))))
-        
     }
     var parentId LnsInt
     parentId = DBCtrl_rootNsId
@@ -261,7 +259,6 @@ func DBCtrl_test(_env *LnsEnv) bool {
         db.FP.AddSymbolRef(_env, newid, fileId, 200 + index, index * 20, true)
         db.FP.AddSymbolSet(_env, newid, fileId, 300 + index, index * 30)
         parentId = newid
-        
     }
     {
         var added bool
@@ -380,7 +377,6 @@ func NewDBCtrl_IdMgr(_env *LnsEnv, arg1 LnsInt) *DBCtrl_IdMgr {
 // 20: DeclConstr
 func (self *DBCtrl_IdMgr) InitDBCtrl_IdMgr(_env *LnsEnv, idNum LnsInt) {
     self.idNum = idNum
-    
 }
 
 // 24: decl @lns.@tags.@DBCtrl.IdMgr.getIdNext
@@ -388,7 +384,6 @@ func (self *DBCtrl_IdMgr) getIdNext(_env *LnsEnv) LnsInt {
     var idNum LnsInt
     idNum = self.idNum
     self.idNum = self.idNum + 1
-    
     return idNum
 }
 
@@ -485,7 +480,6 @@ func DBCtrl_DBCtrl_getMaxId_1_(_env *LnsEnv, access *DBAccess_DBAccess,tableName
     id = nil
     access.FP.MapRowList(_env, tableName, nil, 1, "MAX(id)", nil, base.Base_queryMapForm(func(_env *LnsEnv, items *LnsMap) bool {
         id = items.Get("id")
-        
         return false
     }), base.Base_errHandleForm(DBCtrl_getMaxId___anonymous_1_))
     if id != nil{
@@ -498,17 +492,11 @@ func DBCtrl_DBCtrl_getMaxId_1_(_env *LnsEnv, access *DBAccess_DBAccess,tableName
 // 58: DeclConstr
 func (self *DBCtrl_DBCtrl) InitDBCtrl_DBCtrl(_env *LnsEnv, access *DBAccess_DBAccess,readonly bool) {
     self.access = access
-    
     self.projDir = Depend_getCurDir(_env)
-    
     self.idMgrNamespace = NewDBCtrl_IdMgr(_env, DBCtrl_DBCtrl_getMaxId_1_(_env, access, "namespace", DBCtrl_userNsId))
-    
     self.idMgrSimpleName = NewDBCtrl_IdMgr(_env, DBCtrl_DBCtrl_getMaxId_1_(_env, access, "simpleName", DBCtrl_userNsId))
-    
     self.idMgrFilePath = NewDBCtrl_IdMgr(_env, DBCtrl_DBCtrl_getMaxId_1_(_env, access, "filePath", DBCtrl_userNsId))
-    
     self.idMgrProjInfo = NewDBCtrl_IdMgr(_env, DBCtrl_DBCtrl_getMaxId_1_(_env, access, "projInfo", DBCtrl_userNsId))
-    
 }
 
 // 72: decl @lns.@tags.@DBCtrl.DBCtrl.close
@@ -542,7 +530,6 @@ func (self *DBCtrl_DBCtrl) Update(_env *LnsEnv, tableName string,set string,cond
     sql = _env.LuaVM.String_format("UPDATE %s SET %s", []LnsAny{tableName, set})
     if Lns_isCondTrue( condition){
         sql = _env.LuaVM.String_format("%s WHERE %s", []LnsAny{sql, condition})
-        
     }
     self.FP.Exec(_env, sql, nil)
 }
@@ -645,7 +632,6 @@ func (self *DBCtrl_DBCtrl) GetProjId(_env *LnsEnv, path string) LnsAny {
             if !Lns_IsNil( _projInfo ) {
                 projInfo := _projInfo.(*DBCtrl_ItemProjInfo)
                 projId = projInfo.FP.Get_id(_env)
-                
             }
         }
         return false
@@ -671,7 +657,6 @@ func (self *DBCtrl_DBCtrl) AddProj(_env *LnsEnv, path string)(LnsInt, bool) {
 // 395: decl @lns.@tags.@DBCtrl.DBCtrl.addFile
 func (self *DBCtrl_DBCtrl) AddFile(_env *LnsEnv, path string,mod string)(LnsInt, bool) {
     path = DBCtrl_normalizePath_15_(_env, path)
-    
     var fileId LnsAny
     fileId = nil
     self.FP.MapRowList(_env, "filePath", _env.LuaVM.String_format("path = '%s'", []LnsAny{path}), 1, nil, base.Base_queryMapForm(func(_env *LnsEnv, items *LnsMap) bool {
@@ -680,7 +665,6 @@ func (self *DBCtrl_DBCtrl) AddFile(_env *LnsEnv, path string,mod string)(LnsInt,
             if !Lns_IsNil( _filePath ) {
                 filePath := _filePath.(*DBCtrl_ItemFilePath)
                 fileId = filePath.FP.Get_id(_env)
-                
             }
         }
         return false
@@ -719,7 +703,6 @@ func (self *DBCtrl_DBCtrl) MapFilePath(_env *LnsEnv, callback DBCtrl_MapFileCall
 func (self *DBCtrl_DBCtrl) GetFileIdFromPath(_env *LnsEnv, path string) LnsInt {
     __func__ := "@lns.@tags.@DBCtrl.DBCtrl.getFileIdFromPath"
     path = DBCtrl_normalizePath_15_(_env, path)
-    
     var fileId LnsAny
     fileId = nil
     self.FP.MapRowList(_env, "filePath", _env.LuaVM.String_format("path = '%s'", []LnsAny{path}), 1, nil, base.Base_queryMapForm(func(_env *LnsEnv, items *LnsMap) bool {
@@ -728,7 +711,6 @@ func (self *DBCtrl_DBCtrl) GetFileIdFromPath(_env *LnsEnv, path string) LnsInt {
             if !Lns_IsNil( _filePath ) {
                 filePath := _filePath.(*DBCtrl_ItemFilePath)
                 fileId = filePath.FP.Get_id(_env)
-                
             }
         }
         return false
@@ -754,7 +736,6 @@ func (self *DBCtrl_DBCtrl) GetFilePath(_env *LnsEnv, fileId LnsInt) LnsAny {
             if !Lns_IsNil( _obj ) {
                 obj := _obj.(*DBCtrl_ItemFilePath)
                 path = obj.FP.Get_path(_env)
-                
             }
         }
         return false
@@ -795,7 +776,6 @@ func (self *DBCtrl_DBCtrl) GetName(_env *LnsEnv, nsId LnsInt) LnsAny {
             if !Lns_IsNil( _obj ) {
                 obj := _obj.(*DBCtrl_ItemNamespace)
                 name = obj.FP.Get_name(_env)
-                
             }
         }
         return false
@@ -813,7 +793,6 @@ func (self *DBCtrl_DBCtrl) getNsId(_env *LnsEnv, name string) LnsAny {
             if !Lns_IsNil( _obj ) {
                 obj := _obj.(*DBCtrl_ItemNamespace)
                 nsId = obj.FP.Get_id(_env)
-                
             }
         }
         return false
@@ -855,7 +834,6 @@ func (self *DBCtrl_DBCtrl) AddNamespace(_env *LnsEnv, fullName string,parentId L
             if !Lns_IsNil( _obj ) {
                 obj := _obj.(*DBCtrl_ItemNamespace)
                 id = obj.FP.Get_id(_env)
-                
             }
         }
         return false
@@ -1015,7 +993,6 @@ func (self *DBCtrl_DBCtrl) MapSymbolDecl(_env *LnsEnv, name string,callback DBCt
             if !Lns_IsNil( _item ) {
                 item := _item.(*DBCtrl_ItemOverride)
                 overrideStr = _env.LuaVM.String_format("%s, %d", []LnsAny{overrideStr, item.FP.Get_nsId(_env)})
-                
             }
         }
         return true
@@ -1066,7 +1043,6 @@ func (self *DBCtrl_DBCtrl) MapSymbolRef(_env *LnsEnv, name string,onlySet bool,c
             if !Lns_IsNil( _item ) {
                 item := _item.(*DBCtrl_ItemOverride)
                 overrideStr = _env.LuaVM.String_format("%s, %d", []LnsAny{overrideStr, item.FP.Get_superNsId(_env)})
-                
             }
         }
         return true
@@ -1075,7 +1051,6 @@ func (self *DBCtrl_DBCtrl) MapSymbolRef(_env *LnsEnv, name string,onlySet bool,c
     cond = _env.LuaVM.String_format("nsId IN (%s)", []LnsAny{overrideStr})
     if onlySet{
         cond = _env.LuaVM.String_format("(%s) AND setOp = 1", []LnsAny{cond})
-        
     }
     self.FP.MapRowListSort(_env, "symbolRef", cond, nil, nil, "fileId, line", base.Base_queryMapForm(func(_env *LnsEnv, items *LnsMap) bool {
         {

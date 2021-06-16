@@ -53,13 +53,11 @@ func Log_str2level(_env *LnsEnv, txt string) LnsAny {
 // 28: decl @lns.@tags.@Log.setLevel
 func Log_setLevel(_env *LnsEnv, level LnsInt) {
     Log_outputLevel = level
-    
 }
 
 // 33: decl @lns.@tags.@Log.enableDetail
 func Log_enableDetail(_env *LnsEnv, flag bool) {
     Log_detail = flag
-    
 }
 
 // 41: decl @lns.@tags.@Log.log

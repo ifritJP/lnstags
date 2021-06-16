@@ -33,15 +33,11 @@ func Ast_buildAst(_env *LnsEnv, logLevel LnsInt,pathList *LnsList,projDir LnsAny
     lnsOpt = LuneOpt.Option_createDefaultOption(_env, pathList, projDir)
     lnsOpt.FP.Set_stdinFile(_env, stdinFile)
     lnsOpt.TargetLuaVer = LuaVer.LuaVer_ver53
-    
     lnsOpt.TransCtrlInfo.LegacyMutableControl = transCtrlInfo.LegacyMutableControl
-    
     if forceAll{
         lnsOpt.TransCtrlInfo.UptodateMode = Types.Types_CheckingUptodateMode__ForceAll_Obj
-        
     } else { 
         lnsOpt.TransCtrlInfo.UptodateMode = &Types.Types_CheckingUptodateMode__Force1{LuneUtil.Util_scriptPath2Module(_env, pathList.GetAt(1).(string))}
-        
     }
     front.Front_build(_env, lnsOpt, astCallback)
 }
