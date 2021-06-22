@@ -10,6 +10,8 @@ github.com/ifritJP/LuneScript/src v0.0.0-20210622112110-362ce5651ade h1:6lcf7Nuw
 github.com/ifritJP/LuneScript/src v0.0.0-20210622112110-362ce5651ade/go.mod h1:sTuwIYaYJpJzhDSDsiw/yZOlGeOe9oATT905zzpwZwM=
 github.com/ifritJP/LuneScript/src v0.0.0-20210622121810-daef52ca3381 h1:00Gb4E+Oqf0PGEX5aTZ9UBm1HE1S3eoFQBzEC1b8Obc=
 github.com/ifritJP/LuneScript/src v0.0.0-20210622121810-daef52ca3381/go.mod h1:sTuwIYaYJpJzhDSDsiw/yZOlGeOe9oATT905zzpwZwM=
+github.com/ifritJP/LuneScript/src v0.0.0-20210622231123-f927d8280697 h1:VBOVm7rCKO5V4vEJWcImLqG8Go25ZlrUvNH7BACNZJ8=
+github.com/ifritJP/LuneScript/src v0.0.0-20210622231123-f927d8280697/go.mod h1:sTuwIYaYJpJzhDSDsiw/yZOlGeOe9oATT905zzpwZwM=
 github.com/ifritJP/lnssqlite3/src v0.0.0-20210523141024-7ad875760090 h1:YruSAwJSbu72VK5hHqiIAX0i/OZEbZKEQr3tpFiVFgk=
 github.com/ifritJP/lnssqlite3/src v0.0.0-20210523141024-7ad875760090/go.mod h1:w3Gp9QH7FShOL8eyl1QLYHwMPfimV3FrgQEalAaXxQ0=
 github.com/mattn/go-sqlite3 v1.14.7 h1:fxWBnXkxfM6sRiuH3bqJ4CfzZojMOLVc0UTsTglEghA=
