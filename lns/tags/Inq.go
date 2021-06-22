@@ -14,7 +14,7 @@ func Inq_InqDef(_env *LnsEnv, db *DBCtrl_DBCtrl,pattern string) {
         {
             _path := db.FP.GetFilePath(_env, item.FP.Get_fileId(_env))
             if _path == nil{
-                panic(_env.LuaVM.String_format("file id is illegal -- %d", []LnsAny{item.FP.Get_fileId(_env)}))
+                panic(_env.GetVM().String_format("file id is illegal -- %d", []LnsAny{item.FP.Get_fileId(_env)}))
             } else {
                 path = _path.(string)
             }
@@ -34,7 +34,7 @@ func Inq_InqRef(_env *LnsEnv, db *DBCtrl_DBCtrl,pattern string,onlySet bool) {
         {
             _path := db.FP.GetFilePath(_env, item.FP.Get_fileId(_env))
             if _path == nil{
-                panic(_env.LuaVM.String_format("file id is illegal -- %d", []LnsAny{item.FP.Get_fileId(_env)}))
+                panic(_env.GetVM().String_format("file id is illegal -- %d", []LnsAny{item.FP.Get_fileId(_env)}))
             } else {
                 path = _path.(string)
             }
@@ -54,7 +54,7 @@ func Inq_InqAllmut(_env *LnsEnv, db *DBCtrl_DBCtrl) {
         {
             _path := db.FP.GetFilePath(_env, item.FP.Get_fileId(_env))
             if _path == nil{
-                panic(_env.LuaVM.String_format("file id is illegal -- %d", []LnsAny{item.FP.Get_fileId(_env)}))
+                panic(_env.GetVM().String_format("file id is illegal -- %d", []LnsAny{item.FP.Get_fileId(_env)}))
             } else {
                 path = _path.(string)
             }
@@ -74,12 +74,12 @@ func Inq_InqAsync(_env *LnsEnv, db *DBCtrl_DBCtrl,asyncMode LnsInt) {
         {
             _path := db.FP.GetFilePath(_env, item.FP.Get_fileId(_env))
             if _path == nil{
-                panic(_env.LuaVM.String_format("file id is illegal -- %d", []LnsAny{item.FP.Get_fileId(_env)}))
+                panic(_env.GetVM().String_format("file id is illegal -- %d", []LnsAny{item.FP.Get_fileId(_env)}))
             } else {
                 path = _path.(string)
             }
         }
-        Util_outputLocate(_env, Lns_io_stdout, _env.LuaVM.String_format("%d", []LnsAny{asyncMode}), path, factory.FP.Create(_env, path, nil), item.FP.Get_line(_env))
+        Util_outputLocate(_env, Lns_io_stdout, _env.GetVM().String_format("%d", []LnsAny{asyncMode}), path, factory.FP.Create(_env, path, nil), item.FP.Get_line(_env))
         return true
     }))
 }
@@ -94,7 +94,7 @@ func Inq_InqLuaval(_env *LnsEnv, db *DBCtrl_DBCtrl) {
         {
             _path := db.FP.GetFilePath(_env, item.FP.Get_fileId(_env))
             if _path == nil{
-                panic(_env.LuaVM.String_format("file id is illegal -- %d", []LnsAny{item.FP.Get_fileId(_env)}))
+                panic(_env.GetVM().String_format("file id is illegal -- %d", []LnsAny{item.FP.Get_fileId(_env)}))
             } else {
                 path = _path.(string)
             }
@@ -114,7 +114,7 @@ func Inq_InqAsyncLock(_env *LnsEnv, db *DBCtrl_DBCtrl) {
         {
             _path := db.FP.GetFilePath(_env, item.FP.Get_fileId(_env))
             if _path == nil{
-                panic(_env.LuaVM.String_format("file id is illegal -- %d", []LnsAny{item.FP.Get_fileId(_env)}))
+                panic(_env.GetVM().String_format("file id is illegal -- %d", []LnsAny{item.FP.Get_fileId(_env)}))
             } else {
                 path = _path.(string)
             }

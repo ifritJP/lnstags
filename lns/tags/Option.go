@@ -92,14 +92,14 @@ type analyzeArgs__getNextOpNonNilFunc_0_ func (_env *LnsEnv, arg1 string) string
 func Option_printUsage_4_(_env *LnsEnv, messages LnsAny) {
     if messages != nil{
         messages_72 := messages.(string)
-        Lns_io_stderr.Write(_env, _env.LuaVM.String_format("%s\n", []LnsAny{messages_72}))
+        Lns_io_stderr.Write(_env, _env.GetVM().String_format("%s\n", []LnsAny{messages_72}))
     }
     Lns_print([]LnsAny{"usage: lnstags init [option]"})
     Lns_print([]LnsAny{"usage: lnstags build [option] filepath"})
     Lns_print([]LnsAny{"usage: lnstags inq <def|ref|set|allmut> pattern"})
     Lns_print([]LnsAny{"usage: lnstags inq-at <def|ref|set> filepath lineno column"})
     Lns_print([]LnsAny{"usage: lnstags test [option]"})
-    _env.LuaVM.OS_exit(1)
+    _env.GetVM().OS_exit(1)
 }
 
 // 72: decl @lns.@tags.@Option.analyzeArgs
@@ -133,7 +133,7 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
                     arg = _arg.(string)
                 }
             }
-            if Lns_isCondTrue( Lns_car(_env.LuaVM.String_find(arg,"^-", nil, nil))){
+            if Lns_isCondTrue( Lns_car(_env.GetVM().String_find(arg,"^-", nil, nil))){
                 if _switch1 := arg; _switch1 == "-i" {
                     stdinFlag = true
                 } else if _switch1 == "--log" {
@@ -175,7 +175,7 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
                         return (LnsInt)(num)
                     }
                 }
-                Option_printUsage_4_(_env, _env.LuaVM.String_format("illegal num -- %s", []LnsAny{arg}))
+                Option_printUsage_4_(_env, _env.GetVM().String_format("illegal num -- %s", []LnsAny{arg}))
             }
         }
         Option_printUsage_4_(_env, mess)
@@ -199,7 +199,7 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
         {
             _inqMode := Option_InqMode__from(_env, nextToken)
             if _inqMode == nil{
-                Option_printUsage_4_(_env, _env.LuaVM.String_format("illegal inqMod -- %s", []LnsAny{nextToken}))
+                Option_printUsage_4_(_env, _env.GetVM().String_format("illegal inqMod -- %s", []LnsAny{nextToken}))
             } else {
                 inqMode = _inqMode.(string)
             }
@@ -241,7 +241,7 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
                         option.pattern = getNextOpNonNil(_env, "none pattern")
                     }
                 } else {
-                    Option_printUsage_4_(_env, _env.LuaVM.String_format("illegal option -- %s", []LnsAny{arg}))
+                    Option_printUsage_4_(_env, _env.GetVM().String_format("illegal option -- %s", []LnsAny{arg}))
                 }
             }
         } else { 
@@ -342,14 +342,6 @@ func (self *Option_AnalyzeFileInfo) Get_path(_env *LnsEnv) string{ return self.p
 func (self *Option_AnalyzeFileInfo) Get_lineNo(_env *LnsEnv) LnsInt{ return self.lineNo }
 func (self *Option_AnalyzeFileInfo) Get_column(_env *LnsEnv) LnsInt{ return self.column }
 func (self *Option_AnalyzeFileInfo) Get_stdinFile(_env *LnsEnv) LnsAny{ return self.stdinFile }
-// 32: DeclConstr
-func (self *Option_AnalyzeFileInfo) InitOption_AnalyzeFileInfo(_env *LnsEnv) {
-    self.path = ""
-    self.lineNo = 0
-    self.column = 0
-    self.stdinFile = nil
-}
-
 
 // declaration Class -- Option
 type Option_OptionMtd interface {
@@ -404,17 +396,6 @@ func (self *Option_Option) Get_pattern(_env *LnsEnv) string{ return self.pattern
 func (self *Option_Option) Get_analyzeFileInfo(_env *LnsEnv) *Option_AnalyzeFileInfo{ return self.analyzeFileInfo }
 func (self *Option_Option) Get_logLevel(_env *LnsEnv) LnsAny{ return self.logLevel }
 func (self *Option_Option) Get_transCtrlInfo(_env *LnsEnv) *LuneTypes.Types_TransCtrlInfo{ return self.transCtrlInfo }
-// 49: DeclConstr
-func (self *Option_Option) InitOption_Option(_env *LnsEnv) {
-    self.logLevel = nil
-    self.pathList = NewLnsList([]LnsAny{})
-    self.mode = Option_Mode__Build
-    self.inqMode = Option_InqMode__Def
-    self.pattern = ""
-    self.analyzeFileInfo = NewOption_AnalyzeFileInfo(_env)
-    self.transCtrlInfo = LuneTypes.Types_TransCtrlInfo_create_normal(_env)
-}
-
 
 func Lns_Option_init(_env *LnsEnv) {
     if init_Option { return }
@@ -427,4 +408,21 @@ func Lns_Option_init(_env *LnsEnv) {
 }
 func init() {
     init_Option = false
+}
+// 32: DeclConstr
+func (self *Option_AnalyzeFileInfo) InitOption_AnalyzeFileInfo(_env *LnsEnv) {
+    self.path = ""
+    self.lineNo = 0
+    self.column = 0
+    self.stdinFile = nil
+}
+// 49: DeclConstr
+func (self *Option_Option) InitOption_Option(_env *LnsEnv) {
+    self.logLevel = nil
+    self.pathList = NewLnsList([]LnsAny{})
+    self.mode = Option_Mode__Build
+    self.inqMode = Option_InqMode__Def
+    self.pattern = ""
+    self.analyzeFileInfo = NewOption_AnalyzeFileInfo(_env)
+    self.transCtrlInfo = LuneTypes.Types_TransCtrlInfo_create_normal(_env)
 }

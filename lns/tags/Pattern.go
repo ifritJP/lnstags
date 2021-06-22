@@ -15,7 +15,7 @@ import LuneUtil "github.com/ifritJP/LuneScript/src/lune/base"
 var init_Pattern bool
 var Pattern__mod__ string
 // for 288
-func Pattern_convExp1986(arg1 []LnsAny) string {
+func Pattern_convExp0_1986(arg1 []LnsAny) string {
     return Lns_getFromMulti( arg1, 0 ).(string)
 }
 // 272: decl @lns.@tags.@Pattern.getPatterAt
@@ -37,10 +37,10 @@ func Pattern_getPatterAt(_env *LnsEnv, db *DBCtrl_DBCtrl,analyzeFileInfo *Option
     var projDir LnsAny
     projDir = nil
     if Lns_isCondTrue( _env.PopVal( _env.IncStack() ||
-        _env.SetStackVal( Lns_car(_env.LuaVM.String_find(path,"^%.%.", nil, nil))) ||
-        _env.SetStackVal( Lns_car(_env.LuaVM.String_find(path,"^/", nil, nil))) )){
+        _env.SetStackVal( Lns_car(_env.GetVM().String_find(path,"^%.%.", nil, nil))) ||
+        _env.SetStackVal( Lns_car(_env.GetVM().String_find(path,"^/", nil, nil))) )){
         var dir string
-        dir = Pattern_convExp1986(Lns_2DDD(_env.LuaVM.String_gsub(path,"/[^/]+$", "")))
+        dir = Pattern_convExp0_1986(Lns_2DDD(_env.GetVM().String_gsub(path,"/[^/]+$", "")))
         projDir = LuneUtil.Util_searchProjDir(_env, dir)
     }
     Ast_buildAst(_env, LuneLog.Log_Level__Err, NewLnsList([]LnsAny{path}), projDir, analyzeFileInfo.FP.Get_stdinFile(_env), false, transCtrlInfo, front.Front_AstCallback(func(_env *LnsEnv, ast *AstInfo.AstInfo_ASTInfo) {
@@ -50,7 +50,7 @@ func Pattern_getPatterAt(_env *LnsEnv, db *DBCtrl_DBCtrl,analyzeFileInfo *Option
             filter = NewPattern_SyntaxFilter(_env, ast)
             pattern = filter.FP.GetPattern(_env, path, analyzeFileInfo, inqMod)
             Log_log(_env, Log_Level__Log, __func__, 298, Log_CreateMessage(func(_env *LnsEnv) string {
-                return _env.LuaVM.String_format("pattern -- %s", []LnsAny{pattern})
+                return _env.GetVM().String_format("pattern -- %s", []LnsAny{pattern})
             }))
             
         }
@@ -152,6 +152,7 @@ type Pattern_SyntaxFilterMtd interface {
     ProcessRefField(_env *LnsEnv, arg1 *Nodes.Nodes_RefFieldNode, arg2 LnsAny)
     ProcessRefType(_env *LnsEnv, arg1 *Nodes.Nodes_RefTypeNode, arg2 LnsAny)
     ProcessRepeat(_env *LnsEnv, arg1 *Nodes.Nodes_RepeatNode, arg2 LnsAny)
+    ProcessRequest(_env *LnsEnv, arg1 *Nodes.Nodes_RequestNode, arg2 LnsAny)
     ProcessReturn(_env *LnsEnv, arg1 *Nodes.Nodes_ReturnNode, arg2 LnsAny)
     ProcessRoot(_env *LnsEnv, arg1 *Nodes.Nodes_RootNode, arg2 LnsAny)
     ProcessScope(_env *LnsEnv, arg1 *Nodes.Nodes_ScopeNode, arg2 LnsAny)
@@ -198,12 +199,36 @@ func NewPattern_SyntaxFilter(_env *LnsEnv, arg1 *AstInfo.AstInfo_ASTInfo) *Patte
     obj.InitPattern_SyntaxFilter(_env, arg1)
     return obj
 }
+
+func Lns_Pattern_init(_env *LnsEnv) {
+    if init_Pattern { return }
+    init_Pattern = true
+    Pattern__mod__ = "@lns.@tags.@Pattern"
+    Lns_InitMod()
+    Lns_DBCtrl_init(_env)
+    Lns_Option_init(_env)
+    Lns_Log_init(_env)
+    Lns_Ast_init(_env)
+    LuneOpt.Lns_Option_init(_env)
+    Nodes.Lns_Nodes_init(_env)
+    Parser.Lns_Parser_init(_env)
+    TransUnit.Lns_TransUnit_init(_env)
+    front.Lns_front_init(_env)
+    Types.Lns_Types_init(_env)
+    LuneAst.Lns_Ast_init(_env)
+    AstInfo.Lns_AstInfo_init(_env)
+    LuaVer.Lns_LuaVer_init(_env)
+    LuneLog.Lns_Log_init(_env)
+    LuneUtil.Lns_Util_init(_env)
+}
+func init() {
+    init_Pattern = false
+}
 // 28: DeclConstr
 func (self *Pattern_SyntaxFilter) InitPattern_SyntaxFilter(_env *LnsEnv, ast *AstInfo.AstInfo_ASTInfo) {
     self.InitNodes_Filter(_env, true, ast.FP.Get_exportInfo(_env).FP.Get_moduleTypeInfo(_env), ast.FP.Get_exportInfo(_env).FP.Get_moduleTypeInfo(_env).FP.Get_scope(_env))
     self.ast = ast
 }
-
 // 35: decl @lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode
 func (self *Pattern_SyntaxFilter) getPatternFromNode(_env *LnsEnv, analyzeFileInfo *Option_AnalyzeFileInfo,inqMod string,nearest *Nodes.Nodes_Node) LnsAny {
     __func__ := "@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode"
@@ -218,7 +243,7 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(_env *LnsEnv, analyzeFileIn
         return false
     }
     Log_log(_env, Log_Level__Log, __func__, 20, Log_CreateMessage(func(_env *LnsEnv) string {
-        return _env.LuaVM.String_format("%s %s:%4d:%3d -- %s", []LnsAny{"nearestNode -- ", nearest.FP.Get_effectivePos(_env).StreamName, nearest.FP.Get_effectivePos(_env).LineNo, nearest.FP.Get_effectivePos(_env).Column, Nodes.Nodes_getNodeKindName(_env, nearest.FP.Get_kind(_env))})
+        return _env.GetVM().String_format("%s %s:%4d:%3d -- %s", []LnsAny{"nearestNode -- ", nearest.FP.Get_effectivePos(_env).StreamName, nearest.FP.Get_effectivePos(_env).LineNo, nearest.FP.Get_effectivePos(_env).Column, Nodes.Nodes_getNodeKindName(_env, nearest.FP.Get_kind(_env))})
     }))
     
     
@@ -516,12 +541,11 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(_env *LnsEnv, analyzeFileIn
         }
     }
     Log_log(_env, Log_Level__Err, __func__, 193, Log_CreateMessage(func(_env *LnsEnv) string {
-        return _env.LuaVM.String_format("unknown pattern -- %s", []LnsAny{Nodes.Nodes_getNodeKindName(_env, nearest.FP.Get_kind(_env))})
+        return _env.GetVM().String_format("unknown pattern -- %s", []LnsAny{Nodes.Nodes_getNodeKindName(_env, nearest.FP.Get_kind(_env))})
     }))
     
     return nil
 }
-
 // 197: decl @lns.@tags.@Pattern.SyntaxFilter.getPattern
 func (self *Pattern_SyntaxFilter) GetPattern(_env *LnsEnv, path string,analyzeFileInfo *Option_AnalyzeFileInfo,inqMod string) LnsAny {
     var isInner func(_env *LnsEnv, pos *Types.Types_Position,name string) bool
@@ -603,7 +627,7 @@ func (self *Pattern_SyntaxFilter) GetPattern(_env *LnsEnv, path string,analyzeFi
                     }
                 }
                 Log_log(_env, Log_Level__Trace, __func__, 20, Log_CreateMessage(func(_env *LnsEnv) string {
-                    return _env.LuaVM.String_format("%s %s:%4d:%3d -- %s", []LnsAny{"visit:", node.FP.Get_effectivePos(_env).StreamName, node.FP.Get_effectivePos(_env).LineNo, node.FP.Get_effectivePos(_env).Column, Nodes.Nodes_getNodeKindName(_env, node.FP.Get_kind(_env))})
+                    return _env.GetVM().String_format("%s %s:%4d:%3d -- %s", []LnsAny{"visit:", node.FP.Get_effectivePos(_env).StreamName, node.FP.Get_effectivePos(_env).LineNo, node.FP.Get_effectivePos(_env).Column, Nodes.Nodes_getNodeKindName(_env, node.FP.Get_kind(_env))})
                 }))
                 
                 
@@ -620,30 +644,4 @@ func (self *Pattern_SyntaxFilter) GetPattern(_env *LnsEnv, path string,analyzeFi
         }
     }
     return pattern
-}
-
-
-func Lns_Pattern_init(_env *LnsEnv) {
-    if init_Pattern { return }
-    init_Pattern = true
-    Pattern__mod__ = "@lns.@tags.@Pattern"
-    Lns_InitMod()
-    Lns_DBCtrl_init(_env)
-    Lns_Option_init(_env)
-    Lns_Log_init(_env)
-    Lns_Ast_init(_env)
-    LuneOpt.Lns_Option_init(_env)
-    Nodes.Lns_Nodes_init(_env)
-    Parser.Lns_Parser_init(_env)
-    TransUnit.Lns_TransUnit_init(_env)
-    front.Lns_front_init(_env)
-    Types.Lns_Types_init(_env)
-    LuneAst.Lns_Ast_init(_env)
-    AstInfo.Lns_AstInfo_init(_env)
-    LuaVer.Lns_LuaVer_init(_env)
-    LuneLog.Lns_Log_init(_env)
-    LuneUtil.Lns_Util_init(_env)
-}
-func init() {
-    init_Pattern = false
 }

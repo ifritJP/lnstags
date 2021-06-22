@@ -18,7 +18,7 @@ func Ast_getFullNameSym(_env *LnsEnv, filter *Nodes.Nodes_Filter,symbolInfo *Lun
         return symbolInfo.FP.Get_name(_env)
     }
     var name string
-    name = _env.LuaVM.String_format("%s.%s", []LnsAny{filter.FP.GetFull(_env, symbolInfo.FP.Get_namespaceTypeInfo(_env), false), symbolInfo.FP.Get_name(_env)})
+    name = _env.GetVM().String_format("%s.%s", []LnsAny{filter.FP.GetFull(_env, symbolInfo.FP.Get_namespaceTypeInfo(_env), false), symbolInfo.FP.Get_name(_env)})
     return name
 }
 

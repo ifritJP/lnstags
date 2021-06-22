@@ -67,10 +67,10 @@ func Log_log(_env *LnsEnv, level LnsInt,funcName string,lineNo LnsInt,callback L
     if level <= Log_outputLevel{
         if Log_detail{
             var nowClock LnsReal
-            nowClock = _env.LuaVM.OS_clock()
-            logStream.Write(_env, _env.LuaVM.String_format("%6d:%s:%s:%d:", []LnsAny{(LnsInt)((nowClock * LnsReal(1000))), Log_Level_getTxt( level), funcName, lineNo}))
+            nowClock = _env.GetVM().OS_clock()
+            logStream.Write(_env, _env.GetVM().String_format("%6d:%s:%s:%d:", []LnsAny{(LnsInt)((nowClock * LnsReal(1000))), Log_Level_getTxt( level), funcName, lineNo}))
         } else { 
-            logStream.Write(_env, _env.LuaVM.String_format("%s:%s:", []LnsAny{Log_Level_getTxt( level), funcName}))
+            logStream.Write(_env, _env.GetVM().String_format("%s:%s:", []LnsAny{Log_Level_getTxt( level), funcName}))
         }
         logStream.Write(_env, callback(_env))
         logStream.Write(_env, "\n")

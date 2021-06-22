@@ -4,7 +4,7 @@ import . "github.com/ifritJP/LuneScript/src/lune/base/runtime_go"
 var init_Util bool
 var Util__mod__ string
 // for 33
-func Util_convExp183(arg1 []LnsAny) LnsAny {
+func Util_convExp0_183(arg1 []LnsAny) LnsAny {
     return Lns_getFromMulti( arg1, 0 )
 }
 // 49: decl @lns.@tags.@Util.outputLocate
@@ -20,7 +20,7 @@ func Util_outputLocate(_env *LnsEnv, stream Lns_oStream,symbol string,path strin
             line = _line.(string)
         }
     }
-    stream.Write(_env, _env.LuaVM.String_format("%-16s %4d %-16s %s\n", []LnsAny{symbol, lineNo, path, line}))
+    stream.Write(_env, _env.GetVM().String_format("%-16s %4d %-16s %s\n", []LnsAny{symbol, lineNo, path, line}))
 }
 
 // declaration Class -- SourceCodeLineAccessor
@@ -64,16 +64,6 @@ func (self *Util_SourceCodeLineAccessor) InitUtil_SourceCodeLineAccessor(_env *L
     self.lineList = arg2
 }
 func (self *Util_SourceCodeLineAccessor) Get_path(_env *LnsEnv) string{ return self.path }
-// 5: decl @lns.@tags.@Util.SourceCodeLineAccessor.getLine
-func (self *Util_SourceCodeLineAccessor) GetLine(_env *LnsEnv, lineNo LnsInt) LnsAny {
-    if _env.PopVal( _env.IncStack() ||
-        _env.SetStackVal( lineNo < 0) ||
-        _env.SetStackVal( self.lineList.Len() < lineNo) ).(bool){
-        return nil
-    }
-    return self.lineList.GetAt(lineNo).(string)
-}
-
 
 // declaration Class -- SourceCodeLineAccessorFactory
 type Util_SourceCodeLineAccessorFactoryMtd interface {
@@ -109,11 +99,29 @@ func NewUtil_SourceCodeLineAccessorFactory(_env *LnsEnv) *Util_SourceCodeLineAcc
     obj.InitUtil_SourceCodeLineAccessorFactory(_env)
     return obj
 }
+
+func Lns_Util_init(_env *LnsEnv) {
+    if init_Util { return }
+    init_Util = true
+    Util__mod__ = "@lns.@tags.@Util"
+    Lns_InitMod()
+}
+func init() {
+    init_Util = false
+}
+// 5: decl @lns.@tags.@Util.SourceCodeLineAccessor.getLine
+func (self *Util_SourceCodeLineAccessor) GetLine(_env *LnsEnv, lineNo LnsInt) LnsAny {
+    if _env.PopVal( _env.IncStack() ||
+        _env.SetStackVal( lineNo < 0) ||
+        _env.SetStackVal( self.lineList.Len() < lineNo) ).(bool){
+        return nil
+    }
+    return self.lineList.GetAt(lineNo).(string)
+}
 // 16: DeclConstr
 func (self *Util_SourceCodeLineAccessorFactory) InitUtil_SourceCodeLineAccessorFactory(_env *LnsEnv) {
     self.path2accessor = NewLnsMap( map[LnsAny]LnsAny{})
 }
-
 // 20: decl @lns.@tags.@Util.SourceCodeLineAccessorFactory.create
 func (self *Util_SourceCodeLineAccessorFactory) Create(_env *LnsEnv, filePath string,fileContents LnsAny) LnsAny {
     {
@@ -134,14 +142,14 @@ func (self *Util_SourceCodeLineAccessorFactory) Create(_env *LnsEnv, filePath st
                     _applyPrev1 = Lns_getFromMulti(_applyWork1,0)
                     if Lns_IsNil( _applyPrev1 ) { break }
                     line := _applyPrev1.(string)
-                    lineList.Insert(_env.LuaVM.String_sub(line, 1, len(line) - 1))
+                    lineList.Insert(_env.GetVM().String_sub(line, 1, len(line) - 1))
                 }
             }
     } else {
         var handle Lns_luaStream
         
         {
-            _handle := Util_convExp183(Lns_2DDD(Lns_io_open(filePath, "r")))
+            _handle := Util_convExp0_183(Lns_2DDD(Lns_io_open(filePath, "r")))
             if _handle == nil{
                 return nil
             } else {
@@ -166,15 +174,4 @@ func (self *Util_SourceCodeLineAccessorFactory) Create(_env *LnsEnv, filePath st
     accessor = NewUtil_SourceCodeLineAccessor(_env, filePath, lineList)
     self.path2accessor.Set(filePath,accessor)
     return accessor
-}
-
-
-func Lns_Util_init(_env *LnsEnv) {
-    if init_Util { return }
-    init_Util = true
-    Util__mod__ = "@lns.@tags.@Util"
-    Lns_InitMod()
-}
-func init() {
-    init_Util = false
 }

@@ -131,7 +131,7 @@ func Main___main(_env *LnsEnv, args *LnsList) LnsInt {
             _pattern := Pattern_getPatterAt(_env, db, analyzeFileInfo, option.FP.Get_inqMode(_env), option.FP.Get_transCtrlInfo(_env))
             if _pattern == nil{
                 db.FP.Close(_env)
-                Lns_print([]LnsAny{_env.LuaVM.String_format("illegal pos -- %s:%d:%d", []LnsAny{analyzeFileInfo.FP.Get_path(_env), analyzeFileInfo.FP.Get_lineNo(_env), analyzeFileInfo.FP.Get_column(_env)})})
+                Lns_print([]LnsAny{_env.GetVM().String_format("illegal pos -- %s:%d:%d", []LnsAny{analyzeFileInfo.FP.Get_path(_env), analyzeFileInfo.FP.Get_lineNo(_env), analyzeFileInfo.FP.Get_column(_env)})})
                 return 1
             } else {
                 pattern = _pattern.(string)
