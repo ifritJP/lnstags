@@ -126,6 +126,483 @@ func Analyze_start(_env *LnsEnv, db *DBCtrl_DBCtrl,pathList *LnsList,transCtrlIn
 
 
 
+// 34: decl @lns.@tags.@Analyze.tagFilter.addFileId
+func (self *Analyze_tagFilter) addFileId(_env *LnsEnv, path string,mod string) LnsInt {
+    __func__ := "@lns.@tags.@Analyze.tagFilter.addFileId"
+    {
+        __exp := self.file2id.Get(path)
+        if !Lns_IsNil( __exp ) {
+            _exp := __exp.(LnsInt)
+            return _exp
+        }
+    }
+    var fileId LnsInt
+    fileId = Analyze_convExp0_332(Lns_2DDD(self.db.FP.AddFile(_env, path, mod)))
+    Log_log(_env, Log_Level__Debug, __func__, 39, Log_CreateMessage(func(_env *LnsEnv) string {
+        return _env.GetVM().String_format("add file -- %d, %s", []LnsAny{fileId, path})
+    }))
+    
+    self.file2id.Set(path,fileId)
+    return fileId
+}
+// 44: decl @lns.@tags.@Analyze.tagFilter.getFileId
+func (self *Analyze_tagFilter) getFileId(_env *LnsEnv, path string) LnsInt {
+    {
+        __exp := self.file2id.Get(path)
+        if !Lns_IsNil( __exp ) {
+            _exp := __exp.(LnsInt)
+            return _exp
+        }
+    }
+    var fileId LnsInt
+    fileId = self.db.FP.GetFileIdFromPath(_env, path)
+    self.file2id.Set(path,fileId)
+    return fileId
+}
+// 70: decl @lns.@tags.@Analyze.tagFilter.registerType
+func (self *Analyze_tagFilter) registerType(_env *LnsEnv, typeInfo *LuneAst.Ast_TypeInfo)(LnsInt, bool) {
+    __func__ := "@lns.@tags.@Analyze.tagFilter.registerType"
+    typeInfo = typeInfo.FP.Get_nonnilableType(_env).FP.Get_srcTypeInfo(_env).FP.Get_genSrcTypeInfo(_env)
+    if Lns_op_not(LuneAst.Ast_TypeInfo_hasParent(_env, typeInfo)){
+        return DBCtrl_rootNsId, false
+    }
+    {
+        __exp := self.type2nsid.Get(typeInfo)
+        if !Lns_IsNil( __exp ) {
+            _exp := __exp.(LnsInt)
+            return _exp, false
+        }
+    }
+    var parentNsId LnsInt
+    parentNsId = Analyze_convExp0_502(Lns_2DDD(self.FP.registerType(_env, typeInfo.FP.Get_parentInfo(_env))))
+    var name string
+    name = self.FP.GetFull(_env, typeInfo, false)
+    var nsId LnsInt
+    var added bool
+    nsId,added = self.db.FP.AddNamespace(_env, name, parentNsId)
+    Log_log(_env, Log_Level__Debug, __func__, 82, Log_CreateMessage(func(_env *LnsEnv) string {
+        return _env.GetVM().String_format("%s %s %d", []LnsAny{name, added, nsId})
+    }))
+    
+    self.type2nsid.Set(typeInfo,nsId)
+    return nsId, added
+}
+// 87: decl @lns.@tags.@Analyze.tagFilter.registerSymbol
+func (self *Analyze_tagFilter) registerSymbol(_env *LnsEnv, symbolInfo *LuneAst.Ast_SymbolInfo)(LnsInt, bool) {
+    __func__ := "@lns.@tags.@Analyze.tagFilter.registerSymbol"
+    symbolInfo = symbolInfo.FP.GetOrg(_env)
+    {
+        __exp := self.sym2nsid.Get(symbolInfo)
+        if !Lns_IsNil( __exp ) {
+            _exp := __exp.(LnsInt)
+            return _exp, false
+        }
+    }
+    var parentNsId LnsInt
+    parentNsId = Analyze_convExp0_643(Lns_2DDD(self.FP.registerType(_env, symbolInfo.FP.Get_namespaceTypeInfo(_env))))
+    var name string
+    name = Ast_getFullNameSym(_env, &self.Nodes_Filter, symbolInfo)
+    var nsId LnsInt
+    var added bool
+    nsId,added = self.db.FP.AddNamespace(_env, name, parentNsId)
+    Log_log(_env, Log_Level__Debug, __func__, 96, Log_CreateMessage(func(_env *LnsEnv) string {
+        return _env.GetVM().String_format("%s %s %d", []LnsAny{name, added, nsId})
+    }))
+    
+    self.sym2nsid.Set(symbolInfo,nsId)
+    return nsId, added
+}
+// 101: decl @lns.@tags.@Analyze.tagFilter.registDeclSym
+func (self *Analyze_tagFilter) registDeclSym(_env *LnsEnv, symbolInfo *LuneAst.Ast_SymbolInfo) LnsInt {
+    __func__ := "@lns.@tags.@Analyze.tagFilter.registDeclSym"
+    var symNsId LnsInt
+    symNsId = Analyze_convExp0_759(Lns_2DDD(self.FP.registerSymbol(_env, symbolInfo)))
+    var pos Types.Types_Position
+    pos = Lns_unwrap( _env.NilAccFin(_env.NilAccPush(symbolInfo.FP.Get_pos(_env)) && 
+    Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(Types.Types_Position).Get_orgPos(_env)}))).(Types.Types_Position)
+    var fileId LnsInt
+    fileId = self.FP.getFileId(_env, pos.StreamName)
+    self.db.FP.AddSymbolDecl(_env, symNsId, fileId, pos.LineNo, pos.Column)
+    Log_log(_env, Log_Level__Debug, __func__, 106, Log_CreateMessage(func(_env *LnsEnv) string {
+        return symbolInfo.FP.Get_name(_env)
+    }))
+    
+    return symNsId
+}
+// 110: decl @lns.@tags.@Analyze.tagFilter.addSymbolRef
+func (self *Analyze_tagFilter) addSymbolRef(_env *LnsEnv, mbrNsId LnsInt,pos Types.Types_Position,setOp bool) {
+    pos = pos.Get_orgPos(_env)
+    self.db.FP.AddSymbolRef(_env, mbrNsId, self.FP.getFileId(_env, pos.StreamName), pos.LineNo, pos.Column, setOp)
+}
+// 119: decl @lns.@tags.@Analyze.tagFilter.registerDecl
+func (self *Analyze_tagFilter) registerDecl(_env *LnsEnv, nodeManager *Nodes.Nodes_NodeManager) {
+    var registDeclTypeOp func(_env *LnsEnv, typeInfo *LuneAst.Ast_TypeInfo,pos Types.Types_Position) LnsInt
+    registDeclTypeOp = func(_env *LnsEnv, typeInfo *LuneAst.Ast_TypeInfo,pos Types.Types_Position) LnsInt {
+        var nsId LnsInt
+        nsId = Analyze_convExp0_896(Lns_2DDD(self.FP.registerType(_env, typeInfo)))
+        pos = pos.Get_orgPos(_env)
+        self.db.FP.AddSymbolDecl(_env, nsId, self.FP.getFileId(_env, pos.StreamName), pos.LineNo, pos.Column)
+        return nsId
+    }
+    var registDeclType func(_env *LnsEnv, workNode *Nodes.Nodes_Node) LnsInt
+    registDeclType = func(_env *LnsEnv, workNode *Nodes.Nodes_Node) LnsInt {
+        return registDeclTypeOp(_env, workNode.FP.Get_expType(_env), workNode.FP.Get_pos(_env))
+    }
+    var registerAutoMethod func(_env *LnsEnv, parentInfo *LuneAst.Ast_TypeInfo,pos Types.Types_Position)
+    registerAutoMethod = func(_env *LnsEnv, parentInfo *LuneAst.Ast_TypeInfo,pos Types.Types_Position) {
+        for _, _symbolInfo := range( Lns_unwrap( _env.NilAccFin(_env.NilAccPush(parentInfo.FP.Get_scope(_env)) && 
+        Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(*LuneAst.Ast_Scope).FP.Get_symbol2SymbolInfoMap(_env)}))).(*LnsMap).Items ) {
+            symbolInfo := _symbolInfo.(LuneAst.Ast_SymbolInfoDownCast).ToAst_SymbolInfo()
+            var typeInfo *LuneAst.Ast_TypeInfo
+            typeInfo = symbolInfo.FP.Get_typeInfo(_env)
+            if typeInfo.FP.Get_autoFlag(_env){
+                registDeclTypeOp(_env, typeInfo, pos)
+            }
+        }
+    }
+    for _, _workNode := range( nodeManager.FP.GetDeclFormNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_DeclFormNodeDownCast).ToNodes_DeclFormNode()
+        registDeclType(_env, &workNode.Nodes_Node)
+        for _, _altType := range( workNode.FP.Get_expType(_env).FP.Get_itemTypeInfoList(_env).Items ) {
+            altType := _altType.(LuneAst.Ast_TypeInfoDownCast).ToAst_TypeInfo()
+            registDeclTypeOp(_env, altType, workNode.FP.Get_pos(_env))
+        }
+    }
+    for _, _workNode := range( nodeManager.FP.GetProtoClassNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_ProtoClassNodeDownCast).ToNodes_ProtoClassNode()
+        registDeclType(_env, &workNode.Nodes_Node)
+    }
+    for _, _workNode := range( nodeManager.FP.GetDeclClassNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_DeclClassNodeDownCast).ToNodes_DeclClassNode()
+        registDeclType(_env, &workNode.Nodes_Node)
+        for _, _altType := range( workNode.FP.Get_expType(_env).FP.Get_itemTypeInfoList(_env).Items ) {
+            altType := _altType.(LuneAst.Ast_TypeInfoDownCast).ToAst_TypeInfo()
+            registDeclTypeOp(_env, altType, workNode.FP.Get_pos(_env))
+        }
+        registerAutoMethod(_env, workNode.FP.Get_expType(_env), workNode.FP.Get_pos(_env))
+    }
+    for _, _workNode := range( nodeManager.FP.GetDeclConstrNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_DeclConstrNodeDownCast).ToNodes_DeclConstrNode()
+        registDeclType(_env, &workNode.Nodes_Node)
+    }
+    for _, _workNode := range( nodeManager.FP.GetDeclFuncNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_DeclFuncNodeDownCast).ToNodes_DeclFuncNode()
+        registDeclType(_env, &workNode.Nodes_Node)
+        for _, _altType := range( workNode.FP.Get_expType(_env).FP.Get_itemTypeInfoList(_env).Items ) {
+            altType := _altType.(LuneAst.Ast_TypeInfoDownCast).ToAst_TypeInfo()
+            registDeclTypeOp(_env, altType, workNode.FP.Get_pos(_env))
+        }
+    }
+    for _, _workNode := range( nodeManager.FP.GetProtoMethodNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_ProtoMethodNodeDownCast).ToNodes_ProtoMethodNode()
+        registDeclType(_env, &workNode.Nodes_Node)
+    }
+    var addMethod func(_env *LnsEnv, methodType *LuneAst.Ast_TypeInfo,pos Types.Types_Position) LnsInt
+    addMethod = func(_env *LnsEnv, methodType *LuneAst.Ast_TypeInfo,pos Types.Types_Position) LnsInt {
+        var nsId LnsInt
+        nsId = registDeclTypeOp(_env, methodType, pos)
+        if Lns_op_not(methodType.FP.Get_staticFlag(_env)){
+            {
+                _scope := methodType.FP.Get_parentInfo(_env).FP.Get_scope(_env)
+                if !Lns_IsNil( _scope ) {
+                    scope := _scope.(*LuneAst.Ast_Scope)
+                    scope.FP.FilterTypeInfoFieldAndIF(_env, false, scope, LuneAst.Ast_ScopeAccess__Normal, LuneAst.Ast_filterForm(func(_env *LnsEnv, symbolInfo *LuneAst.Ast_SymbolInfo) bool {
+                        if symbolInfo.FP.Get_name(_env) == methodType.FP.Get_rawTxt(_env){
+                            var superNsId LnsInt
+                            superNsId = Analyze_convExp0_1214(Lns_2DDD(self.FP.registerType(_env, symbolInfo.FP.Get_typeInfo(_env))))
+                            self.db.FP.AddOverride(_env, nsId, superNsId)
+                        }
+                        return true
+                    }))
+                }
+            }
+        }
+        for _, _altType := range( methodType.FP.Get_itemTypeInfoList(_env).Items ) {
+            altType := _altType.(LuneAst.Ast_TypeInfoDownCast).ToAst_TypeInfo()
+            registDeclTypeOp(_env, altType, pos)
+        }
+        self.db.FP.AddAsyncMode(_env, nsId, methodType.FP.Get_asyncMode(_env))
+        return nsId
+    }
+    for _, _workNode := range( nodeManager.FP.GetDeclMethodNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_DeclMethodNodeDownCast).ToNodes_DeclMethodNode()
+        addMethod(_env, workNode.FP.Get_expType(_env), workNode.FP.Get_pos(_env))
+    }
+    for _, _workNode := range( nodeManager.FP.GetDeclEnumNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_DeclEnumNodeDownCast).ToNodes_DeclEnumNode()
+        registDeclType(_env, &workNode.Nodes_Node)
+        registerAutoMethod(_env, workNode.FP.Get_expType(_env), workNode.FP.Get_pos(_env))
+        for _, _name := range( workNode.FP.Get_valueNameList(_env).Items ) {
+            name := _name.(Types.Types_TokenDownCast).ToTypes_Token()
+            {
+                __exp := workNode.FP.Get_scope(_env).FP.GetSymbolInfoChild(_env, name.Txt)
+                if !Lns_IsNil( __exp ) {
+                    _exp := __exp.(*LuneAst.Ast_SymbolInfo)
+                    self.FP.registDeclSym(_env, _exp)
+                }
+            }
+        }
+    }
+    for _, _workNode := range( nodeManager.FP.GetDeclAlgeNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_DeclAlgeNodeDownCast).ToNodes_DeclAlgeNode()
+        registDeclType(_env, &workNode.Nodes_Node)
+        {
+            __forsortCollection0 := workNode.FP.Get_algeType(_env).FP.Get_valInfoMap(_env)
+            __forsortSorted0 := __forsortCollection0.CreateKeyListStr()
+            __forsortSorted0.Sort( _env, LnsItemKindStr, nil )
+            for _, _name := range( __forsortSorted0.Items ) {
+                name := _name.(string)
+                {
+                    __exp := _env.NilAccFin(_env.NilAccPush(workNode.FP.Get_algeType(_env).FP.Get_scope(_env)) && 
+                    Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(*LuneAst.Ast_Scope).FP.GetSymbolInfoChild(_env, name)})/* 212:14 */)
+                    if !Lns_IsNil( __exp ) {
+                        _exp := __exp.(*LuneAst.Ast_SymbolInfo)
+                        self.FP.registDeclSym(_env, _exp)
+                    }
+                }
+            }
+        }
+    }
+    for _, _workNode := range( nodeManager.FP.GetDeclMacroNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_DeclMacroNodeDownCast).ToNodes_DeclMacroNode()
+        registDeclType(_env, &workNode.Nodes_Node)
+    }
+    for _, _workNode := range( nodeManager.FP.GetAliasNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_AliasNodeDownCast).ToNodes_AliasNode()
+        registDeclTypeOp(_env, workNode.FP.Get_expType(_env), Lns_unwrap( workNode.FP.Get_newSymbol(_env).FP.Get_pos(_env)).(Types.Types_Position))
+    }
+    for _, _workNode := range( nodeManager.FP.GetImportNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_ImportNodeDownCast).ToNodes_ImportNode()
+        self.FP.registDeclSym(_env, workNode.FP.Get_info(_env).FP.Get_symbolInfo(_env))
+    }
+    for _, _workNode := range( nodeManager.FP.GetDeclVarNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_DeclVarNodeDownCast).ToNodes_DeclVarNode()
+        for _, _symbolInfo := range( workNode.FP.Get_symbolInfoList(_env).Items ) {
+            symbolInfo := _symbolInfo.(LuneAst.Ast_SymbolInfoDownCast).ToAst_SymbolInfo()
+            if symbolInfo.FP.Get_scope(_env) == self.moduleTypeInfo.FP.Get_scope(_env){
+                self.FP.registDeclSym(_env, symbolInfo)
+            }
+        }
+    }
+    for _, _workNode := range( nodeManager.FP.GetDeclMemberNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_DeclMemberNodeDownCast).ToNodes_DeclMemberNode()
+        var mbrNsId LnsInt
+        mbrNsId = self.FP.registDeclSym(_env, workNode.FP.Get_symbolInfo(_env))
+        if workNode.FP.Get_getterMode(_env) != LuneAst.Ast_AccessMode__None{
+            var name string
+            name = _env.GetVM().String_format("get_%s", []LnsAny{workNode.FP.Get_name(_env).Txt})
+            var pos Types.Types_Position
+            pos = Lns_unwrap( _env.NilAccFin(_env.NilAccPush(workNode.FP.Get_getterToken(_env)) && 
+            _env.NilAccPush(_env.NilAccPop().(*Types.Types_Token).Pos))).(Types.Types_Position)
+            addMethod(_env, Lns_unwrap( _env.NilAccFin(_env.NilAccPush(workNode.FP.Get_classType(_env).FP.Get_scope(_env)) && 
+            Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(*LuneAst.Ast_Scope).FP.GetTypeInfoChild(_env, name)})/* 244:20 */)).(*LuneAst.Ast_TypeInfo), pos)
+            self.FP.addSymbolRef(_env, mbrNsId, pos, true)
+        }
+        if workNode.FP.Get_setterMode(_env) != LuneAst.Ast_AccessMode__None{
+            var name string
+            name = _env.GetVM().String_format("set_%s", []LnsAny{workNode.FP.Get_name(_env).Txt})
+            var pos Types.Types_Position
+            pos = Lns_unwrap( _env.NilAccFin(_env.NilAccPush(workNode.FP.Get_setterToken(_env)) && 
+            _env.NilAccPush(_env.NilAccPop().(*Types.Types_Token).Pos))).(Types.Types_Position)
+            addMethod(_env, Lns_unwrap( _env.NilAccFin(_env.NilAccPush(workNode.FP.Get_classType(_env).FP.Get_scope(_env)) && 
+            Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(*LuneAst.Ast_Scope).FP.GetTypeInfoChild(_env, name)})/* 252:20 */)).(*LuneAst.Ast_TypeInfo), pos)
+            self.FP.addSymbolRef(_env, mbrNsId, pos, false)
+        }
+        if workNode.FP.Get_refType(_env).FP.Get_mutMode(_env) == LuneAst.Ast_MutMode__AllMut{
+            self.db.FP.AddAllmutDecl(_env, mbrNsId)
+        }
+    }
+}
+// 262: decl @lns.@tags.@Analyze.tagFilter.registerRefs
+func (self *Analyze_tagFilter) registerRefs(_env *LnsEnv, nodeManager *Nodes.Nodes_NodeManager) {
+    __func__ := "@lns.@tags.@Analyze.tagFilter.registerRefs"
+    var addSymbolRef func(_env *LnsEnv, symbolInfo *LuneAst.Ast_SymbolInfo,pos Types.Types_Position,setOp bool)
+    addSymbolRef = func(_env *LnsEnv, symbolInfo *LuneAst.Ast_SymbolInfo,pos Types.Types_Position,setOp bool) {
+        if _switch0 := symbolInfo.FP.Get_name(_env); _switch0 == "__func__" || _switch0 == "__mod__" || _switch0 == "__line__" {
+            return 
+        }
+        var nsId LnsInt
+        var added bool
+        nsId,added = self.FP.registerSymbol(_env, symbolInfo)
+        if Lns_isCondTrue( _env.PopVal( _env.IncStack() ||
+            _env.SetStackVal( added) &&
+            _env.SetStackVal( Lns_op_not(LuneAst.Ast_isBuiltin(_env, symbolInfo.FP.Get_namespaceTypeInfo(_env).FP.Get_typeId(_env).Id))) ).(bool)){
+            self.noDefNsIdList.Insert(nsId)
+        }
+        self.FP.addSymbolRef(_env, nsId, pos, setOp)
+    }
+    var registerRefType func(_env *LnsEnv, typeInfo *LuneAst.Ast_TypeInfo,pos Types.Types_Position)
+    registerRefType = func(_env *LnsEnv, typeInfo *LuneAst.Ast_TypeInfo,pos Types.Types_Position) {
+        var nsId LnsInt
+        var added bool
+        nsId,added = self.FP.registerType(_env, typeInfo)
+        if Lns_isCondTrue( _env.PopVal( _env.IncStack() ||
+            _env.SetStackVal( added) &&
+            _env.SetStackVal( Lns_op_not(LuneAst.Ast_isBuiltin(_env, typeInfo.FP.Get_typeId(_env).Id))) ).(bool)){
+            self.noDefNsIdList.Insert(nsId)
+        }
+        self.FP.addSymbolRef(_env, nsId, pos, true)
+    }
+    var registerRefSym func(_env *LnsEnv, symbolInfo *LuneAst.Ast_SymbolInfo,pos Types.Types_Position,setOp bool)
+    registerRefSym = func(_env *LnsEnv, symbolInfo *LuneAst.Ast_SymbolInfo,pos Types.Types_Position,setOp bool) {
+        if _switch1 := symbolInfo.FP.Get_namespaceTypeInfo(_env).FP.Get_kind(_env); _switch1 == LuneAst.Ast_TypeInfoKind__Enum || _switch1 == LuneAst.Ast_TypeInfoKind__Alge {
+            addSymbolRef(_env, symbolInfo, pos, true)
+        } else {
+            if _switch0 := symbolInfo.FP.Get_kind(_env); _switch0 == LuneAst.Ast_SymbolKind__Fun || _switch0 == LuneAst.Ast_SymbolKind__Mac || _switch0 == LuneAst.Ast_SymbolKind__Mtd {
+                registerRefType(_env, symbolInfo.FP.Get_typeInfo(_env), pos)
+            } else if _switch0 == LuneAst.Ast_SymbolKind__Typ {
+                if symbolInfo.FP.Get_typeInfo(_env).FP.Get_kind(_env) == LuneAst.Ast_TypeInfoKind__Module{
+                    addSymbolRef(_env, symbolInfo, pos, true)
+                }
+                registerRefType(_env, symbolInfo.FP.Get_typeInfo(_env), pos)
+            } else if _switch0 == LuneAst.Ast_SymbolKind__Mbr {
+                addSymbolRef(_env, symbolInfo, pos, setOp)
+            } else if _switch0 == LuneAst.Ast_SymbolKind__Var {
+                if _env.PopVal( _env.IncStack() ||
+                    _env.SetStackVal( LuneAst.Ast_isPubToExternal(_env, symbolInfo.FP.Get_accessMode(_env))) ||
+                    _env.SetStackVal( symbolInfo.FP.Get_scope(_env) == self.moduleTypeInfo.FP.Get_scope(_env)) ).(bool){
+                    addSymbolRef(_env, symbolInfo, pos, setOp)
+                }
+            } else if _switch0 == LuneAst.Ast_SymbolKind__Arg {
+            }
+        }
+    }
+    var addRefLuaval func(_env *LnsEnv, node *Nodes.Nodes_Node)
+    addRefLuaval = func(_env *LnsEnv, node *Nodes.Nodes_Node) {
+        if node.FP.Get_expType(_env).FP.Get_kind(_env) == LuneAst.Ast_TypeInfoKind__Ext{
+            self.db.FP.AddLuavalRef(_env, self.FP.getFileId(_env, node.FP.Get_pos(_env).StreamName), node.FP.Get_pos(_env).LineNo, node.FP.Get_pos(_env).Column)
+        }
+    }
+    for _, _workNode := range( nodeManager.FP.GetExpSetValNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_ExpSetValNodeDownCast).ToNodes_ExpSetValNode()
+        for _, _leftSym := range( workNode.FP.Get_LeftSymList(_env).Items ) {
+            leftSym := _leftSym.(LuneAst.Ast_SymbolInfoDownCast).ToAst_SymbolInfo()
+            if _switch0 := leftSym.FP.Get_kind(_env); _switch0 == LuneAst.Ast_SymbolKind__Mbr {
+                registerRefSym(_env, leftSym, workNode.FP.Get_pos(_env), true)
+            } else if _switch0 == LuneAst.Ast_SymbolKind__Var {
+                if _env.PopVal( _env.IncStack() ||
+                    _env.SetStackVal( LuneAst.Ast_isPubToExternal(_env, leftSym.FP.Get_accessMode(_env))) ||
+                    _env.SetStackVal( leftSym.FP.Get_scope(_env) == self.moduleTypeInfo.FP.Get_scope(_env)) ).(bool){
+                    registerRefSym(_env, leftSym, workNode.FP.Get_pos(_env), true)
+                }
+            }
+        }
+    }
+    for _, _workNode := range( nodeManager.FP.GetExpNewNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_ExpNewNodeDownCast).ToNodes_ExpNewNode()
+        registerRefType(_env, workNode.FP.Get_ctorTypeInfo(_env), workNode.FP.Get_pos(_env))
+    }
+    for _, _workNode := range( nodeManager.FP.GetExpCallSuperCtorNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_ExpCallSuperCtorNodeDownCast).ToNodes_ExpCallSuperCtorNode()
+        registerRefType(_env, workNode.FP.Get_methodType(_env), workNode.FP.Get_pos(_env))
+    }
+    for _, _workNode := range( nodeManager.FP.GetExpCallSuperNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_ExpCallSuperNodeDownCast).ToNodes_ExpCallSuperNode()
+        registerRefType(_env, workNode.FP.Get_methodType(_env), workNode.FP.Get_pos(_env))
+    }
+    for _, _workNode := range( nodeManager.FP.GetExpRefNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_ExpRefNodeDownCast).ToNodes_ExpRefNode()
+        registerRefSym(_env, workNode.FP.Get_symbolInfo(_env), workNode.FP.Get_pos(_env), false)
+        addRefLuaval(_env, &workNode.Nodes_Node)
+    }
+    for _, _workNode := range( nodeManager.FP.GetRefFieldNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_RefFieldNodeDownCast).ToNodes_RefFieldNode()
+        {
+            __exp := workNode.FP.Get_symbolInfo(_env)
+            if !Lns_IsNil( __exp ) {
+                _exp := __exp.(*LuneAst.Ast_SymbolInfo)
+                registerRefSym(_env, _exp, workNode.FP.Get_pos(_env), false)
+            } else {
+                if Lns_op_not(workNode.FP.Get_macroArgFlag(_env)){
+                    Log_log(_env, Log_Level__Warn, __func__, 378, Log_CreateMessage(func(_env *LnsEnv) string {
+                        return _env.GetVM().String_format("no symbolInfo -- %s, %s:%d:%d", []LnsAny{workNode.FP.Get_field(_env).Txt, workNode.FP.Get_pos(_env).StreamName, workNode.FP.Get_pos(_env).LineNo, workNode.FP.Get_pos(_env).Column})
+                    }))
+                    
+                }
+            }
+        }
+        addRefLuaval(_env, &workNode.Nodes_Node)
+    }
+    for _, _workNode := range( nodeManager.FP.GetExpCallNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_ExpCallNodeDownCast).ToNodes_ExpCallNode()
+        addRefLuaval(_env, &workNode.Nodes_Node)
+    }
+    for _, _workNode := range( nodeManager.FP.GetGetFieldNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_GetFieldNodeDownCast).ToNodes_GetFieldNode()
+        registerRefType(_env, workNode.FP.Get_getterTypeInfo(_env), workNode.FP.Get_pos(_env))
+    }
+    for _, _workNode := range( nodeManager.FP.GetExpOmitEnumNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_ExpOmitEnumNodeDownCast).ToNodes_ExpOmitEnumNode()
+        {
+            __exp := _env.NilAccFin(_env.NilAccPush(workNode.FP.Get_enumTypeInfo(_env).FP.Get_scope(_env)) && 
+            Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(*LuneAst.Ast_Scope).FP.GetSymbolInfoChild(_env, workNode.FP.Get_valInfo(_env).FP.Get_name(_env))})/* 392:11 */)
+            if !Lns_IsNil( __exp ) {
+                _exp := __exp.(*LuneAst.Ast_SymbolInfo)
+                registerRefSym(_env, _exp, workNode.FP.Get_pos(_env), false)
+            }
+        }
+    }
+    for _, _workNode := range( nodeManager.FP.GetAsyncLockNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_AsyncLockNodeDownCast).ToNodes_AsyncLockNode()
+        self.db.FP.AddAsyncLock(_env, self.FP.getFileId(_env, workNode.FP.Get_pos(_env).StreamName), workNode.FP.Get_pos(_env).LineNo, workNode.FP.Get_pos(_env).Column, LnsInt(workNode.FP.Get_lockKind(_env)))
+    }
+    for _, _workNode := range( nodeManager.FP.GetMatchNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_MatchNodeDownCast).ToNodes_MatchNode()
+        for _, _matchCase := range( workNode.FP.Get_caseList(_env).Items ) {
+            matchCase := _matchCase.(Nodes.Nodes_MatchCaseDownCast).ToNodes_MatchCase()
+            var valInfo *LuneAst.Ast_AlgeValInfo
+            valInfo = matchCase.FP.Get_valInfo(_env)
+            {
+                __exp := _env.NilAccFin(_env.NilAccPush(valInfo.FP.Get_algeTpye(_env).FP.Get_scope(_env)) && 
+                Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(*LuneAst.Ast_Scope).FP.GetSymbolInfoChild(_env, valInfo.FP.Get_name(_env))})/* 406:14 */)
+                if !Lns_IsNil( __exp ) {
+                    _exp := __exp.(*LuneAst.Ast_SymbolInfo)
+                    registerRefSym(_env, _exp, matchCase.FP.Get_block(_env).FP.Get_pos(_env), false)
+                }
+            }
+        }
+    }
+    for _, _workNode := range( nodeManager.FP.GetNewAlgeValNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_NewAlgeValNodeDownCast).ToNodes_NewAlgeValNode()
+        var valInfo *LuneAst.Ast_AlgeValInfo
+        valInfo = workNode.FP.Get_valInfo(_env)
+        {
+            __exp := _env.NilAccFin(_env.NilAccPush(valInfo.FP.Get_algeTpye(_env).FP.Get_scope(_env)) && 
+            Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(*LuneAst.Ast_Scope).FP.GetSymbolInfoChild(_env, valInfo.FP.Get_name(_env))})/* 413:11 */)
+            if !Lns_IsNil( __exp ) {
+                _exp := __exp.(*LuneAst.Ast_SymbolInfo)
+                registerRefSym(_env, _exp, workNode.FP.Get_pos(_env), false)
+            }
+        }
+    }
+}
+// 420: decl @lns.@tags.@Analyze.tagFilter.processRoot
+func (self *Analyze_tagFilter) ProcessRoot(_env *LnsEnv, node *Nodes.Nodes_RootNode,_opt LnsAny) {
+    self.type2nsid.Set(LuneAst.Ast_headTypeInfo,DBCtrl_rootNsId)
+    var modNsId LnsInt
+    modNsId = Analyze_convExp0_2425(Lns_2DDD(self.FP.registerType(_env, node.FP.Get_moduleTypeInfo(_env))))
+    var fileId LnsInt
+    fileId = self.FP.getFileId(_env, self.streamName)
+    self.db.FP.AddSymbolDecl(_env, modNsId, fileId, 1, 1)
+    var projDir string
+    projDir = DBCtrl_getProjDir(_env, self.streamName, self.FP.GetFull(_env, node.FP.Get_moduleTypeInfo(_env), false))
+    for _, _workNode := range( node.FP.Get_nodeManager(_env).FP.GetSubfileNodeList(_env).Items ) {
+        workNode := _workNode.(Nodes.Nodes_SubfileNodeDownCast).ToNodes_SubfileNode()
+        {
+            _usePath := workNode.FP.Get_usePath(_env)
+            if !Lns_IsNil( _usePath ) {
+                usePath := _usePath.(string)
+                var subPath string
+                subPath = LuneUtil.Util_pathJoin(_env, projDir, Lns_car(_env.GetVM().String_gsub(usePath,"%.", "/")).(string) + ".lns")
+                var subId LnsInt
+                subId = self.FP.addFileId(_env, subPath, usePath)
+                self.db.FP.AddSubfile(_env, fileId, subId)
+            }
+        }
+    }
+    self.FP.registerDecl(_env, node.FP.Get_nodeManager(_env))
+    self.FP.registerRefs(_env, node.FP.Get_nodeManager(_env))
+}
 // declaration Class -- Opt
 type Analyze_OptMtd interface {
 }
@@ -164,7 +641,7 @@ func (self *Analyze_Opt) InitAnalyze_Opt(_env *LnsEnv) {
 // declaration Class -- tagFilter
 type Analyze_tagFilterMtd interface {
     addFileId(_env *LnsEnv, arg1 string, arg2 string) LnsInt
-    addSymbolRef(_env *LnsEnv, arg1 LnsInt, arg2 *Types.Types_Position, arg3 bool)
+    addSymbolRef(_env *LnsEnv, arg1 LnsInt, arg2 Types.Types_Position, arg3 bool)
     DefaultProcess(_env *LnsEnv, arg1 *Nodes.Nodes_Node, arg2 LnsAny)
     getFileId(_env *LnsEnv, arg1 string) LnsInt
     GetFull(_env *LnsEnv, arg1 *LuneAst.Ast_TypeInfo, arg2 bool) string
@@ -306,6 +783,21 @@ func NewAnalyze_tagFilter(_env *LnsEnv, arg1 *Nodes.Nodes_RootNode, arg2 *DBCtrl
     obj.InitAnalyze_tagFilter(_env, arg1, arg2, arg3, arg4)
     return obj
 }
+// 54: DeclConstr
+func (self *Analyze_tagFilter) InitAnalyze_tagFilter(_env *LnsEnv, rootNode *Nodes.Nodes_RootNode,db *DBCtrl_DBCtrl,streamName string,noDefNsIdList *LnsList) {
+    self.InitNodes_Filter(_env, true, rootNode.FP.Get_moduleTypeInfo(_env), rootNode.FP.Get_moduleTypeInfo(_env).FP.Get_scope(_env))
+    self.noDefNsIdList = noDefNsIdList
+    self.moduleTypeInfo = rootNode.FP.Get_moduleTypeInfo(_env)
+    self.file2id = NewLnsMap( map[LnsAny]LnsAny{})
+    self.db = db
+    self.streamName = streamName
+    self.type2nsid = NewLnsMap( map[LnsAny]LnsAny{})
+    self.sym2nsid = NewLnsMap( map[LnsAny]LnsAny{})
+    var mod string
+    mod = self.FP.GetFull(_env, rootNode.FP.Get_moduleTypeInfo(_env), false)
+    self.FP.addFileId(_env, streamName, mod)
+}
+
 
 func Lns_Analyze_init(_env *LnsEnv) {
     if init_Analyze { return }
@@ -330,495 +822,4 @@ func Lns_Analyze_init(_env *LnsEnv) {
 }
 func init() {
     init_Analyze = false
-}
-// 34: decl @lns.@tags.@Analyze.tagFilter.addFileId
-func (self *Analyze_tagFilter) addFileId(_env *LnsEnv, path string,mod string) LnsInt {
-    __func__ := "@lns.@tags.@Analyze.tagFilter.addFileId"
-    {
-        __exp := self.file2id.Get(path)
-        if !Lns_IsNil( __exp ) {
-            _exp := __exp.(LnsInt)
-            return _exp
-        }
-    }
-    var fileId LnsInt
-    fileId = Analyze_convExp0_332(Lns_2DDD(self.db.FP.AddFile(_env, path, mod)))
-    Log_log(_env, Log_Level__Debug, __func__, 39, Log_CreateMessage(func(_env *LnsEnv) string {
-        return _env.GetVM().String_format("add file -- %d, %s", []LnsAny{fileId, path})
-    }))
-    
-    self.file2id.Set(path,fileId)
-    return fileId
-}
-// 44: decl @lns.@tags.@Analyze.tagFilter.getFileId
-func (self *Analyze_tagFilter) getFileId(_env *LnsEnv, path string) LnsInt {
-    {
-        __exp := self.file2id.Get(path)
-        if !Lns_IsNil( __exp ) {
-            _exp := __exp.(LnsInt)
-            return _exp
-        }
-    }
-    var fileId LnsInt
-    fileId = self.db.FP.GetFileIdFromPath(_env, path)
-    self.file2id.Set(path,fileId)
-    return fileId
-}
-// 54: DeclConstr
-func (self *Analyze_tagFilter) InitAnalyze_tagFilter(_env *LnsEnv, rootNode *Nodes.Nodes_RootNode,db *DBCtrl_DBCtrl,streamName string,noDefNsIdList *LnsList) {
-    self.InitNodes_Filter(_env, true, rootNode.FP.Get_moduleTypeInfo(_env), rootNode.FP.Get_moduleTypeInfo(_env).FP.Get_scope(_env))
-    self.noDefNsIdList = noDefNsIdList
-    self.moduleTypeInfo = rootNode.FP.Get_moduleTypeInfo(_env)
-    self.file2id = NewLnsMap( map[LnsAny]LnsAny{})
-    self.db = db
-    self.streamName = streamName
-    self.type2nsid = NewLnsMap( map[LnsAny]LnsAny{})
-    self.sym2nsid = NewLnsMap( map[LnsAny]LnsAny{})
-    var mod string
-    mod = self.FP.GetFull(_env, rootNode.FP.Get_moduleTypeInfo(_env), false)
-    self.FP.addFileId(_env, streamName, mod)
-}
-// 70: decl @lns.@tags.@Analyze.tagFilter.registerType
-func (self *Analyze_tagFilter) registerType(_env *LnsEnv, typeInfo *LuneAst.Ast_TypeInfo)(LnsInt, bool) {
-    __func__ := "@lns.@tags.@Analyze.tagFilter.registerType"
-    typeInfo = typeInfo.FP.Get_nonnilableType(_env).FP.Get_srcTypeInfo(_env).FP.Get_genSrcTypeInfo(_env)
-    if Lns_op_not(LuneAst.Ast_TypeInfo_hasParent(_env, typeInfo)){
-        return DBCtrl_rootNsId, false
-    }
-    {
-        __exp := self.type2nsid.Get(typeInfo)
-        if !Lns_IsNil( __exp ) {
-            _exp := __exp.(LnsInt)
-            return _exp, false
-        }
-    }
-    var parentNsId LnsInt
-    parentNsId = Analyze_convExp0_502(Lns_2DDD(self.FP.registerType(_env, typeInfo.FP.Get_parentInfo(_env))))
-    var name string
-    name = self.FP.GetFull(_env, typeInfo, false)
-    var nsId LnsInt
-    var added bool
-    nsId,added = self.db.FP.AddNamespace(_env, name, parentNsId)
-    Log_log(_env, Log_Level__Debug, __func__, 82, Log_CreateMessage(func(_env *LnsEnv) string {
-        return _env.GetVM().String_format("%s %s %d", []LnsAny{name, added, nsId})
-    }))
-    
-    self.type2nsid.Set(typeInfo,nsId)
-    return nsId, added
-}
-// 87: decl @lns.@tags.@Analyze.tagFilter.registerSymbol
-func (self *Analyze_tagFilter) registerSymbol(_env *LnsEnv, symbolInfo *LuneAst.Ast_SymbolInfo)(LnsInt, bool) {
-    __func__ := "@lns.@tags.@Analyze.tagFilter.registerSymbol"
-    symbolInfo = symbolInfo.FP.GetOrg(_env)
-    {
-        __exp := self.sym2nsid.Get(symbolInfo)
-        if !Lns_IsNil( __exp ) {
-            _exp := __exp.(LnsInt)
-            return _exp, false
-        }
-    }
-    var parentNsId LnsInt
-    parentNsId = Analyze_convExp0_643(Lns_2DDD(self.FP.registerType(_env, symbolInfo.FP.Get_namespaceTypeInfo(_env))))
-    var name string
-    name = Ast_getFullNameSym(_env, &self.Nodes_Filter, symbolInfo)
-    var nsId LnsInt
-    var added bool
-    nsId,added = self.db.FP.AddNamespace(_env, name, parentNsId)
-    Log_log(_env, Log_Level__Debug, __func__, 96, Log_CreateMessage(func(_env *LnsEnv) string {
-        return _env.GetVM().String_format("%s %s %d", []LnsAny{name, added, nsId})
-    }))
-    
-    self.sym2nsid.Set(symbolInfo,nsId)
-    return nsId, added
-}
-// 101: decl @lns.@tags.@Analyze.tagFilter.registDeclSym
-func (self *Analyze_tagFilter) registDeclSym(_env *LnsEnv, symbolInfo *LuneAst.Ast_SymbolInfo) LnsInt {
-    __func__ := "@lns.@tags.@Analyze.tagFilter.registDeclSym"
-    var symNsId LnsInt
-    symNsId = Analyze_convExp0_759(Lns_2DDD(self.FP.registerSymbol(_env, symbolInfo)))
-    var pos *Types.Types_Position
-    pos = Lns_unwrap( _env.NilAccFin(_env.NilAccPush(symbolInfo.FP.Get_pos(_env)) && 
-    Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(*Types.Types_Position).FP.Get_orgPos(_env)}))).(*Types.Types_Position)
-    var fileId LnsInt
-    fileId = self.FP.getFileId(_env, pos.StreamName)
-    self.db.FP.AddSymbolDecl(_env, symNsId, fileId, pos.LineNo, pos.Column)
-    Log_log(_env, Log_Level__Debug, __func__, 106, Log_CreateMessage(func(_env *LnsEnv) string {
-        return symbolInfo.FP.Get_name(_env)
-    }))
-    
-    return symNsId
-}
-// 110: decl @lns.@tags.@Analyze.tagFilter.addSymbolRef
-func (self *Analyze_tagFilter) addSymbolRef(_env *LnsEnv, mbrNsId LnsInt,pos *Types.Types_Position,setOp bool) {
-    pos = pos.FP.Get_orgPos(_env)
-    self.db.FP.AddSymbolRef(_env, mbrNsId, self.FP.getFileId(_env, pos.StreamName), pos.LineNo, pos.Column, setOp)
-}
-// 119: decl @lns.@tags.@Analyze.tagFilter.registerDecl
-func (self *Analyze_tagFilter) registerDecl(_env *LnsEnv, nodeManager *Nodes.Nodes_NodeManager) {
-    var registDeclTypeOp func(_env *LnsEnv, typeInfo *LuneAst.Ast_TypeInfo,pos *Types.Types_Position) LnsInt
-    registDeclTypeOp = func(_env *LnsEnv, typeInfo *LuneAst.Ast_TypeInfo,pos *Types.Types_Position) LnsInt {
-        var nsId LnsInt
-        nsId = Analyze_convExp0_896(Lns_2DDD(self.FP.registerType(_env, typeInfo)))
-        pos = pos.FP.Get_orgPos(_env)
-        self.db.FP.AddSymbolDecl(_env, nsId, self.FP.getFileId(_env, pos.StreamName), pos.LineNo, pos.Column)
-        return nsId
-    }
-    var registDeclType func(_env *LnsEnv, workNode *Nodes.Nodes_Node) LnsInt
-    registDeclType = func(_env *LnsEnv, workNode *Nodes.Nodes_Node) LnsInt {
-        return registDeclTypeOp(_env, workNode.FP.Get_expType(_env), workNode.FP.Get_pos(_env))
-    }
-    var registerAutoMethod func(_env *LnsEnv, parentInfo *LuneAst.Ast_TypeInfo,pos *Types.Types_Position)
-    registerAutoMethod = func(_env *LnsEnv, parentInfo *LuneAst.Ast_TypeInfo,pos *Types.Types_Position) {
-        for _, _symbolInfo := range( Lns_unwrap( _env.NilAccFin(_env.NilAccPush(parentInfo.FP.Get_scope(_env)) && 
-        Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(*LuneAst.Ast_Scope).FP.Get_symbol2SymbolInfoMap(_env)}))).(*LnsMap).Items ) {
-            symbolInfo := _symbolInfo.(LuneAst.Ast_SymbolInfoDownCast).ToAst_SymbolInfo()
-            var typeInfo *LuneAst.Ast_TypeInfo
-            typeInfo = symbolInfo.FP.Get_typeInfo(_env)
-            if typeInfo.FP.Get_autoFlag(_env){
-                registDeclTypeOp(_env, typeInfo, pos)
-            }
-        }
-    }
-    for _, _workNode := range( nodeManager.FP.GetDeclFormNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_DeclFormNodeDownCast).ToNodes_DeclFormNode()
-        registDeclType(_env, &workNode.Nodes_Node)
-        for _, _altType := range( workNode.FP.Get_expType(_env).FP.Get_itemTypeInfoList(_env).Items ) {
-            altType := _altType.(LuneAst.Ast_TypeInfoDownCast).ToAst_TypeInfo()
-            registDeclTypeOp(_env, altType, workNode.FP.Get_pos(_env))
-        }
-    }
-    for _, _workNode := range( nodeManager.FP.GetProtoClassNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_ProtoClassNodeDownCast).ToNodes_ProtoClassNode()
-        registDeclType(_env, &workNode.Nodes_Node)
-    }
-    for _, _workNode := range( nodeManager.FP.GetDeclClassNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_DeclClassNodeDownCast).ToNodes_DeclClassNode()
-        registDeclType(_env, &workNode.Nodes_Node)
-        for _, _altType := range( workNode.FP.Get_expType(_env).FP.Get_itemTypeInfoList(_env).Items ) {
-            altType := _altType.(LuneAst.Ast_TypeInfoDownCast).ToAst_TypeInfo()
-            registDeclTypeOp(_env, altType, workNode.FP.Get_pos(_env))
-        }
-        registerAutoMethod(_env, workNode.FP.Get_expType(_env), workNode.FP.Get_pos(_env))
-    }
-    for _, _workNode := range( nodeManager.FP.GetDeclConstrNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_DeclConstrNodeDownCast).ToNodes_DeclConstrNode()
-        registDeclType(_env, &workNode.Nodes_Node)
-    }
-    for _, _workNode := range( nodeManager.FP.GetDeclFuncNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_DeclFuncNodeDownCast).ToNodes_DeclFuncNode()
-        registDeclType(_env, &workNode.Nodes_Node)
-        for _, _altType := range( workNode.FP.Get_expType(_env).FP.Get_itemTypeInfoList(_env).Items ) {
-            altType := _altType.(LuneAst.Ast_TypeInfoDownCast).ToAst_TypeInfo()
-            registDeclTypeOp(_env, altType, workNode.FP.Get_pos(_env))
-        }
-    }
-    for _, _workNode := range( nodeManager.FP.GetProtoMethodNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_ProtoMethodNodeDownCast).ToNodes_ProtoMethodNode()
-        registDeclType(_env, &workNode.Nodes_Node)
-    }
-    var addMethod func(_env *LnsEnv, methodType *LuneAst.Ast_TypeInfo,pos *Types.Types_Position) LnsInt
-    addMethod = func(_env *LnsEnv, methodType *LuneAst.Ast_TypeInfo,pos *Types.Types_Position) LnsInt {
-        var nsId LnsInt
-        nsId = registDeclTypeOp(_env, methodType, pos)
-        if Lns_op_not(methodType.FP.Get_staticFlag(_env)){
-            {
-                _scope := methodType.FP.Get_parentInfo(_env).FP.Get_scope(_env)
-                if !Lns_IsNil( _scope ) {
-                    scope := _scope.(*LuneAst.Ast_Scope)
-                    scope.FP.FilterTypeInfoFieldAndIF(_env, false, scope, LuneAst.Ast_ScopeAccess__Normal, LuneAst.Ast_filterForm(func(_env *LnsEnv, symbolInfo *LuneAst.Ast_SymbolInfo) bool {
-                        if symbolInfo.FP.Get_name(_env) == methodType.FP.Get_rawTxt(_env){
-                            var superNsId LnsInt
-                            superNsId = Analyze_convExp0_1214(Lns_2DDD(self.FP.registerType(_env, symbolInfo.FP.Get_typeInfo(_env))))
-                            self.db.FP.AddOverride(_env, nsId, superNsId)
-                        }
-                        return true
-                    }))
-                }
-            }
-        }
-        for _, _altType := range( methodType.FP.Get_itemTypeInfoList(_env).Items ) {
-            altType := _altType.(LuneAst.Ast_TypeInfoDownCast).ToAst_TypeInfo()
-            registDeclTypeOp(_env, altType, pos)
-        }
-        self.db.FP.AddAsyncMode(_env, nsId, methodType.FP.Get_asyncMode(_env))
-        return nsId
-    }
-    for _, _workNode := range( nodeManager.FP.GetDeclMethodNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_DeclMethodNodeDownCast).ToNodes_DeclMethodNode()
-        addMethod(_env, workNode.FP.Get_expType(_env), workNode.FP.Get_pos(_env))
-    }
-    for _, _workNode := range( nodeManager.FP.GetDeclEnumNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_DeclEnumNodeDownCast).ToNodes_DeclEnumNode()
-        registDeclType(_env, &workNode.Nodes_Node)
-        registerAutoMethod(_env, workNode.FP.Get_expType(_env), workNode.FP.Get_pos(_env))
-        for _, _name := range( workNode.FP.Get_valueNameList(_env).Items ) {
-            name := _name.(Types.Types_TokenDownCast).ToTypes_Token()
-            {
-                __exp := workNode.FP.Get_scope(_env).FP.GetSymbolInfoChild(_env, name.Txt)
-                if !Lns_IsNil( __exp ) {
-                    _exp := __exp.(*LuneAst.Ast_SymbolInfo)
-                    self.FP.registDeclSym(_env, _exp)
-                }
-            }
-        }
-    }
-    for _, _workNode := range( nodeManager.FP.GetDeclAlgeNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_DeclAlgeNodeDownCast).ToNodes_DeclAlgeNode()
-        registDeclType(_env, &workNode.Nodes_Node)
-        {
-            __forsortCollection1 := workNode.FP.Get_algeType(_env).FP.Get_valInfoMap(_env)
-            __forsortSorted1 := __forsortCollection1.CreateKeyListStr()
-            __forsortSorted1.Sort( _env, LnsItemKindStr, nil )
-            for _, _name := range( __forsortSorted1.Items ) {
-                name := _name.(string)
-                {
-                    __exp := _env.NilAccFin(_env.NilAccPush(workNode.FP.Get_algeType(_env).FP.Get_scope(_env)) && 
-                    Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(*LuneAst.Ast_Scope).FP.GetSymbolInfoChild(_env, name)})/* 212:14 */)
-                    if !Lns_IsNil( __exp ) {
-                        _exp := __exp.(*LuneAst.Ast_SymbolInfo)
-                        self.FP.registDeclSym(_env, _exp)
-                    }
-                }
-            }
-        }
-    }
-    for _, _workNode := range( nodeManager.FP.GetDeclMacroNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_DeclMacroNodeDownCast).ToNodes_DeclMacroNode()
-        registDeclType(_env, &workNode.Nodes_Node)
-    }
-    for _, _workNode := range( nodeManager.FP.GetAliasNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_AliasNodeDownCast).ToNodes_AliasNode()
-        registDeclTypeOp(_env, workNode.FP.Get_expType(_env), Lns_unwrap( workNode.FP.Get_newSymbol(_env).FP.Get_pos(_env)).(*Types.Types_Position))
-    }
-    for _, _workNode := range( nodeManager.FP.GetImportNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_ImportNodeDownCast).ToNodes_ImportNode()
-        self.FP.registDeclSym(_env, workNode.FP.Get_info(_env).FP.Get_symbolInfo(_env))
-    }
-    for _, _workNode := range( nodeManager.FP.GetDeclVarNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_DeclVarNodeDownCast).ToNodes_DeclVarNode()
-        for _, _symbolInfo := range( workNode.FP.Get_symbolInfoList(_env).Items ) {
-            symbolInfo := _symbolInfo.(LuneAst.Ast_SymbolInfoDownCast).ToAst_SymbolInfo()
-            if symbolInfo.FP.Get_scope(_env) == self.moduleTypeInfo.FP.Get_scope(_env){
-                self.FP.registDeclSym(_env, symbolInfo)
-            }
-        }
-    }
-    for _, _workNode := range( nodeManager.FP.GetDeclMemberNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_DeclMemberNodeDownCast).ToNodes_DeclMemberNode()
-        var mbrNsId LnsInt
-        mbrNsId = self.FP.registDeclSym(_env, workNode.FP.Get_symbolInfo(_env))
-        if workNode.FP.Get_getterMode(_env) != LuneAst.Ast_AccessMode__None{
-            var name string
-            name = _env.GetVM().String_format("get_%s", []LnsAny{workNode.FP.Get_name(_env).Txt})
-            var pos *Types.Types_Position
-            pos = Lns_unwrap( _env.NilAccFin(_env.NilAccPush(workNode.FP.Get_getterToken(_env)) && 
-            _env.NilAccPush(_env.NilAccPop().(*Types.Types_Token).Pos))).(*Types.Types_Position)
-            addMethod(_env, Lns_unwrap( _env.NilAccFin(_env.NilAccPush(workNode.FP.Get_classType(_env).FP.Get_scope(_env)) && 
-            Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(*LuneAst.Ast_Scope).FP.GetTypeInfoChild(_env, name)})/* 244:20 */)).(*LuneAst.Ast_TypeInfo), pos)
-            self.FP.addSymbolRef(_env, mbrNsId, pos, true)
-        }
-        if workNode.FP.Get_setterMode(_env) != LuneAst.Ast_AccessMode__None{
-            var name string
-            name = _env.GetVM().String_format("set_%s", []LnsAny{workNode.FP.Get_name(_env).Txt})
-            var pos *Types.Types_Position
-            pos = Lns_unwrap( _env.NilAccFin(_env.NilAccPush(workNode.FP.Get_setterToken(_env)) && 
-            _env.NilAccPush(_env.NilAccPop().(*Types.Types_Token).Pos))).(*Types.Types_Position)
-            addMethod(_env, Lns_unwrap( _env.NilAccFin(_env.NilAccPush(workNode.FP.Get_classType(_env).FP.Get_scope(_env)) && 
-            Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(*LuneAst.Ast_Scope).FP.GetTypeInfoChild(_env, name)})/* 252:20 */)).(*LuneAst.Ast_TypeInfo), pos)
-            self.FP.addSymbolRef(_env, mbrNsId, pos, false)
-        }
-        if workNode.FP.Get_refType(_env).FP.Get_mutMode(_env) == LuneAst.Ast_MutMode__AllMut{
-            self.db.FP.AddAllmutDecl(_env, mbrNsId)
-        }
-    }
-}
-// 262: decl @lns.@tags.@Analyze.tagFilter.registerRefs
-func (self *Analyze_tagFilter) registerRefs(_env *LnsEnv, nodeManager *Nodes.Nodes_NodeManager) {
-    __func__ := "@lns.@tags.@Analyze.tagFilter.registerRefs"
-    var addSymbolRef func(_env *LnsEnv, symbolInfo *LuneAst.Ast_SymbolInfo,pos *Types.Types_Position,setOp bool)
-    addSymbolRef = func(_env *LnsEnv, symbolInfo *LuneAst.Ast_SymbolInfo,pos *Types.Types_Position,setOp bool) {
-        if _switch1 := symbolInfo.FP.Get_name(_env); _switch1 == "__func__" || _switch1 == "__mod__" || _switch1 == "__line__" {
-            return 
-        }
-        var nsId LnsInt
-        var added bool
-        nsId,added = self.FP.registerSymbol(_env, symbolInfo)
-        if Lns_isCondTrue( _env.PopVal( _env.IncStack() ||
-            _env.SetStackVal( added) &&
-            _env.SetStackVal( Lns_op_not(LuneAst.Ast_isBuiltin(_env, symbolInfo.FP.Get_namespaceTypeInfo(_env).FP.Get_typeId(_env).Id))) ).(bool)){
-            self.noDefNsIdList.Insert(nsId)
-        }
-        self.FP.addSymbolRef(_env, nsId, pos, setOp)
-    }
-    var registerRefType func(_env *LnsEnv, typeInfo *LuneAst.Ast_TypeInfo,pos *Types.Types_Position)
-    registerRefType = func(_env *LnsEnv, typeInfo *LuneAst.Ast_TypeInfo,pos *Types.Types_Position) {
-        var nsId LnsInt
-        var added bool
-        nsId,added = self.FP.registerType(_env, typeInfo)
-        if Lns_isCondTrue( _env.PopVal( _env.IncStack() ||
-            _env.SetStackVal( added) &&
-            _env.SetStackVal( Lns_op_not(LuneAst.Ast_isBuiltin(_env, typeInfo.FP.Get_typeId(_env).Id))) ).(bool)){
-            self.noDefNsIdList.Insert(nsId)
-        }
-        self.FP.addSymbolRef(_env, nsId, pos, true)
-    }
-    var registerRefSym func(_env *LnsEnv, symbolInfo *LuneAst.Ast_SymbolInfo,pos *Types.Types_Position,setOp bool)
-    registerRefSym = func(_env *LnsEnv, symbolInfo *LuneAst.Ast_SymbolInfo,pos *Types.Types_Position,setOp bool) {
-        if _switch1 := symbolInfo.FP.Get_namespaceTypeInfo(_env).FP.Get_kind(_env); _switch1 == LuneAst.Ast_TypeInfoKind__Enum || _switch1 == LuneAst.Ast_TypeInfoKind__Alge {
-            addSymbolRef(_env, symbolInfo, pos, true)
-        } else {
-            if _switch2 := symbolInfo.FP.Get_kind(_env); _switch2 == LuneAst.Ast_SymbolKind__Fun || _switch2 == LuneAst.Ast_SymbolKind__Mac || _switch2 == LuneAst.Ast_SymbolKind__Mtd {
-                registerRefType(_env, symbolInfo.FP.Get_typeInfo(_env), pos)
-            } else if _switch2 == LuneAst.Ast_SymbolKind__Typ {
-                if symbolInfo.FP.Get_typeInfo(_env).FP.Get_kind(_env) == LuneAst.Ast_TypeInfoKind__Module{
-                    addSymbolRef(_env, symbolInfo, pos, true)
-                }
-                registerRefType(_env, symbolInfo.FP.Get_typeInfo(_env), pos)
-            } else if _switch2 == LuneAst.Ast_SymbolKind__Mbr {
-                addSymbolRef(_env, symbolInfo, pos, setOp)
-            } else if _switch2 == LuneAst.Ast_SymbolKind__Var {
-                if _env.PopVal( _env.IncStack() ||
-                    _env.SetStackVal( LuneAst.Ast_isPubToExternal(_env, symbolInfo.FP.Get_accessMode(_env))) ||
-                    _env.SetStackVal( symbolInfo.FP.Get_scope(_env) == self.moduleTypeInfo.FP.Get_scope(_env)) ).(bool){
-                    addSymbolRef(_env, symbolInfo, pos, setOp)
-                }
-            } else if _switch2 == LuneAst.Ast_SymbolKind__Arg {
-            }
-        }
-    }
-    var addRefLuaval func(_env *LnsEnv, node *Nodes.Nodes_Node)
-    addRefLuaval = func(_env *LnsEnv, node *Nodes.Nodes_Node) {
-        if node.FP.Get_expType(_env).FP.Get_kind(_env) == LuneAst.Ast_TypeInfoKind__Ext{
-            self.db.FP.AddLuavalRef(_env, self.FP.getFileId(_env, node.FP.Get_pos(_env).StreamName), node.FP.Get_pos(_env).LineNo, node.FP.Get_pos(_env).Column)
-        }
-    }
-    for _, _workNode := range( nodeManager.FP.GetExpSetValNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_ExpSetValNodeDownCast).ToNodes_ExpSetValNode()
-        for _, _leftSym := range( workNode.FP.Get_LeftSymList(_env).Items ) {
-            leftSym := _leftSym.(LuneAst.Ast_SymbolInfoDownCast).ToAst_SymbolInfo()
-            if _switch1 := leftSym.FP.Get_kind(_env); _switch1 == LuneAst.Ast_SymbolKind__Mbr {
-                registerRefSym(_env, leftSym, workNode.FP.Get_pos(_env), true)
-            } else if _switch1 == LuneAst.Ast_SymbolKind__Var {
-                if _env.PopVal( _env.IncStack() ||
-                    _env.SetStackVal( LuneAst.Ast_isPubToExternal(_env, leftSym.FP.Get_accessMode(_env))) ||
-                    _env.SetStackVal( leftSym.FP.Get_scope(_env) == self.moduleTypeInfo.FP.Get_scope(_env)) ).(bool){
-                    registerRefSym(_env, leftSym, workNode.FP.Get_pos(_env), true)
-                }
-            }
-        }
-    }
-    for _, _workNode := range( nodeManager.FP.GetExpNewNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_ExpNewNodeDownCast).ToNodes_ExpNewNode()
-        registerRefType(_env, workNode.FP.Get_ctorTypeInfo(_env), workNode.FP.Get_pos(_env))
-    }
-    for _, _workNode := range( nodeManager.FP.GetExpCallSuperCtorNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_ExpCallSuperCtorNodeDownCast).ToNodes_ExpCallSuperCtorNode()
-        registerRefType(_env, workNode.FP.Get_methodType(_env), workNode.FP.Get_pos(_env))
-    }
-    for _, _workNode := range( nodeManager.FP.GetExpCallSuperNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_ExpCallSuperNodeDownCast).ToNodes_ExpCallSuperNode()
-        registerRefType(_env, workNode.FP.Get_methodType(_env), workNode.FP.Get_pos(_env))
-    }
-    for _, _workNode := range( nodeManager.FP.GetExpRefNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_ExpRefNodeDownCast).ToNodes_ExpRefNode()
-        registerRefSym(_env, workNode.FP.Get_symbolInfo(_env), workNode.FP.Get_pos(_env), false)
-        addRefLuaval(_env, &workNode.Nodes_Node)
-    }
-    for _, _workNode := range( nodeManager.FP.GetRefFieldNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_RefFieldNodeDownCast).ToNodes_RefFieldNode()
-        {
-            __exp := workNode.FP.Get_symbolInfo(_env)
-            if !Lns_IsNil( __exp ) {
-                _exp := __exp.(*LuneAst.Ast_SymbolInfo)
-                registerRefSym(_env, _exp, workNode.FP.Get_pos(_env), false)
-            } else {
-                if Lns_op_not(workNode.FP.Get_macroArgFlag(_env)){
-                    Log_log(_env, Log_Level__Warn, __func__, 378, Log_CreateMessage(func(_env *LnsEnv) string {
-                        return _env.GetVM().String_format("no symbolInfo -- %s, %s:%d:%d", []LnsAny{workNode.FP.Get_field(_env).Txt, workNode.FP.Get_pos(_env).StreamName, workNode.FP.Get_pos(_env).LineNo, workNode.FP.Get_pos(_env).Column})
-                    }))
-                    
-                }
-            }
-        }
-        addRefLuaval(_env, &workNode.Nodes_Node)
-    }
-    for _, _workNode := range( nodeManager.FP.GetExpCallNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_ExpCallNodeDownCast).ToNodes_ExpCallNode()
-        addRefLuaval(_env, &workNode.Nodes_Node)
-    }
-    for _, _workNode := range( nodeManager.FP.GetGetFieldNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_GetFieldNodeDownCast).ToNodes_GetFieldNode()
-        registerRefType(_env, workNode.FP.Get_getterTypeInfo(_env), workNode.FP.Get_pos(_env))
-    }
-    for _, _workNode := range( nodeManager.FP.GetExpOmitEnumNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_ExpOmitEnumNodeDownCast).ToNodes_ExpOmitEnumNode()
-        {
-            __exp := _env.NilAccFin(_env.NilAccPush(workNode.FP.Get_enumTypeInfo(_env).FP.Get_scope(_env)) && 
-            Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(*LuneAst.Ast_Scope).FP.GetSymbolInfoChild(_env, workNode.FP.Get_valInfo(_env).FP.Get_name(_env))})/* 392:11 */)
-            if !Lns_IsNil( __exp ) {
-                _exp := __exp.(*LuneAst.Ast_SymbolInfo)
-                registerRefSym(_env, _exp, workNode.FP.Get_pos(_env), false)
-            }
-        }
-    }
-    for _, _workNode := range( nodeManager.FP.GetAsyncLockNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_AsyncLockNodeDownCast).ToNodes_AsyncLockNode()
-        self.db.FP.AddAsyncLock(_env, self.FP.getFileId(_env, workNode.FP.Get_pos(_env).StreamName), workNode.FP.Get_pos(_env).LineNo, workNode.FP.Get_pos(_env).Column, LnsInt(workNode.FP.Get_lockKind(_env)))
-    }
-    for _, _workNode := range( nodeManager.FP.GetMatchNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_MatchNodeDownCast).ToNodes_MatchNode()
-        for _, _matchCase := range( workNode.FP.Get_caseList(_env).Items ) {
-            matchCase := _matchCase.(Nodes.Nodes_MatchCaseDownCast).ToNodes_MatchCase()
-            var valInfo *LuneAst.Ast_AlgeValInfo
-            valInfo = matchCase.FP.Get_valInfo(_env)
-            {
-                __exp := _env.NilAccFin(_env.NilAccPush(valInfo.FP.Get_algeTpye(_env).FP.Get_scope(_env)) && 
-                Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(*LuneAst.Ast_Scope).FP.GetSymbolInfoChild(_env, valInfo.FP.Get_name(_env))})/* 406:14 */)
-                if !Lns_IsNil( __exp ) {
-                    _exp := __exp.(*LuneAst.Ast_SymbolInfo)
-                    registerRefSym(_env, _exp, matchCase.FP.Get_block(_env).FP.Get_pos(_env), false)
-                }
-            }
-        }
-    }
-    for _, _workNode := range( nodeManager.FP.GetNewAlgeValNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_NewAlgeValNodeDownCast).ToNodes_NewAlgeValNode()
-        var valInfo *LuneAst.Ast_AlgeValInfo
-        valInfo = workNode.FP.Get_valInfo(_env)
-        {
-            __exp := _env.NilAccFin(_env.NilAccPush(valInfo.FP.Get_algeTpye(_env).FP.Get_scope(_env)) && 
-            Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(*LuneAst.Ast_Scope).FP.GetSymbolInfoChild(_env, valInfo.FP.Get_name(_env))})/* 413:11 */)
-            if !Lns_IsNil( __exp ) {
-                _exp := __exp.(*LuneAst.Ast_SymbolInfo)
-                registerRefSym(_env, _exp, workNode.FP.Get_pos(_env), false)
-            }
-        }
-    }
-}
-// 420: decl @lns.@tags.@Analyze.tagFilter.processRoot
-func (self *Analyze_tagFilter) ProcessRoot(_env *LnsEnv, node *Nodes.Nodes_RootNode,_opt LnsAny) {
-    self.type2nsid.Set(LuneAst.Ast_headTypeInfo,DBCtrl_rootNsId)
-    var modNsId LnsInt
-    modNsId = Analyze_convExp0_2425(Lns_2DDD(self.FP.registerType(_env, node.FP.Get_moduleTypeInfo(_env))))
-    var fileId LnsInt
-    fileId = self.FP.getFileId(_env, self.streamName)
-    self.db.FP.AddSymbolDecl(_env, modNsId, fileId, 1, 1)
-    var projDir string
-    projDir = DBCtrl_getProjDir(_env, self.streamName, self.FP.GetFull(_env, node.FP.Get_moduleTypeInfo(_env), false))
-    for _, _workNode := range( node.FP.Get_nodeManager(_env).FP.GetSubfileNodeList(_env).Items ) {
-        workNode := _workNode.(Nodes.Nodes_SubfileNodeDownCast).ToNodes_SubfileNode()
-        {
-            _usePath := workNode.FP.Get_usePath(_env)
-            if !Lns_IsNil( _usePath ) {
-                usePath := _usePath.(string)
-                var subPath string
-                subPath = LuneUtil.Util_pathJoin(_env, projDir, Lns_car(_env.GetVM().String_gsub(usePath,"%.", "/")).(string) + ".lns")
-                var subId LnsInt
-                subId = self.FP.addFileId(_env, subPath, usePath)
-                self.db.FP.AddSubfile(_env, fileId, subId)
-            }
-        }
-    }
-    self.FP.registerDecl(_env, node.FP.Get_nodeManager(_env))
-    self.FP.registerRefs(_env, node.FP.Get_nodeManager(_env))
 }

@@ -66,6 +66,422 @@ func Pattern_getPatterAt(_env *LnsEnv, db *DBCtrl_DBCtrl,analyzeFileInfo *Option
 
 
 
+// 35: decl @lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode
+func (self *Pattern_SyntaxFilter) getPatternFromNode(_env *LnsEnv, analyzeFileInfo *Option_AnalyzeFileInfo,inqMod string,nearest *Nodes.Nodes_Node) LnsAny {
+    __func__ := "@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode"
+    var isInner func(_env *LnsEnv, pos Types.Types_Position,name string) bool
+    isInner = func(_env *LnsEnv, pos Types.Types_Position,name string) bool {
+        if Lns_isCondTrue( _env.PopVal( _env.IncStack() ||
+            _env.SetStackVal( pos.LineNo == analyzeFileInfo.FP.Get_lineNo(_env)) &&
+            _env.SetStackVal( pos.Column <= analyzeFileInfo.FP.Get_column(_env)) &&
+            _env.SetStackVal( pos.Column + len(name) >= analyzeFileInfo.FP.Get_column(_env)) ).(bool)){
+            return true
+        }
+        return false
+    }
+    Log_log(_env, Log_Level__Log, __func__, 20, Log_CreateMessage(func(_env *LnsEnv) string {
+        return _env.GetVM().String_format("%s %s:%4d:%3d -- %s", []LnsAny{"nearestNode -- ", nearest.FP.Get_effectivePos(_env).StreamName, nearest.FP.Get_effectivePos(_env).LineNo, nearest.FP.Get_effectivePos(_env).Column, Nodes.Nodes_getNodeKindName(_env, nearest.FP.Get_kind(_env))})
+    }))
+    
+    
+    {
+        _workNode := Nodes.Nodes_ImportNodeDownCastF(nearest.FP)
+        if !Lns_IsNil( _workNode ) {
+            workNode := _workNode.(*Nodes.Nodes_ImportNode)
+            if _switch0 := inqMod; _switch0 == Option_InqMode__Def {
+                return self.FP.GetFull(_env, workNode.FP.Get_expType(_env), false)
+            } else if _switch0 == Option_InqMode__Ref {
+                return Ast_getFullNameSym(_env, &self.Nodes_Filter, workNode.FP.Get_info(_env).FP.Get_symbolInfo(_env))
+            } else if _switch0 == Option_InqMode__Set || _switch0 == Option_InqMode__AllMut || _switch0 == Option_InqMode__Async || _switch0 == Option_InqMode__Noasync || _switch0 == Option_InqMode__Luaval || _switch0 == Option_InqMode__AsyncLock {
+            }
+            return nil
+        }
+    }
+    {
+        _workNode := Nodes.Nodes_ExpRefNodeDownCastF(nearest.FP)
+        if !Lns_IsNil( _workNode ) {
+            workNode := _workNode.(*Nodes.Nodes_ExpRefNode)
+            return Ast_getFullNameSym(_env, &self.Nodes_Filter, workNode.FP.Get_symbolInfo(_env))
+        }
+    }
+    {
+        _workNode := Nodes.Nodes_RefFieldNodeDownCastF(nearest.FP)
+        if !Lns_IsNil( _workNode ) {
+            workNode := _workNode.(*Nodes.Nodes_RefFieldNode)
+            if isInner(_env, workNode.FP.Get_field(_env).Pos, workNode.FP.Get_field(_env).Txt){
+                {
+                    _symbolInfo := workNode.FP.Get_symbolInfo(_env)
+                    if !Lns_IsNil( _symbolInfo ) {
+                        symbolInfo := _symbolInfo.(*LuneAst.Ast_SymbolInfo)
+                        return Ast_getFullNameSym(_env, &self.Nodes_Filter, symbolInfo)
+                    }
+                }
+            }
+        }
+    }
+    {
+        _workNode := Nodes.Nodes_DeclVarNodeDownCastF(nearest.FP)
+        if !Lns_IsNil( _workNode ) {
+            workNode := _workNode.(*Nodes.Nodes_DeclVarNode)
+            for _, _varSym := range( workNode.FP.Get_symbolInfoList(_env).Items ) {
+                varSym := _varSym.(LuneAst.Ast_SymbolInfoDownCast).ToAst_SymbolInfo()
+                if isInner(_env, Lns_unwrap( varSym.FP.Get_pos(_env)).(Types.Types_Position), varSym.FP.Get_name(_env)){
+                    return Ast_getFullNameSym(_env, &self.Nodes_Filter, varSym)
+                }
+                
+            }
+        }
+    }
+    {
+        _workNode := Nodes.Nodes_ExpOmitEnumNodeDownCastF(nearest.FP)
+        if !Lns_IsNil( _workNode ) {
+            workNode := _workNode.(*Nodes.Nodes_ExpOmitEnumNode)
+            if isInner(_env, workNode.FP.Get_effectivePos(_env), workNode.FP.Get_valInfo(_env).FP.Get_name(_env)){
+                return Ast_getFullNameSym(_env, &self.Nodes_Filter, workNode.FP.Get_valInfo(_env).FP.Get_symbolInfo(_env))
+            }
+        }
+    }
+    {
+        _workNode := Nodes.Nodes_NewAlgeValNodeDownCastF(nearest.FP)
+        if !Lns_IsNil( _workNode ) {
+            workNode := _workNode.(*Nodes.Nodes_NewAlgeValNode)
+            if isInner(_env, workNode.FP.Get_effectivePos(_env), workNode.FP.Get_valInfo(_env).FP.Get_name(_env)){
+                return Ast_getFullNameSym(_env, &self.Nodes_Filter, workNode.FP.Get_valInfo(_env).FP.Get_symbolInfo(_env))
+            }
+        }
+    }
+    {
+        _workNode := Nodes.Nodes_ExpMacroExpNodeDownCastF(nearest.FP)
+        if !Lns_IsNil( _workNode ) {
+            workNode := _workNode.(*Nodes.Nodes_ExpMacroExpNode)
+            if isInner(_env, workNode.FP.Get_effectivePos(_env), workNode.FP.Get_expType(_env).FP.Get_rawTxt(_env)){
+                return self.FP.GetFull(_env, workNode.FP.Get_macroType(_env), false)
+            }
+        }
+    }
+    {
+        _workNode := Nodes.Nodes_DeclFuncNodeDownCastF(nearest.FP)
+        if !Lns_IsNil( _workNode ) {
+            workNode := _workNode.(*Nodes.Nodes_DeclFuncNode)
+            {
+                _name := workNode.FP.Get_declInfo(_env).FP.Get_name(_env)
+                if !Lns_IsNil( _name ) {
+                    name := _name.(*Types.Types_Token)
+                    if isInner(_env, name.Pos, name.Txt){
+                        return self.FP.GetFull(_env, workNode.FP.Get_expType(_env), false)
+                    }
+                }
+            }
+            
+        }
+    }
+    {
+        _workNode := Nodes.Nodes_DeclEnumNodeDownCastF(nearest.FP)
+        if !Lns_IsNil( _workNode ) {
+            workNode := _workNode.(*Nodes.Nodes_DeclEnumNode)
+            var name *Types.Types_Token
+            name = workNode.FP.Get_name(_env)
+            if isInner(_env, name.Pos, name.Txt){
+                return self.FP.GetFull(_env, workNode.FP.Get_expType(_env), false)
+            }
+            for _, _valInfo := range( workNode.FP.Get_enumType(_env).FP.Get_name2EnumValInfo(_env).Items ) {
+                valInfo := _valInfo.(LuneAst.Ast_EnumValInfoDownCast).ToAst_EnumValInfo()
+                if isInner(_env, Lns_unwrap( valInfo.FP.Get_symbolInfo(_env).FP.Get_pos(_env)).(Types.Types_Position), valInfo.FP.Get_symbolInfo(_env).FP.Get_name(_env)){
+                    return Ast_getFullNameSym(_env, &self.Nodes_Filter, valInfo.FP.Get_symbolInfo(_env))
+                }
+                
+            }
+        }
+    }
+    {
+        _workNode := Nodes.Nodes_DeclAlgeNodeDownCastF(nearest.FP)
+        if !Lns_IsNil( _workNode ) {
+            workNode := _workNode.(*Nodes.Nodes_DeclAlgeNode)
+            var name *Types.Types_Token
+            name = workNode.FP.Get_name(_env)
+            if isInner(_env, name.Pos, name.Txt){
+                return self.FP.GetFull(_env, workNode.FP.Get_expType(_env), false)
+            }
+            for _, _valInfo := range( workNode.FP.Get_algeType(_env).FP.Get_valInfoMap(_env).Items ) {
+                valInfo := _valInfo.(LuneAst.Ast_AlgeValInfoDownCast).ToAst_AlgeValInfo()
+                if isInner(_env, Lns_unwrap( valInfo.FP.Get_symbolInfo(_env).FP.Get_pos(_env)).(Types.Types_Position), valInfo.FP.Get_symbolInfo(_env).FP.Get_name(_env)){
+                    return Ast_getFullNameSym(_env, &self.Nodes_Filter, valInfo.FP.Get_symbolInfo(_env))
+                }
+                
+            }
+        }
+    }
+    {
+        _workNode := Nodes.Nodes_DeclClassNodeDownCastF(nearest.FP)
+        if !Lns_IsNil( _workNode ) {
+            workNode := _workNode.(*Nodes.Nodes_DeclClassNode)
+            if isInner(_env, workNode.FP.Get_name(_env).Pos, workNode.FP.Get_name(_env).Txt){
+                return self.FP.GetFull(_env, workNode.FP.Get_expType(_env), false)
+            }
+        }
+    }
+    {
+        _workNode := Nodes.Nodes_DeclMethodNodeDownCastF(nearest.FP)
+        if !Lns_IsNil( _workNode ) {
+            workNode := _workNode.(*Nodes.Nodes_DeclMethodNode)
+            {
+                _name := workNode.FP.Get_declInfo(_env).FP.Get_name(_env)
+                if !Lns_IsNil( _name ) {
+                    name := _name.(*Types.Types_Token)
+                    if isInner(_env, name.Pos, name.Txt){
+                        return self.FP.GetFull(_env, workNode.FP.Get_expType(_env), false)
+                    }
+                }
+            }
+            
+        }
+    }
+    {
+        _workNode := Nodes.Nodes_ProtoClassNodeDownCastF(nearest.FP)
+        if !Lns_IsNil( _workNode ) {
+            workNode := _workNode.(*Nodes.Nodes_ProtoClassNode)
+            var name *Types.Types_Token
+            name = workNode.FP.Get_name(_env)
+            if isInner(_env, name.Pos, name.Txt){
+                return self.FP.GetFull(_env, workNode.FP.Get_expType(_env), false)
+            }
+        }
+    }
+    {
+        _workNode := Nodes.Nodes_DeclMemberNodeDownCastF(nearest.FP)
+        if !Lns_IsNil( _workNode ) {
+            workNode := _workNode.(*Nodes.Nodes_DeclMemberNode)
+            if isInner(_env, Lns_unwrap( workNode.FP.Get_symbolInfo(_env).FP.Get_pos(_env)).(Types.Types_Position), workNode.FP.Get_symbolInfo(_env).FP.Get_name(_env)){
+                return Ast_getFullNameSym(_env, &self.Nodes_Filter, workNode.FP.Get_symbolInfo(_env))
+            }
+            
+            {
+                _token, _symbol := workNode.FP.Get_getterToken(_env), workNode.FP.GetGetterSym(_env)
+                if !Lns_IsNil( _token ) && !Lns_IsNil( _symbol ) {
+                    token := _token.(*Types.Types_Token)
+                    symbol := _symbol.(*LuneAst.Ast_SymbolInfo)
+                    if isInner(_env, token.Pos, token.Txt){
+                        return Ast_getFullNameSym(_env, &self.Nodes_Filter, symbol)
+                    }
+                }
+            }
+            {
+                _token, _symbol := workNode.FP.Get_setterToken(_env), workNode.FP.GetSetterSym(_env)
+                if !Lns_IsNil( _token ) && !Lns_IsNil( _symbol ) {
+                    token := _token.(*Types.Types_Token)
+                    symbol := _symbol.(*LuneAst.Ast_SymbolInfo)
+                    if isInner(_env, token.Pos, token.Txt){
+                        return Ast_getFullNameSym(_env, &self.Nodes_Filter, symbol)
+                    }
+                }
+            }
+        }
+    }
+    {
+        _workNode := Nodes.Nodes_DeclConstrNodeDownCastF(nearest.FP)
+        if !Lns_IsNil( _workNode ) {
+            workNode := _workNode.(*Nodes.Nodes_DeclConstrNode)
+            {
+                _name := workNode.FP.Get_declInfo(_env).FP.Get_name(_env)
+                if !Lns_IsNil( _name ) {
+                    name := _name.(*Types.Types_Token)
+                    if isInner(_env, name.Pos, name.Txt){
+                        return self.FP.GetFull(_env, workNode.FP.Get_expType(_env), false)
+                    }
+                }
+            }
+            
+        }
+    }
+    {
+        _workNode := Nodes.Nodes_ExpCallSuperCtorNodeDownCastF(nearest.FP)
+        if !Lns_IsNil( _workNode ) {
+            workNode := _workNode.(*Nodes.Nodes_ExpCallSuperCtorNode)
+            return self.FP.GetFull(_env, workNode.FP.Get_methodType(_env), false)
+        }
+    }
+    {
+        _workNode := Nodes.Nodes_ExpCallSuperNodeDownCastF(nearest.FP)
+        if !Lns_IsNil( _workNode ) {
+            workNode := _workNode.(*Nodes.Nodes_ExpCallSuperNode)
+            return self.FP.GetFull(_env, workNode.FP.Get_methodType(_env), false)
+        }
+    }
+    {
+        _workNode := Nodes.Nodes_ExpNewNodeDownCastF(nearest.FP)
+        if !Lns_IsNil( _workNode ) {
+            workNode := _workNode.(*Nodes.Nodes_ExpNewNode)
+            if isInner(_env, workNode.FP.Get_pos(_env), "new"){
+                return self.FP.GetFull(_env, workNode.FP.Get_ctorTypeInfo(_env), false)
+            }
+        }
+    }
+    {
+        _workNode := Nodes.Nodes_DeclMacroNodeDownCastF(nearest.FP)
+        if !Lns_IsNil( _workNode ) {
+            workNode := _workNode.(*Nodes.Nodes_DeclMacroNode)
+            var name *Types.Types_Token
+            name = workNode.FP.Get_declInfo(_env).FP.Get_name(_env)
+            if isInner(_env, name.Pos, name.Txt){
+                return self.FP.GetFull(_env, workNode.FP.Get_expType(_env), false)
+            }
+        }
+    }
+    {
+        _workNode := Nodes.Nodes_ExpMacroExpNodeDownCastF(nearest.FP)
+        if !Lns_IsNil( _workNode ) {
+            workNode := _workNode.(*Nodes.Nodes_ExpMacroExpNode)
+            if isInner(_env, workNode.FP.Get_pos(_env), workNode.FP.Get_macroType(_env).FP.Get_rawTxt(_env)){
+                return self.FP.GetFull(_env, workNode.FP.Get_macroType(_env), false)
+            }
+        }
+    }
+    {
+        _workNode := Nodes.Nodes_GetFieldNodeDownCastF(nearest.FP)
+        if !Lns_IsNil( _workNode ) {
+            workNode := _workNode.(*Nodes.Nodes_GetFieldNode)
+            {
+                _symbolInfo := workNode.FP.Get_symbolInfo(_env)
+                if !Lns_IsNil( _symbolInfo ) {
+                    symbolInfo := _symbolInfo.(*LuneAst.Ast_SymbolInfo)
+                    if isInner(_env, workNode.FP.Get_field(_env).Pos, workNode.FP.Get_field(_env).Txt){
+                        return Ast_getFullNameSym(_env, &self.Nodes_Filter, symbolInfo)
+                    }
+                }
+            }
+        }
+    }
+    {
+        _workNode := Nodes.Nodes_AliasNodeDownCastF(nearest.FP)
+        if !Lns_IsNil( _workNode ) {
+            workNode := _workNode.(*Nodes.Nodes_AliasNode)
+            if isInner(_env, Lns_unwrap( workNode.FP.Get_newSymbol(_env).FP.Get_pos(_env)).(Types.Types_Position), workNode.FP.Get_newSymbol(_env).FP.Get_name(_env)){
+                return Ast_getFullNameSym(_env, &self.Nodes_Filter, workNode.FP.Get_newSymbol(_env))
+            }
+            
+        }
+    }
+    {
+        _workNode := Nodes.Nodes_DeclFormNodeDownCastF(nearest.FP)
+        if !Lns_IsNil( _workNode ) {
+            workNode := _workNode.(*Nodes.Nodes_DeclFormNode)
+            {
+                _name := workNode.FP.Get_declInfo(_env).FP.Get_name(_env)
+                if !Lns_IsNil( _name ) {
+                    name := _name.(*Types.Types_Token)
+                    if isInner(_env, name.Pos, name.Txt){
+                        return self.FP.GetFull(_env, workNode.FP.Get_expType(_env), false)
+                    }
+                }
+            }
+            
+        }
+    }
+    Log_log(_env, Log_Level__Err, __func__, 193, Log_CreateMessage(func(_env *LnsEnv) string {
+        return _env.GetVM().String_format("unknown pattern -- %s", []LnsAny{Nodes.Nodes_getNodeKindName(_env, nearest.FP.Get_kind(_env))})
+    }))
+    
+    return nil
+}
+// 197: decl @lns.@tags.@Pattern.SyntaxFilter.getPattern
+func (self *Pattern_SyntaxFilter) GetPattern(_env *LnsEnv, path string,analyzeFileInfo *Option_AnalyzeFileInfo,inqMod string) LnsAny {
+    var isInner func(_env *LnsEnv, pos Types.Types_Position,name string) bool
+    isInner = func(_env *LnsEnv, pos Types.Types_Position,name string) bool {
+        if Lns_isCondTrue( _env.PopVal( _env.IncStack() ||
+            _env.SetStackVal( pos.LineNo == analyzeFileInfo.FP.Get_lineNo(_env)) &&
+            _env.SetStackVal( pos.Column <= analyzeFileInfo.FP.Get_column(_env)) &&
+            _env.SetStackVal( pos.Column + len(name) >= analyzeFileInfo.FP.Get_column(_env)) ).(bool)){
+            return true
+        }
+        return false
+    }
+    var pattern LnsAny
+    pattern = nil
+    if self.ast.FP.Get_streamName(_env) == path{
+        var nearestNode LnsAny
+        nearestNode = nil
+        self.ast.FP.Get_node(_env).FP.Visit(_env, Nodes.Nodes_NodeVisitor(func(_env *LnsEnv, node *Nodes.Nodes_Node,parent *Nodes.Nodes_Node,relation string,depth LnsInt) LnsInt {
+            __func__ := "@lns.@tags.@Pattern.SyntaxFilter.getPattern.<anonymous>"
+            if analyzeFileInfo.FP.Get_path(_env) == node.FP.Get_effectivePos(_env).StreamName{
+                if Lns_isCondTrue( _env.PopVal( _env.IncStack() ||
+                    _env.SetStackVal( analyzeFileInfo.FP.Get_lineNo(_env) == node.FP.Get_effectivePos(_env).LineNo) &&
+                    _env.SetStackVal( analyzeFileInfo.FP.Get_column(_env) >= node.FP.Get_effectivePos(_env).Column) ).(bool)){
+                    {
+                        _declMemberNode := Nodes.Nodes_DeclMemberNodeDownCastF(node.FP)
+                        if !Lns_IsNil( _declMemberNode ) {
+                            declMemberNode := _declMemberNode.(*Nodes.Nodes_DeclMemberNode)
+                            {
+                                _token := declMemberNode.FP.Get_getterToken(_env)
+                                if !Lns_IsNil( _token ) {
+                                    token := _token.(*Types.Types_Token)
+                                    if isInner(_env, token.Pos, token.Txt){
+                                        nearestNode = node
+                                        return Nodes.Nodes_NodeVisitMode__End
+                                    }
+                                }
+                            }
+                            {
+                                _token := declMemberNode.FP.Get_setterToken(_env)
+                                if !Lns_IsNil( _token ) {
+                                    token := _token.(*Types.Types_Token)
+                                    if isInner(_env, token.Pos, token.Txt){
+                                        nearestNode = node
+                                        return Nodes.Nodes_NodeVisitMode__End
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    {
+                        _nearest := nearestNode
+                        if !Lns_IsNil( _nearest ) {
+                            nearest := _nearest.(*Nodes.Nodes_Node)
+                            if nearest.FP.Get_effectivePos(_env).LineNo != analyzeFileInfo.FP.Get_lineNo(_env){
+                                nearestNode = node
+                            }
+                            if nearest.FP.Get_effectivePos(_env).Column < node.FP.Get_effectivePos(_env).Column{
+                                nearestNode = node
+                            } else if nearest.FP.Get_effectivePos(_env).Column == node.FP.Get_effectivePos(_env).Column{
+                                nearestNode = node
+                            }
+                        } else {
+                            nearestNode = node
+                        }
+                    }
+                } else { 
+                    {
+                        _nearest := nearestNode
+                        if !Lns_IsNil( _nearest ) {
+                            nearest := _nearest.(*Nodes.Nodes_Node)
+                            if Lns_isCondTrue( _env.PopVal( _env.IncStack() ||
+                                _env.SetStackVal( nearest.FP.Get_effectivePos(_env).LineNo < node.FP.Get_effectivePos(_env).LineNo) &&
+                                _env.SetStackVal( node.FP.Get_effectivePos(_env).LineNo < analyzeFileInfo.FP.Get_lineNo(_env)) ).(bool)){
+                                nearestNode = node
+                            }
+                        } else {
+                            nearestNode = node
+                        }
+                    }
+                }
+                Log_log(_env, Log_Level__Trace, __func__, 20, Log_CreateMessage(func(_env *LnsEnv) string {
+                    return _env.GetVM().String_format("%s %s:%4d:%3d -- %s", []LnsAny{"visit:", node.FP.Get_effectivePos(_env).StreamName, node.FP.Get_effectivePos(_env).LineNo, node.FP.Get_effectivePos(_env).Column, Nodes.Nodes_getNodeKindName(_env, node.FP.Get_kind(_env))})
+                }))
+                
+                
+                return Nodes.Nodes_NodeVisitMode__Child
+            }
+            return Nodes.Nodes_NodeVisitMode__Next
+        }), 0, NewLnsSet([]LnsAny{}))
+        {
+            _nearest := nearestNode
+            if !Lns_IsNil( _nearest ) {
+                nearest := _nearest.(*Nodes.Nodes_Node)
+                pattern = self.FP.getPatternFromNode(_env, analyzeFileInfo, inqMod, nearest)
+            }
+        }
+    }
+    return pattern
+}
 // declaration Class -- SyntaxFilter
 type Pattern_SyntaxFilterMtd interface {
     DefaultProcess(_env *LnsEnv, arg1 *Nodes.Nodes_Node, arg2 LnsAny)
@@ -199,6 +615,12 @@ func NewPattern_SyntaxFilter(_env *LnsEnv, arg1 *AstInfo.AstInfo_ASTInfo) *Patte
     obj.InitPattern_SyntaxFilter(_env, arg1)
     return obj
 }
+// 28: DeclConstr
+func (self *Pattern_SyntaxFilter) InitPattern_SyntaxFilter(_env *LnsEnv, ast *AstInfo.AstInfo_ASTInfo) {
+    self.InitNodes_Filter(_env, true, ast.FP.Get_exportInfo(_env).FP.Get_moduleTypeInfo(_env), ast.FP.Get_exportInfo(_env).FP.Get_moduleTypeInfo(_env).FP.Get_scope(_env))
+    self.ast = ast
+}
+
 
 func Lns_Pattern_init(_env *LnsEnv) {
     if init_Pattern { return }
@@ -223,425 +645,4 @@ func Lns_Pattern_init(_env *LnsEnv) {
 }
 func init() {
     init_Pattern = false
-}
-// 28: DeclConstr
-func (self *Pattern_SyntaxFilter) InitPattern_SyntaxFilter(_env *LnsEnv, ast *AstInfo.AstInfo_ASTInfo) {
-    self.InitNodes_Filter(_env, true, ast.FP.Get_exportInfo(_env).FP.Get_moduleTypeInfo(_env), ast.FP.Get_exportInfo(_env).FP.Get_moduleTypeInfo(_env).FP.Get_scope(_env))
-    self.ast = ast
-}
-// 35: decl @lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode
-func (self *Pattern_SyntaxFilter) getPatternFromNode(_env *LnsEnv, analyzeFileInfo *Option_AnalyzeFileInfo,inqMod string,nearest *Nodes.Nodes_Node) LnsAny {
-    __func__ := "@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode"
-    var isInner func(_env *LnsEnv, pos *Types.Types_Position,name string) bool
-    isInner = func(_env *LnsEnv, pos *Types.Types_Position,name string) bool {
-        if Lns_isCondTrue( _env.PopVal( _env.IncStack() ||
-            _env.SetStackVal( pos.LineNo == analyzeFileInfo.FP.Get_lineNo(_env)) &&
-            _env.SetStackVal( pos.Column <= analyzeFileInfo.FP.Get_column(_env)) &&
-            _env.SetStackVal( pos.Column + len(name) >= analyzeFileInfo.FP.Get_column(_env)) ).(bool)){
-            return true
-        }
-        return false
-    }
-    Log_log(_env, Log_Level__Log, __func__, 20, Log_CreateMessage(func(_env *LnsEnv) string {
-        return _env.GetVM().String_format("%s %s:%4d:%3d -- %s", []LnsAny{"nearestNode -- ", nearest.FP.Get_effectivePos(_env).StreamName, nearest.FP.Get_effectivePos(_env).LineNo, nearest.FP.Get_effectivePos(_env).Column, Nodes.Nodes_getNodeKindName(_env, nearest.FP.Get_kind(_env))})
-    }))
-    
-    
-    {
-        _workNode := Nodes.Nodes_ImportNodeDownCastF(nearest.FP)
-        if !Lns_IsNil( _workNode ) {
-            workNode := _workNode.(*Nodes.Nodes_ImportNode)
-            if _switch1 := inqMod; _switch1 == Option_InqMode__Def {
-                return self.FP.GetFull(_env, workNode.FP.Get_expType(_env), false)
-            } else if _switch1 == Option_InqMode__Ref {
-                return Ast_getFullNameSym(_env, &self.Nodes_Filter, workNode.FP.Get_info(_env).FP.Get_symbolInfo(_env))
-            } else if _switch1 == Option_InqMode__Set || _switch1 == Option_InqMode__AllMut || _switch1 == Option_InqMode__Async || _switch1 == Option_InqMode__Noasync || _switch1 == Option_InqMode__Luaval || _switch1 == Option_InqMode__AsyncLock {
-            }
-            return nil
-        }
-    }
-    {
-        _workNode := Nodes.Nodes_ExpRefNodeDownCastF(nearest.FP)
-        if !Lns_IsNil( _workNode ) {
-            workNode := _workNode.(*Nodes.Nodes_ExpRefNode)
-            return Ast_getFullNameSym(_env, &self.Nodes_Filter, workNode.FP.Get_symbolInfo(_env))
-        }
-    }
-    {
-        _workNode := Nodes.Nodes_RefFieldNodeDownCastF(nearest.FP)
-        if !Lns_IsNil( _workNode ) {
-            workNode := _workNode.(*Nodes.Nodes_RefFieldNode)
-            if isInner(_env, workNode.FP.Get_field(_env).Pos, workNode.FP.Get_field(_env).Txt){
-                {
-                    _symbolInfo := workNode.FP.Get_symbolInfo(_env)
-                    if !Lns_IsNil( _symbolInfo ) {
-                        symbolInfo := _symbolInfo.(*LuneAst.Ast_SymbolInfo)
-                        return Ast_getFullNameSym(_env, &self.Nodes_Filter, symbolInfo)
-                    }
-                }
-            }
-        }
-    }
-    {
-        _workNode := Nodes.Nodes_DeclVarNodeDownCastF(nearest.FP)
-        if !Lns_IsNil( _workNode ) {
-            workNode := _workNode.(*Nodes.Nodes_DeclVarNode)
-            for _, _varSym := range( workNode.FP.Get_symbolInfoList(_env).Items ) {
-                varSym := _varSym.(LuneAst.Ast_SymbolInfoDownCast).ToAst_SymbolInfo()
-                if isInner(_env, Lns_unwrap( varSym.FP.Get_pos(_env)).(*Types.Types_Position), varSym.FP.Get_name(_env)){
-                    return Ast_getFullNameSym(_env, &self.Nodes_Filter, varSym)
-                }
-                
-            }
-        }
-    }
-    {
-        _workNode := Nodes.Nodes_ExpOmitEnumNodeDownCastF(nearest.FP)
-        if !Lns_IsNil( _workNode ) {
-            workNode := _workNode.(*Nodes.Nodes_ExpOmitEnumNode)
-            if isInner(_env, workNode.FP.Get_effectivePos(_env), workNode.FP.Get_valInfo(_env).FP.Get_name(_env)){
-                return Ast_getFullNameSym(_env, &self.Nodes_Filter, workNode.FP.Get_valInfo(_env).FP.Get_symbolInfo(_env))
-            }
-        }
-    }
-    {
-        _workNode := Nodes.Nodes_NewAlgeValNodeDownCastF(nearest.FP)
-        if !Lns_IsNil( _workNode ) {
-            workNode := _workNode.(*Nodes.Nodes_NewAlgeValNode)
-            if isInner(_env, workNode.FP.Get_effectivePos(_env), workNode.FP.Get_valInfo(_env).FP.Get_name(_env)){
-                return Ast_getFullNameSym(_env, &self.Nodes_Filter, workNode.FP.Get_valInfo(_env).FP.Get_symbolInfo(_env))
-            }
-        }
-    }
-    {
-        _workNode := Nodes.Nodes_ExpMacroExpNodeDownCastF(nearest.FP)
-        if !Lns_IsNil( _workNode ) {
-            workNode := _workNode.(*Nodes.Nodes_ExpMacroExpNode)
-            if isInner(_env, workNode.FP.Get_effectivePos(_env), workNode.FP.Get_expType(_env).FP.Get_rawTxt(_env)){
-                return self.FP.GetFull(_env, workNode.FP.Get_macroType(_env), false)
-            }
-        }
-    }
-    {
-        _workNode := Nodes.Nodes_DeclFuncNodeDownCastF(nearest.FP)
-        if !Lns_IsNil( _workNode ) {
-            workNode := _workNode.(*Nodes.Nodes_DeclFuncNode)
-            {
-                _name := workNode.FP.Get_declInfo(_env).FP.Get_name(_env)
-                if !Lns_IsNil( _name ) {
-                    name := _name.(*Types.Types_Token)
-                    if isInner(_env, name.Pos, name.Txt){
-                        return self.FP.GetFull(_env, workNode.FP.Get_expType(_env), false)
-                    }
-                }
-            }
-            
-        }
-    }
-    {
-        _workNode := Nodes.Nodes_DeclEnumNodeDownCastF(nearest.FP)
-        if !Lns_IsNil( _workNode ) {
-            workNode := _workNode.(*Nodes.Nodes_DeclEnumNode)
-            var name *Types.Types_Token
-            name = workNode.FP.Get_name(_env)
-            if isInner(_env, name.Pos, name.Txt){
-                return self.FP.GetFull(_env, workNode.FP.Get_expType(_env), false)
-            }
-            for _, _valInfo := range( workNode.FP.Get_enumType(_env).FP.Get_name2EnumValInfo(_env).Items ) {
-                valInfo := _valInfo.(LuneAst.Ast_EnumValInfoDownCast).ToAst_EnumValInfo()
-                if isInner(_env, Lns_unwrap( valInfo.FP.Get_symbolInfo(_env).FP.Get_pos(_env)).(*Types.Types_Position), valInfo.FP.Get_symbolInfo(_env).FP.Get_name(_env)){
-                    return Ast_getFullNameSym(_env, &self.Nodes_Filter, valInfo.FP.Get_symbolInfo(_env))
-                }
-                
-            }
-        }
-    }
-    {
-        _workNode := Nodes.Nodes_DeclAlgeNodeDownCastF(nearest.FP)
-        if !Lns_IsNil( _workNode ) {
-            workNode := _workNode.(*Nodes.Nodes_DeclAlgeNode)
-            var name *Types.Types_Token
-            name = workNode.FP.Get_name(_env)
-            if isInner(_env, name.Pos, name.Txt){
-                return self.FP.GetFull(_env, workNode.FP.Get_expType(_env), false)
-            }
-            for _, _valInfo := range( workNode.FP.Get_algeType(_env).FP.Get_valInfoMap(_env).Items ) {
-                valInfo := _valInfo.(LuneAst.Ast_AlgeValInfoDownCast).ToAst_AlgeValInfo()
-                if isInner(_env, Lns_unwrap( valInfo.FP.Get_symbolInfo(_env).FP.Get_pos(_env)).(*Types.Types_Position), valInfo.FP.Get_symbolInfo(_env).FP.Get_name(_env)){
-                    return Ast_getFullNameSym(_env, &self.Nodes_Filter, valInfo.FP.Get_symbolInfo(_env))
-                }
-                
-            }
-        }
-    }
-    {
-        _workNode := Nodes.Nodes_DeclClassNodeDownCastF(nearest.FP)
-        if !Lns_IsNil( _workNode ) {
-            workNode := _workNode.(*Nodes.Nodes_DeclClassNode)
-            if isInner(_env, workNode.FP.Get_name(_env).Pos, workNode.FP.Get_name(_env).Txt){
-                return self.FP.GetFull(_env, workNode.FP.Get_expType(_env), false)
-            }
-        }
-    }
-    {
-        _workNode := Nodes.Nodes_DeclMethodNodeDownCastF(nearest.FP)
-        if !Lns_IsNil( _workNode ) {
-            workNode := _workNode.(*Nodes.Nodes_DeclMethodNode)
-            {
-                _name := workNode.FP.Get_declInfo(_env).FP.Get_name(_env)
-                if !Lns_IsNil( _name ) {
-                    name := _name.(*Types.Types_Token)
-                    if isInner(_env, name.Pos, name.Txt){
-                        return self.FP.GetFull(_env, workNode.FP.Get_expType(_env), false)
-                    }
-                }
-            }
-            
-        }
-    }
-    {
-        _workNode := Nodes.Nodes_ProtoClassNodeDownCastF(nearest.FP)
-        if !Lns_IsNil( _workNode ) {
-            workNode := _workNode.(*Nodes.Nodes_ProtoClassNode)
-            var name *Types.Types_Token
-            name = workNode.FP.Get_name(_env)
-            if isInner(_env, name.Pos, name.Txt){
-                return self.FP.GetFull(_env, workNode.FP.Get_expType(_env), false)
-            }
-        }
-    }
-    {
-        _workNode := Nodes.Nodes_DeclMemberNodeDownCastF(nearest.FP)
-        if !Lns_IsNil( _workNode ) {
-            workNode := _workNode.(*Nodes.Nodes_DeclMemberNode)
-            if isInner(_env, Lns_unwrap( workNode.FP.Get_symbolInfo(_env).FP.Get_pos(_env)).(*Types.Types_Position), workNode.FP.Get_symbolInfo(_env).FP.Get_name(_env)){
-                return Ast_getFullNameSym(_env, &self.Nodes_Filter, workNode.FP.Get_symbolInfo(_env))
-            }
-            
-            {
-                _token, _symbol := workNode.FP.Get_getterToken(_env), workNode.FP.GetGetterSym(_env)
-                if !Lns_IsNil( _token ) && !Lns_IsNil( _symbol ) {
-                    token := _token.(*Types.Types_Token)
-                    symbol := _symbol.(*LuneAst.Ast_SymbolInfo)
-                    if isInner(_env, token.Pos, token.Txt){
-                        return Ast_getFullNameSym(_env, &self.Nodes_Filter, symbol)
-                    }
-                }
-            }
-            {
-                _token, _symbol := workNode.FP.Get_setterToken(_env), workNode.FP.GetSetterSym(_env)
-                if !Lns_IsNil( _token ) && !Lns_IsNil( _symbol ) {
-                    token := _token.(*Types.Types_Token)
-                    symbol := _symbol.(*LuneAst.Ast_SymbolInfo)
-                    if isInner(_env, token.Pos, token.Txt){
-                        return Ast_getFullNameSym(_env, &self.Nodes_Filter, symbol)
-                    }
-                }
-            }
-        }
-    }
-    {
-        _workNode := Nodes.Nodes_DeclConstrNodeDownCastF(nearest.FP)
-        if !Lns_IsNil( _workNode ) {
-            workNode := _workNode.(*Nodes.Nodes_DeclConstrNode)
-            {
-                _name := workNode.FP.Get_declInfo(_env).FP.Get_name(_env)
-                if !Lns_IsNil( _name ) {
-                    name := _name.(*Types.Types_Token)
-                    if isInner(_env, name.Pos, name.Txt){
-                        return self.FP.GetFull(_env, workNode.FP.Get_expType(_env), false)
-                    }
-                }
-            }
-            
-        }
-    }
-    {
-        _workNode := Nodes.Nodes_ExpCallSuperCtorNodeDownCastF(nearest.FP)
-        if !Lns_IsNil( _workNode ) {
-            workNode := _workNode.(*Nodes.Nodes_ExpCallSuperCtorNode)
-            return self.FP.GetFull(_env, workNode.FP.Get_methodType(_env), false)
-        }
-    }
-    {
-        _workNode := Nodes.Nodes_ExpCallSuperNodeDownCastF(nearest.FP)
-        if !Lns_IsNil( _workNode ) {
-            workNode := _workNode.(*Nodes.Nodes_ExpCallSuperNode)
-            return self.FP.GetFull(_env, workNode.FP.Get_methodType(_env), false)
-        }
-    }
-    {
-        _workNode := Nodes.Nodes_ExpNewNodeDownCastF(nearest.FP)
-        if !Lns_IsNil( _workNode ) {
-            workNode := _workNode.(*Nodes.Nodes_ExpNewNode)
-            if isInner(_env, workNode.FP.Get_pos(_env), "new"){
-                return self.FP.GetFull(_env, workNode.FP.Get_ctorTypeInfo(_env), false)
-            }
-        }
-    }
-    {
-        _workNode := Nodes.Nodes_DeclMacroNodeDownCastF(nearest.FP)
-        if !Lns_IsNil( _workNode ) {
-            workNode := _workNode.(*Nodes.Nodes_DeclMacroNode)
-            var name *Types.Types_Token
-            name = workNode.FP.Get_declInfo(_env).FP.Get_name(_env)
-            if isInner(_env, name.Pos, name.Txt){
-                return self.FP.GetFull(_env, workNode.FP.Get_expType(_env), false)
-            }
-        }
-    }
-    {
-        _workNode := Nodes.Nodes_ExpMacroExpNodeDownCastF(nearest.FP)
-        if !Lns_IsNil( _workNode ) {
-            workNode := _workNode.(*Nodes.Nodes_ExpMacroExpNode)
-            if isInner(_env, workNode.FP.Get_pos(_env), workNode.FP.Get_macroType(_env).FP.Get_rawTxt(_env)){
-                return self.FP.GetFull(_env, workNode.FP.Get_macroType(_env), false)
-            }
-        }
-    }
-    {
-        _workNode := Nodes.Nodes_GetFieldNodeDownCastF(nearest.FP)
-        if !Lns_IsNil( _workNode ) {
-            workNode := _workNode.(*Nodes.Nodes_GetFieldNode)
-            {
-                _symbolInfo := workNode.FP.Get_symbolInfo(_env)
-                if !Lns_IsNil( _symbolInfo ) {
-                    symbolInfo := _symbolInfo.(*LuneAst.Ast_SymbolInfo)
-                    if isInner(_env, workNode.FP.Get_field(_env).Pos, workNode.FP.Get_field(_env).Txt){
-                        return Ast_getFullNameSym(_env, &self.Nodes_Filter, symbolInfo)
-                    }
-                }
-            }
-        }
-    }
-    {
-        _workNode := Nodes.Nodes_AliasNodeDownCastF(nearest.FP)
-        if !Lns_IsNil( _workNode ) {
-            workNode := _workNode.(*Nodes.Nodes_AliasNode)
-            if isInner(_env, Lns_unwrap( workNode.FP.Get_newSymbol(_env).FP.Get_pos(_env)).(*Types.Types_Position), workNode.FP.Get_newSymbol(_env).FP.Get_name(_env)){
-                return Ast_getFullNameSym(_env, &self.Nodes_Filter, workNode.FP.Get_newSymbol(_env))
-            }
-            
-        }
-    }
-    {
-        _workNode := Nodes.Nodes_DeclFormNodeDownCastF(nearest.FP)
-        if !Lns_IsNil( _workNode ) {
-            workNode := _workNode.(*Nodes.Nodes_DeclFormNode)
-            {
-                _name := workNode.FP.Get_declInfo(_env).FP.Get_name(_env)
-                if !Lns_IsNil( _name ) {
-                    name := _name.(*Types.Types_Token)
-                    if isInner(_env, name.Pos, name.Txt){
-                        return self.FP.GetFull(_env, workNode.FP.Get_expType(_env), false)
-                    }
-                }
-            }
-            
-        }
-    }
-    Log_log(_env, Log_Level__Err, __func__, 193, Log_CreateMessage(func(_env *LnsEnv) string {
-        return _env.GetVM().String_format("unknown pattern -- %s", []LnsAny{Nodes.Nodes_getNodeKindName(_env, nearest.FP.Get_kind(_env))})
-    }))
-    
-    return nil
-}
-// 197: decl @lns.@tags.@Pattern.SyntaxFilter.getPattern
-func (self *Pattern_SyntaxFilter) GetPattern(_env *LnsEnv, path string,analyzeFileInfo *Option_AnalyzeFileInfo,inqMod string) LnsAny {
-    var isInner func(_env *LnsEnv, pos *Types.Types_Position,name string) bool
-    isInner = func(_env *LnsEnv, pos *Types.Types_Position,name string) bool {
-        if Lns_isCondTrue( _env.PopVal( _env.IncStack() ||
-            _env.SetStackVal( pos.LineNo == analyzeFileInfo.FP.Get_lineNo(_env)) &&
-            _env.SetStackVal( pos.Column <= analyzeFileInfo.FP.Get_column(_env)) &&
-            _env.SetStackVal( pos.Column + len(name) >= analyzeFileInfo.FP.Get_column(_env)) ).(bool)){
-            return true
-        }
-        return false
-    }
-    var pattern LnsAny
-    pattern = nil
-    if self.ast.FP.Get_streamName(_env) == path{
-        var nearestNode LnsAny
-        nearestNode = nil
-        self.ast.FP.Get_node(_env).FP.Visit(_env, Nodes.Nodes_NodeVisitor(func(_env *LnsEnv, node *Nodes.Nodes_Node,parent *Nodes.Nodes_Node,relation string,depth LnsInt) LnsInt {
-            __func__ := "@lns.@tags.@Pattern.SyntaxFilter.getPattern.<anonymous>"
-            if analyzeFileInfo.FP.Get_path(_env) == node.FP.Get_effectivePos(_env).StreamName{
-                if Lns_isCondTrue( _env.PopVal( _env.IncStack() ||
-                    _env.SetStackVal( analyzeFileInfo.FP.Get_lineNo(_env) == node.FP.Get_effectivePos(_env).LineNo) &&
-                    _env.SetStackVal( analyzeFileInfo.FP.Get_column(_env) >= node.FP.Get_effectivePos(_env).Column) ).(bool)){
-                    {
-                        _declMemberNode := Nodes.Nodes_DeclMemberNodeDownCastF(node.FP)
-                        if !Lns_IsNil( _declMemberNode ) {
-                            declMemberNode := _declMemberNode.(*Nodes.Nodes_DeclMemberNode)
-                            {
-                                _token := declMemberNode.FP.Get_getterToken(_env)
-                                if !Lns_IsNil( _token ) {
-                                    token := _token.(*Types.Types_Token)
-                                    if isInner(_env, token.Pos, token.Txt){
-                                        nearestNode = node
-                                        return Nodes.Nodes_NodeVisitMode__End
-                                    }
-                                }
-                            }
-                            {
-                                _token := declMemberNode.FP.Get_setterToken(_env)
-                                if !Lns_IsNil( _token ) {
-                                    token := _token.(*Types.Types_Token)
-                                    if isInner(_env, token.Pos, token.Txt){
-                                        nearestNode = node
-                                        return Nodes.Nodes_NodeVisitMode__End
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    {
-                        _nearest := nearestNode
-                        if !Lns_IsNil( _nearest ) {
-                            nearest := _nearest.(*Nodes.Nodes_Node)
-                            if nearest.FP.Get_effectivePos(_env).LineNo != analyzeFileInfo.FP.Get_lineNo(_env){
-                                nearestNode = node
-                            }
-                            if nearest.FP.Get_effectivePos(_env).Column < node.FP.Get_effectivePos(_env).Column{
-                                nearestNode = node
-                            } else if nearest.FP.Get_effectivePos(_env).Column == node.FP.Get_effectivePos(_env).Column{
-                                nearestNode = node
-                            }
-                        } else {
-                            nearestNode = node
-                        }
-                    }
-                } else { 
-                    {
-                        _nearest := nearestNode
-                        if !Lns_IsNil( _nearest ) {
-                            nearest := _nearest.(*Nodes.Nodes_Node)
-                            if Lns_isCondTrue( _env.PopVal( _env.IncStack() ||
-                                _env.SetStackVal( nearest.FP.Get_effectivePos(_env).LineNo < node.FP.Get_effectivePos(_env).LineNo) &&
-                                _env.SetStackVal( node.FP.Get_effectivePos(_env).LineNo < analyzeFileInfo.FP.Get_lineNo(_env)) ).(bool)){
-                                nearestNode = node
-                            }
-                        } else {
-                            nearestNode = node
-                        }
-                    }
-                }
-                Log_log(_env, Log_Level__Trace, __func__, 20, Log_CreateMessage(func(_env *LnsEnv) string {
-                    return _env.GetVM().String_format("%s %s:%4d:%3d -- %s", []LnsAny{"visit:", node.FP.Get_effectivePos(_env).StreamName, node.FP.Get_effectivePos(_env).LineNo, node.FP.Get_effectivePos(_env).Column, Nodes.Nodes_getNodeKindName(_env, node.FP.Get_kind(_env))})
-                }))
-                
-                
-                return Nodes.Nodes_NodeVisitMode__Child
-            }
-            return Nodes.Nodes_NodeVisitMode__Next
-        }), 0, NewLnsSet([]LnsAny{}))
-        {
-            _nearest := nearestNode
-            if !Lns_IsNil( _nearest ) {
-                nearest := _nearest.(*Nodes.Nodes_Node)
-                pattern = self.FP.getPatternFromNode(_env, analyzeFileInfo, inqMod, nearest)
-            }
-        }
-    }
-    return pattern
 }

@@ -23,6 +23,68 @@ func Util_outputLocate(_env *LnsEnv, stream Lns_oStream,symbol string,path strin
     stream.Write(_env, _env.GetVM().String_format("%-16s %4d %-16s %s\n", []LnsAny{symbol, lineNo, path, line}))
 }
 
+// 5: decl @lns.@tags.@Util.SourceCodeLineAccessor.getLine
+func (self *Util_SourceCodeLineAccessor) GetLine(_env *LnsEnv, lineNo LnsInt) LnsAny {
+    if _env.PopVal( _env.IncStack() ||
+        _env.SetStackVal( lineNo < 0) ||
+        _env.SetStackVal( self.lineList.Len() < lineNo) ).(bool){
+        return nil
+    }
+    return self.lineList.GetAt(lineNo).(string)
+}
+// 20: decl @lns.@tags.@Util.SourceCodeLineAccessorFactory.create
+func (self *Util_SourceCodeLineAccessorFactory) Create(_env *LnsEnv, filePath string,fileContents LnsAny) LnsAny {
+    {
+        __exp := self.path2accessor.Get(filePath)
+        if !Lns_IsNil( __exp ) {
+            _exp := __exp.(*Util_SourceCodeLineAccessor)
+            return _exp
+        }
+    }
+    var lineList *LnsList
+    lineList = NewLnsList([]LnsAny{})
+    if fileContents != nil{
+        fileContents_39 := fileContents.(string)
+            {
+                _applyForm0, _applyParam0, _applyPrev0 := _env.GetVM().String_gmatch(fileContents_39, "[^\n]*\n")
+                for {
+                    _applyWork0 := _applyForm0.(*Lns_luaValue).Call( Lns_2DDD( _applyParam0, _applyPrev0 ) )
+                    _applyPrev0 = Lns_getFromMulti(_applyWork0,0)
+                    if Lns_IsNil( _applyPrev0 ) { break }
+                    line := _applyPrev0.(string)
+                    lineList.Insert(_env.GetVM().String_sub(line, 1, len(line) - 1))
+                }
+            }
+    } else {
+        var handle Lns_luaStream
+        
+        {
+            _handle := Util_convExp0_183(Lns_2DDD(Lns_io_open(filePath, "r")))
+            if _handle == nil{
+                return nil
+            } else {
+                handle = _handle.(Lns_luaStream)
+            }
+        }
+        for  {
+            var text string
+            
+            {
+                _text := handle.Read(_env, "*l")
+                if _text == nil{
+                    break
+                } else {
+                    text = _text.(string)
+                }
+            }
+            lineList.Insert(text)
+        }
+    }
+    var accessor *Util_SourceCodeLineAccessor
+    accessor = NewUtil_SourceCodeLineAccessor(_env, filePath, lineList)
+    self.path2accessor.Set(filePath,accessor)
+    return accessor
+}
 // declaration Class -- SourceCodeLineAccessor
 type Util_SourceCodeLineAccessorMtd interface {
     GetLine(_env *LnsEnv, arg1 LnsInt) LnsAny
@@ -99,6 +161,11 @@ func NewUtil_SourceCodeLineAccessorFactory(_env *LnsEnv) *Util_SourceCodeLineAcc
     obj.InitUtil_SourceCodeLineAccessorFactory(_env)
     return obj
 }
+// 16: DeclConstr
+func (self *Util_SourceCodeLineAccessorFactory) InitUtil_SourceCodeLineAccessorFactory(_env *LnsEnv) {
+    self.path2accessor = NewLnsMap( map[LnsAny]LnsAny{})
+}
+
 
 func Lns_Util_init(_env *LnsEnv) {
     if init_Util { return }
@@ -108,70 +175,4 @@ func Lns_Util_init(_env *LnsEnv) {
 }
 func init() {
     init_Util = false
-}
-// 5: decl @lns.@tags.@Util.SourceCodeLineAccessor.getLine
-func (self *Util_SourceCodeLineAccessor) GetLine(_env *LnsEnv, lineNo LnsInt) LnsAny {
-    if _env.PopVal( _env.IncStack() ||
-        _env.SetStackVal( lineNo < 0) ||
-        _env.SetStackVal( self.lineList.Len() < lineNo) ).(bool){
-        return nil
-    }
-    return self.lineList.GetAt(lineNo).(string)
-}
-// 16: DeclConstr
-func (self *Util_SourceCodeLineAccessorFactory) InitUtil_SourceCodeLineAccessorFactory(_env *LnsEnv) {
-    self.path2accessor = NewLnsMap( map[LnsAny]LnsAny{})
-}
-// 20: decl @lns.@tags.@Util.SourceCodeLineAccessorFactory.create
-func (self *Util_SourceCodeLineAccessorFactory) Create(_env *LnsEnv, filePath string,fileContents LnsAny) LnsAny {
-    {
-        __exp := self.path2accessor.Get(filePath)
-        if !Lns_IsNil( __exp ) {
-            _exp := __exp.(*Util_SourceCodeLineAccessor)
-            return _exp
-        }
-    }
-    var lineList *LnsList
-    lineList = NewLnsList([]LnsAny{})
-    if fileContents != nil{
-        fileContents_39 := fileContents.(string)
-            {
-                _applyForm1, _applyParam1, _applyPrev1 := _env.GetVM().String_gmatch(fileContents_39, "[^\n]*\n")
-                for {
-                    _applyWork1 := _applyForm1.(*Lns_luaValue).Call( Lns_2DDD( _applyParam1, _applyPrev1 ) )
-                    _applyPrev1 = Lns_getFromMulti(_applyWork1,0)
-                    if Lns_IsNil( _applyPrev1 ) { break }
-                    line := _applyPrev1.(string)
-                    lineList.Insert(_env.GetVM().String_sub(line, 1, len(line) - 1))
-                }
-            }
-    } else {
-        var handle Lns_luaStream
-        
-        {
-            _handle := Util_convExp0_183(Lns_2DDD(Lns_io_open(filePath, "r")))
-            if _handle == nil{
-                return nil
-            } else {
-                handle = _handle.(Lns_luaStream)
-            }
-        }
-        for  {
-            var text string
-            
-            {
-                _text := handle.Read(_env, "*l")
-                if _text == nil{
-                    break
-                } else {
-                    text = _text.(string)
-                }
-            }
-            lineList.Insert(text)
-        }
-    }
-    var accessor *Util_SourceCodeLineAccessor
-    accessor = NewUtil_SourceCodeLineAccessor(_env, filePath, lineList)
-    self.path2accessor.Set(filePath,accessor)
-    return accessor
 }

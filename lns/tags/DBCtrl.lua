@@ -2,8 +2,8 @@
 local _moduleObj = {}
 local __mod__ = '@lns.@tags.@DBCtrl'
 local _lune = {}
-if _lune4 then
-   _lune = _lune4
+if _lune6 then
+   _lune = _lune6
 end
 function _lune.nilacc( val, fieldName, access, ... )
    if not val then
@@ -186,8 +186,8 @@ function _lune.__Cast( obj, kind, class )
    return nil
 end
 
-if not _lune4 then
-   _lune4 = _lune
+if not _lune6 then
+   _lune6 = _lune
 end
 
 
