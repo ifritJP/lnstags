@@ -9,7 +9,7 @@ module OS require "os" of "Lua" {
 
 pub fn getCurDir(): str {
    let path;
-   __asyncLock {
+   __luaLock {
       if! OS.getenv( "PWD" ) {
          path = _exp;
       } else {
