@@ -3,7 +3,7 @@ module github.com/ifritJP/lnstags
 go 1.16
 
 require (
-	github.com/ifritJP/LuneScript/src v0.0.0-20210703020500-4b13ad51710d
+	github.com/ifritJP/LuneScript/src v0.0.0-20210703093832-fc78e01cbf94
 	github.com/ifritJP/lnssqlite3/src v0.0.0-20210523141024-7ad875760090
 )
 
