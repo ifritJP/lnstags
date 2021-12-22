@@ -39,8 +39,8 @@
 	 (file (plist-get item :path))
 	 (relative (plist-get item :relative))
 	 (projDir (plist-get item :projDir))
-	 (latest (lnstags-helm-history-latest))
-	 (latest-cdr (cdr latest)))
+	 (latest-cdr lnstags-helm-history-cur-item)
+	 )
     (plist-put latest-cdr :latest (plist-get item :disp))
     (let ((prev-buffer (current-buffer)))
       (find-file file)
@@ -106,7 +106,8 @@
     ))
 
 (defvar lnstags-helm-history nil)
-(defvar lnstags-helm-history-cur nil)
+(defvar lnstags-helm-history-cur-time nil)
+(defvar lnstags-helm-history-cur-item nil)
 
 (defun lnstags-helm-history-latest ()
   (nth (1- (length lnstags-helm-history)) lnstags-helm-history)
@@ -114,11 +115,13 @@
 
 (defun lnstags-helm-history-add-tail (item)
   (let ((time (format-time-string "%m/%d-%T" (current-time))))
-    (setq lnstags-helm-history-cur time)
+    (setq lnstags-helm-history-cur-time time)
+    (setq lnstags-helm-history-cur-item
+	  (list :helm item
+		:time time))
     (add-to-list 'lnstags-helm-history
-		 (list (format "%s %s" time (cdr (assoc 'name item)))
-		       :helm item
-		       :time time)
+		 (cons (format "%s %s" time (cdr (assoc 'name item)))
+		       lnstags-helm-history-cur-item)
 		 t)))
 (defun lnstags-helm-history-del-top ()
   (let ((item (car lnstags-helm-history)))
@@ -133,7 +136,8 @@
   (setq lnstags-helm-history nil)
   )
 (defun lnstags-helm-history-select (item)
-  (setq lnstags-helm-history-cur (plist-get item :time))
+  (setq lnstags-helm-history-cur-time (plist-get item :time))
+  (setq lnstags-helm-history-cur-item item)
   (let ((lnstags-params (plist-get item :helm))
 	candidate-list select-func)
     (setq candidate-list (cdr (assoc 'candidates lnstags-params )))
@@ -151,7 +155,7 @@
 		   (candidates . ,(reverse lnstags-helm-history))
 		   (action . lnstags-helm-history-select))
 	:buffer lnstags-helm-buffer-name
-	:preselect lnstags-helm-history-cur
+	:preselect lnstags-helm-history-cur-time
 	)
   )
   
