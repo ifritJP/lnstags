@@ -110,12 +110,12 @@ function SourceCodeLineAccessor:getLine( lineNo )
    
    return self.lineList[lineNo]
 end
-function SourceCodeLineAccessor.setmeta( obj )
+function SourceCodeLineAccessor._setmeta( obj )
   setmetatable( obj, { __index = SourceCodeLineAccessor  } )
 end
-function SourceCodeLineAccessor.new( path, lineList )
+function SourceCodeLineAccessor._new( path, lineList )
    local obj = {}
-   SourceCodeLineAccessor.setmeta( obj )
+   SourceCodeLineAccessor._setmeta( obj )
    if obj.__init then
       obj:__init( path, lineList )
    end
@@ -133,9 +133,9 @@ end
 
 local SourceCodeLineAccessorFactory = {}
 _moduleObj.SourceCodeLineAccessorFactory = SourceCodeLineAccessorFactory
-function SourceCodeLineAccessorFactory.new(  )
+function SourceCodeLineAccessorFactory._new(  )
    local obj = {}
-   SourceCodeLineAccessorFactory.setmeta( obj )
+   SourceCodeLineAccessorFactory._setmeta( obj )
    if obj.__init then obj:__init(  ); end
    return obj
 end
@@ -181,11 +181,11 @@ function SourceCodeLineAccessorFactory:create( filePath, fileContents )
       
    end
    
-   local accessor = SourceCodeLineAccessor.new(filePath, lineList)
+   local accessor = SourceCodeLineAccessor._new(filePath, lineList)
    self.path2accessor[filePath] = accessor
    return accessor
 end
-function SourceCodeLineAccessorFactory.setmeta( obj )
+function SourceCodeLineAccessorFactory._setmeta( obj )
   setmetatable( obj, { __index = SourceCodeLineAccessorFactory  } )
 end
 

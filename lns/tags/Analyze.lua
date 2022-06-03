@@ -209,12 +209,12 @@ local LuneLog = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.bas
 local LuneUtil = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Util' )
 
 local Opt = {}
-function Opt.setmeta( obj )
+function Opt._setmeta( obj )
   setmetatable( obj, { __index = Opt  } )
 end
-function Opt.new(  )
+function Opt._new(  )
    local obj = {}
-   Opt.setmeta( obj )
+   Opt._setmeta( obj )
    if obj.__init then
       obj:__init(  )
    end
@@ -259,9 +259,9 @@ function tagFilter:getFileId( path )
    self.file2id[path] = fileId
    return fileId
 end
-function tagFilter.new( rootNode, db, streamName, noDefNsIdList )
+function tagFilter._new( rootNode, db, streamName, noDefNsIdList )
    local obj = {}
-   tagFilter.setmeta( obj )
+   tagFilter._setmeta( obj )
    if obj.__init then obj:__init( rootNode, db, streamName, noDefNsIdList ); end
    return obj
 end
@@ -278,7 +278,7 @@ function tagFilter:__init(rootNode, db, streamName, noDefNsIdList)
    local mod = self:getFull( rootNode:get_moduleTypeInfo(), false )
    self:addFileId( streamName, mod )
 end
-function tagFilter.setmeta( obj )
+function tagFilter._setmeta( obj )
   setmetatable( obj, { __index = tagFilter  } )
 end
 
@@ -771,8 +771,8 @@ local function dumpRoot( rootNode, db, streamName, noDefNsIdList )
       return streamName
    end )
    
-   local filter = tagFilter.new(rootNode, db, streamName, noDefNsIdList)
-   rootNode:processFilter( filter, Opt.new() )
+   local filter = tagFilter._new(rootNode, db, streamName, noDefNsIdList)
+   rootNode:processFilter( filter, Opt._new() )
 end
 
 local function start( db, pathList, transCtrlInfo )

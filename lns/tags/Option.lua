@@ -180,9 +180,9 @@ Mode.__allList[8] = Mode.Test
 
 local AnalyzeFileInfo = {}
 _moduleObj.AnalyzeFileInfo = AnalyzeFileInfo
-function AnalyzeFileInfo.new(  )
+function AnalyzeFileInfo._new(  )
    local obj = {}
-   AnalyzeFileInfo.setmeta( obj )
+   AnalyzeFileInfo._setmeta( obj )
    if obj.__init then obj:__init(  ); end
    return obj
 end
@@ -192,7 +192,7 @@ function AnalyzeFileInfo:__init()
    self.column = 0
    self.stdinFile = nil
 end
-function AnalyzeFileInfo.setmeta( obj )
+function AnalyzeFileInfo._setmeta( obj )
   setmetatable( obj, { __index = AnalyzeFileInfo  } )
 end
 function AnalyzeFileInfo:get_path()
@@ -211,9 +211,9 @@ end
 
 local Option = {}
 _moduleObj.Option = Option
-function Option.new(  )
+function Option._new(  )
    local obj = {}
-   Option.setmeta( obj )
+   Option._setmeta( obj )
    if obj.__init then obj:__init(  ); end
    return obj
 end
@@ -223,10 +223,10 @@ function Option:__init()
    self.mode = Mode.Build
    self.inqMode = InqMode.Def
    self.pattern = ""
-   self.analyzeFileInfo = AnalyzeFileInfo.new()
+   self.analyzeFileInfo = AnalyzeFileInfo._new()
    self.transCtrlInfo = LuneTypes.TransCtrlInfo.create_normal(  )
 end
-function Option.setmeta( obj )
+function Option._setmeta( obj )
   setmetatable( obj, { __index = Option  } )
 end
 function Option:get_pathList()
@@ -268,7 +268,7 @@ end
 
 local function analyzeArgs( argList )
 
-   local option = Option.new()
+   local option = Option._new()
    
    local index = 1
    
@@ -459,7 +459,7 @@ local function analyzeArgs( argList )
    
    
    if stdinFlag then
-      option.analyzeFileInfo.stdinFile = LuneTypes.StdinFile.new(LuneUtil.scriptPath2Module( option.analyzeFileInfo:get_path() ), _lune.unwrap( io.stdin:read( "*a" )))
+      option.analyzeFileInfo.stdinFile = LuneTypes.StdinFile._new(LuneUtil.scriptPath2Module( option.analyzeFileInfo:get_path() ), _lune.unwrap( io.stdin:read( "*a" )))
    end
    
    

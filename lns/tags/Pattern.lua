@@ -168,9 +168,9 @@ local LuneUtil = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.ba
 
 local SyntaxFilter = {}
 setmetatable( SyntaxFilter, { __index = Nodes.Filter } )
-function SyntaxFilter.new( ast )
+function SyntaxFilter._new( ast )
    local obj = {}
-   SyntaxFilter.setmeta( obj )
+   SyntaxFilter._setmeta( obj )
    if obj.__init then obj:__init( ast ); end
    return obj
 end
@@ -627,7 +627,7 @@ function SyntaxFilter:getPattern( path, analyzeFileInfo, inqMod )
    
    return pattern
 end
-function SyntaxFilter.setmeta( obj )
+function SyntaxFilter._setmeta( obj )
   setmetatable( obj, { __index = SyntaxFilter  } )
 end
 
@@ -657,7 +657,7 @@ local function getPatterAt( db, analyzeFileInfo, inqMod, transCtrlInfo )
       local __func__ = '@lns.@tags.@Pattern.getPatterAt.<anonymous>'
    
       if ast:get_streamName() == path then
-         local filter = SyntaxFilter.new(ast)
+         local filter = SyntaxFilter._new(ast)
          pattern = filter:getPattern( path, analyzeFileInfo, inqMod )
          Log.log( Log.Level.Log, __func__, 298, function (  )
          

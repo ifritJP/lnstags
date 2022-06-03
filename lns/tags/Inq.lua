@@ -71,7 +71,7 @@ local LuneAst = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.bas
 
 local function InqDef( db, pattern )
 
-   local factory = Util.SourceCodeLineAccessorFactory.new()
+   local factory = Util.SourceCodeLineAccessorFactory._new()
    db:mapSymbolDecl( pattern, function ( item )
    
       local path = db:getFilePath( item:get_fileId() )
@@ -89,7 +89,7 @@ _moduleObj.InqDef = InqDef
 
 local function InqRef( db, pattern, onlySet )
 
-   local factory = Util.SourceCodeLineAccessorFactory.new()
+   local factory = Util.SourceCodeLineAccessorFactory._new()
    db:mapSymbolRef( pattern, onlySet, function ( item )
    
       local path = db:getFilePath( item:get_fileId() )
@@ -107,7 +107,7 @@ _moduleObj.InqRef = InqRef
 
 local function InqAllmut( db )
 
-   local factory = Util.SourceCodeLineAccessorFactory.new()
+   local factory = Util.SourceCodeLineAccessorFactory._new()
    db:mapAllmutDecl( function ( item )
    
       local path = db:getFilePath( item:get_fileId() )
@@ -125,7 +125,7 @@ _moduleObj.InqAllmut = InqAllmut
 
 local function InqAsync( db, asyncMode )
 
-   local factory = Util.SourceCodeLineAccessorFactory.new()
+   local factory = Util.SourceCodeLineAccessorFactory._new()
    db:mapAsyncMode( asyncMode, function ( item )
    
       local path = db:getFilePath( item:get_fileId() )
@@ -143,7 +143,7 @@ _moduleObj.InqAsync = InqAsync
 
 local function InqLuaval( db )
 
-   local factory = Util.SourceCodeLineAccessorFactory.new()
+   local factory = Util.SourceCodeLineAccessorFactory._new()
    db:mapLuavalRef( function ( item )
    
       local path = db:getFilePath( item:get_fileId() )
@@ -161,7 +161,7 @@ _moduleObj.InqLuaval = InqLuaval
 
 local function InqAsyncLock( db )
 
-   local factory = Util.SourceCodeLineAccessorFactory.new()
+   local factory = Util.SourceCodeLineAccessorFactory._new()
    db:mapAsyncLock( function ( item )
    
       local path = db:getFilePath( item:get_fileId() )

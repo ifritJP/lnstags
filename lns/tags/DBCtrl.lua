@@ -205,9 +205,9 @@ local systemFileId = 1
 local DB_VERSION = 10.0
 
 local IdMgr = {}
-function IdMgr.new( idNum )
+function IdMgr._new( idNum )
    local obj = {}
-   IdMgr.setmeta( obj )
+   IdMgr._setmeta( obj )
    if obj.__init then obj:__init( idNum ); end
    return obj
 end
@@ -220,7 +220,7 @@ function IdMgr:getIdNext(  )
    self.idNum = self.idNum + 1
    return idNum
 end
-function IdMgr.setmeta( obj )
+function IdMgr._setmeta( obj )
   setmetatable( obj, { __index = IdMgr  } )
 end
 
@@ -243,9 +243,9 @@ function DBCtrl.getMaxId( access, tableName, defId )
    
    return defId
 end
-function DBCtrl.new( access, readonly )
+function DBCtrl._new( access, readonly )
    local obj = {}
-   DBCtrl.setmeta( obj )
+   DBCtrl._setmeta( obj )
    if obj.__init then obj:__init( access, readonly ); end
    return obj
 end
@@ -253,10 +253,10 @@ function DBCtrl:__init(access, readonly)
    self.access = access
    self.projDir = Depend.getCurDir(  )
    
-   self.idMgrNamespace = IdMgr.new(DBCtrl.getMaxId( access, "namespace", userNsId ))
-   self.idMgrSimpleName = IdMgr.new(DBCtrl.getMaxId( access, "simpleName", userNsId ))
-   self.idMgrFilePath = IdMgr.new(DBCtrl.getMaxId( access, "filePath", userNsId ))
-   self.idMgrProjInfo = IdMgr.new(DBCtrl.getMaxId( access, "projInfo", userNsId ))
+   self.idMgrNamespace = IdMgr._new(DBCtrl.getMaxId( access, "namespace", userNsId ))
+   self.idMgrSimpleName = IdMgr._new(DBCtrl.getMaxId( access, "simpleName", userNsId ))
+   self.idMgrFilePath = IdMgr._new(DBCtrl.getMaxId( access, "filePath", userNsId ))
+   self.idMgrProjInfo = IdMgr._new(DBCtrl.getMaxId( access, "projInfo", userNsId ))
 end
 function DBCtrl:close(  )
 
@@ -364,7 +364,7 @@ function DBCtrl:isKilling(  )
    
    return false
 end
-function DBCtrl.setmeta( obj )
+function DBCtrl._setmeta( obj )
   setmetatable( obj, { __index = DBCtrl  } )
 end
 function DBCtrl:get_projDir()
@@ -374,12 +374,12 @@ end
 
 local ETC = {}
 setmetatable( ETC, { ifList = {Mapping,} } )
-function ETC.setmeta( obj )
+function ETC._setmeta( obj )
   setmetatable( obj, { __index = ETC  } )
 end
-function ETC.new( keyName, val )
+function ETC._new( keyName, val )
    local obj = {}
-   ETC.setmeta( obj )
+   ETC._setmeta( obj )
    if obj.__init then
       obj:__init( keyName, val )
    end
@@ -402,7 +402,7 @@ end
 function ETC._fromMap( val )
   local obj, mes = ETC._fromMapSub( {}, val )
   if obj then
-     ETC.setmeta( obj )
+     ETC._setmeta( obj )
   end
   return obj, mes
 end
@@ -440,7 +440,7 @@ local function open( path, readonly )
    
    db:exec( "PRAGMA case_sensitive_like=ON;", nil )
    
-   local dbCtrl = DBCtrl.new(db, readonly)
+   local dbCtrl = DBCtrl._new(db, readonly)
    
    if not readonly then
       dbCtrl:begin(  )
@@ -532,12 +532,12 @@ end
 
 local ItemProjInfo = {}
 setmetatable( ItemProjInfo, { ifList = {Mapping,} } )
-function ItemProjInfo.setmeta( obj )
+function ItemProjInfo._setmeta( obj )
   setmetatable( obj, { __index = ItemProjInfo  } )
 end
-function ItemProjInfo.new( id, dir )
+function ItemProjInfo._new( id, dir )
    local obj = {}
-   ItemProjInfo.setmeta( obj )
+   ItemProjInfo._setmeta( obj )
    if obj.__init then
       obj:__init( id, dir )
    end
@@ -560,7 +560,7 @@ end
 function ItemProjInfo._fromMap( val )
   local obj, mes = ItemProjInfo._fromMapSub( {}, val )
   if obj then
-     ItemProjInfo.setmeta( obj )
+     ItemProjInfo._setmeta( obj )
   end
   return obj, mes
 end
@@ -583,12 +583,12 @@ end
 local ItemFilePath = {}
 setmetatable( ItemFilePath, { ifList = {Mapping,} } )
 _moduleObj.ItemFilePath = ItemFilePath
-function ItemFilePath.setmeta( obj )
+function ItemFilePath._setmeta( obj )
   setmetatable( obj, { __index = ItemFilePath  } )
 end
-function ItemFilePath.new( id, path, mod, projId )
+function ItemFilePath._new( id, path, mod, projId )
    local obj = {}
-   ItemFilePath.setmeta( obj )
+   ItemFilePath._setmeta( obj )
    if obj.__init then
       obj:__init( id, path, mod, projId )
    end
@@ -619,7 +619,7 @@ end
 function ItemFilePath._fromMap( val )
   local obj, mes = ItemFilePath._fromMapSub( {}, val )
   if obj then
-     ItemFilePath.setmeta( obj )
+     ItemFilePath._setmeta( obj )
   end
   return obj, mes
 end
@@ -644,12 +644,12 @@ end
 local ItemNamespace = {}
 setmetatable( ItemNamespace, { ifList = {Mapping,} } )
 _moduleObj.ItemNamespace = ItemNamespace
-function ItemNamespace.setmeta( obj )
+function ItemNamespace._setmeta( obj )
   setmetatable( obj, { __index = ItemNamespace  } )
 end
-function ItemNamespace.new( id, snameId, parentId, name )
+function ItemNamespace._new( id, snameId, parentId, name )
    local obj = {}
-   ItemNamespace.setmeta( obj )
+   ItemNamespace._setmeta( obj )
    if obj.__init then
       obj:__init( id, snameId, parentId, name )
    end
@@ -680,7 +680,7 @@ end
 function ItemNamespace._fromMap( val )
   local obj, mes = ItemNamespace._fromMapSub( {}, val )
   if obj then
-     ItemNamespace.setmeta( obj )
+     ItemNamespace._setmeta( obj )
   end
   return obj, mes
 end
@@ -705,12 +705,12 @@ end
 local ItemAllmutDecl = {}
 setmetatable( ItemAllmutDecl, { ifList = {Mapping,} } )
 _moduleObj.ItemAllmutDecl = ItemAllmutDecl
-function ItemAllmutDecl.setmeta( obj )
+function ItemAllmutDecl._setmeta( obj )
   setmetatable( obj, { __index = ItemAllmutDecl  } )
 end
-function ItemAllmutDecl.new( nsId, fileId, line )
+function ItemAllmutDecl._new( nsId, fileId, line )
    local obj = {}
-   ItemAllmutDecl.setmeta( obj )
+   ItemAllmutDecl._setmeta( obj )
    if obj.__init then
       obj:__init( nsId, fileId, line )
    end
@@ -737,7 +737,7 @@ end
 function ItemAllmutDecl._fromMap( val )
   local obj, mes = ItemAllmutDecl._fromMapSub( {}, val )
   if obj then
-     ItemAllmutDecl.setmeta( obj )
+     ItemAllmutDecl._setmeta( obj )
   end
   return obj, mes
 end
@@ -761,12 +761,12 @@ end
 local ItemAsyncMode = {}
 setmetatable( ItemAsyncMode, { ifList = {Mapping,} } )
 _moduleObj.ItemAsyncMode = ItemAsyncMode
-function ItemAsyncMode.setmeta( obj )
+function ItemAsyncMode._setmeta( obj )
   setmetatable( obj, { __index = ItemAsyncMode  } )
 end
-function ItemAsyncMode.new( nsId, mode, fileId, line )
+function ItemAsyncMode._new( nsId, mode, fileId, line )
    local obj = {}
-   ItemAsyncMode.setmeta( obj )
+   ItemAsyncMode._setmeta( obj )
    if obj.__init then
       obj:__init( nsId, mode, fileId, line )
    end
@@ -797,7 +797,7 @@ end
 function ItemAsyncMode._fromMap( val )
   local obj, mes = ItemAsyncMode._fromMapSub( {}, val )
   if obj then
-     ItemAsyncMode.setmeta( obj )
+     ItemAsyncMode._setmeta( obj )
   end
   return obj, mes
 end
@@ -822,12 +822,12 @@ end
 local ItemSymbolDecl = {}
 setmetatable( ItemSymbolDecl, { ifList = {Mapping,} } )
 _moduleObj.ItemSymbolDecl = ItemSymbolDecl
-function ItemSymbolDecl.setmeta( obj )
+function ItemSymbolDecl._setmeta( obj )
   setmetatable( obj, { __index = ItemSymbolDecl  } )
 end
-function ItemSymbolDecl.new( nsId, fileId, line, column )
+function ItemSymbolDecl._new( nsId, fileId, line, column )
    local obj = {}
-   ItemSymbolDecl.setmeta( obj )
+   ItemSymbolDecl._setmeta( obj )
    if obj.__init then
       obj:__init( nsId, fileId, line, column )
    end
@@ -858,7 +858,7 @@ end
 function ItemSymbolDecl._fromMap( val )
   local obj, mes = ItemSymbolDecl._fromMapSub( {}, val )
   if obj then
-     ItemSymbolDecl.setmeta( obj )
+     ItemSymbolDecl._setmeta( obj )
   end
   return obj, mes
 end
@@ -883,12 +883,12 @@ end
 local ItemSymbolRef = {}
 setmetatable( ItemSymbolRef, { ifList = {Mapping,} } )
 _moduleObj.ItemSymbolRef = ItemSymbolRef
-function ItemSymbolRef.setmeta( obj )
+function ItemSymbolRef._setmeta( obj )
   setmetatable( obj, { __index = ItemSymbolRef  } )
 end
-function ItemSymbolRef.new( nsId, fileId, line, column, setOp )
+function ItemSymbolRef._new( nsId, fileId, line, column, setOp )
    local obj = {}
-   ItemSymbolRef.setmeta( obj )
+   ItemSymbolRef._setmeta( obj )
    if obj.__init then
       obj:__init( nsId, fileId, line, column, setOp )
    end
@@ -923,7 +923,7 @@ end
 function ItemSymbolRef._fromMap( val )
   local obj, mes = ItemSymbolRef._fromMapSub( {}, val )
   if obj then
-     ItemSymbolRef.setmeta( obj )
+     ItemSymbolRef._setmeta( obj )
   end
   return obj, mes
 end
@@ -949,12 +949,12 @@ end
 local ItemOverride = {}
 setmetatable( ItemOverride, { ifList = {Mapping,} } )
 _moduleObj.ItemOverride = ItemOverride
-function ItemOverride.setmeta( obj )
+function ItemOverride._setmeta( obj )
   setmetatable( obj, { __index = ItemOverride  } )
 end
-function ItemOverride.new( nsId, superNsId )
+function ItemOverride._new( nsId, superNsId )
    local obj = {}
-   ItemOverride.setmeta( obj )
+   ItemOverride._setmeta( obj )
    if obj.__init then
       obj:__init( nsId, superNsId )
    end
@@ -977,7 +977,7 @@ end
 function ItemOverride._fromMap( val )
   local obj, mes = ItemOverride._fromMapSub( {}, val )
   if obj then
-     ItemOverride.setmeta( obj )
+     ItemOverride._setmeta( obj )
   end
   return obj, mes
 end
@@ -1000,12 +1000,12 @@ end
 local ItemLuavalRef = {}
 setmetatable( ItemLuavalRef, { ifList = {Mapping,} } )
 _moduleObj.ItemLuavalRef = ItemLuavalRef
-function ItemLuavalRef.setmeta( obj )
+function ItemLuavalRef._setmeta( obj )
   setmetatable( obj, { __index = ItemLuavalRef  } )
 end
-function ItemLuavalRef.new( fileId, line )
+function ItemLuavalRef._new( fileId, line )
    local obj = {}
-   ItemLuavalRef.setmeta( obj )
+   ItemLuavalRef._setmeta( obj )
    if obj.__init then
       obj:__init( fileId, line )
    end
@@ -1028,7 +1028,7 @@ end
 function ItemLuavalRef._fromMap( val )
   local obj, mes = ItemLuavalRef._fromMapSub( {}, val )
   if obj then
-     ItemLuavalRef.setmeta( obj )
+     ItemLuavalRef._setmeta( obj )
   end
   return obj, mes
 end
@@ -1051,12 +1051,12 @@ end
 local ItemAsyncLock = {}
 setmetatable( ItemAsyncLock, { ifList = {Mapping,} } )
 _moduleObj.ItemAsyncLock = ItemAsyncLock
-function ItemAsyncLock.setmeta( obj )
+function ItemAsyncLock._setmeta( obj )
   setmetatable( obj, { __index = ItemAsyncLock  } )
 end
-function ItemAsyncLock.new( fileId, line, kind )
+function ItemAsyncLock._new( fileId, line, kind )
    local obj = {}
-   ItemAsyncLock.setmeta( obj )
+   ItemAsyncLock._setmeta( obj )
    if obj.__init then
       obj:__init( fileId, line, kind )
    end
@@ -1083,7 +1083,7 @@ end
 function ItemAsyncLock._fromMap( val )
   local obj, mes = ItemAsyncLock._fromMapSub( {}, val )
   if obj then
-     ItemAsyncLock.setmeta( obj )
+     ItemAsyncLock._setmeta( obj )
   end
   return obj, mes
 end
@@ -1467,7 +1467,7 @@ local function create( dbPath )
    end
    
    
-   local dbCtrl = DBCtrl.new(db, false)
+   local dbCtrl = DBCtrl._new(db, false)
    
    dbCtrl:creataTables(  )
    

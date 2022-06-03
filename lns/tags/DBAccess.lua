@@ -85,9 +85,9 @@ local Log = _lune.loadModule( 'lns.tags.Log' )
 
 local DBAccess = {}
 _moduleObj.DBAccess = DBAccess
-function DBAccess.new( db, path, readonlyFlag )
+function DBAccess._new( db, path, readonlyFlag )
    local obj = {}
-   DBAccess.setmeta( obj )
+   DBAccess._setmeta( obj )
    if obj.__init then obj:__init( db, path, readonlyFlag ); end
    return obj
 end
@@ -102,7 +102,7 @@ function DBAccess:errorExit( mess )
    io.stderr:write( mess .. "\n" )
    os.exit( 1 )
 end
-function DBAccess.setmeta( obj )
+function DBAccess._setmeta( obj )
   setmetatable( obj, { __index = DBAccess  } )
 end
 function DBAccess:get_readonlyFlag()
@@ -124,7 +124,7 @@ local function open( path, readonly )
       return nil
    end
    
-   return DBAccess.new(db, path, readonly)
+   return DBAccess._new(db, path, readonly)
 end
 _moduleObj.open = open
 
