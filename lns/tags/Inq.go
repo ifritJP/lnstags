@@ -24,6 +24,7 @@ func Inq_InqDef(_env *LnsEnv, db *DBCtrl_DBCtrl,pattern string) {
     }))
 }
 
+
 // 19: decl @lns.@tags.@Inq.InqRef
 func Inq_InqRef(_env *LnsEnv, db *DBCtrl_DBCtrl,pattern string,onlySet bool) {
     var factory *Util_SourceCodeLineAccessorFactory
@@ -43,6 +44,7 @@ func Inq_InqRef(_env *LnsEnv, db *DBCtrl_DBCtrl,pattern string,onlySet bool) {
         return true
     }))
 }
+
 
 // 33: decl @lns.@tags.@Inq.InqAllmut
 func Inq_InqAllmut(_env *LnsEnv, db *DBCtrl_DBCtrl) {
@@ -64,6 +66,7 @@ func Inq_InqAllmut(_env *LnsEnv, db *DBCtrl_DBCtrl) {
     }))
 }
 
+
 // 47: decl @lns.@tags.@Inq.InqAsync
 func Inq_InqAsync(_env *LnsEnv, db *DBCtrl_DBCtrl,asyncMode LnsInt) {
     var factory *Util_SourceCodeLineAccessorFactory
@@ -83,6 +86,7 @@ func Inq_InqAsync(_env *LnsEnv, db *DBCtrl_DBCtrl,asyncMode LnsInt) {
         return true
     }))
 }
+
 
 // 62: decl @lns.@tags.@Inq.InqLuaval
 func Inq_InqLuaval(_env *LnsEnv, db *DBCtrl_DBCtrl) {
@@ -104,6 +108,7 @@ func Inq_InqLuaval(_env *LnsEnv, db *DBCtrl_DBCtrl) {
     }))
 }
 
+
 // 75: decl @lns.@tags.@Inq.InqAsyncLock
 func Inq_InqAsyncLock(_env *LnsEnv, db *DBCtrl_DBCtrl) {
     var factory *Util_SourceCodeLineAccessorFactory
@@ -123,11 +128,6 @@ func Inq_InqAsyncLock(_env *LnsEnv, db *DBCtrl_DBCtrl) {
         return true
     }))
 }
-
-
-
-
-
 
 
 func Lns_Inq_init(_env *LnsEnv) {

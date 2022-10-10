@@ -26,24 +26,24 @@ func DBAccess_open(_env *LnsEnv, path string,readonly bool) LnsAny {
     return NewDBAccess_DBAccess(_env, db, path, readonly)
 }
 
-func DBAccess_begin___anonymous_0_(_env *LnsEnv) string {
-    return "start"
-}
-func DBAccess_begin___anonymous_1_(_env *LnsEnv) string {
-    return "db mode is read only"
-}
-func DBAccess_commit___anonymous_0_(_env *LnsEnv) string {
-    return "commit: start"
-}
-func DBAccess_commit___anonymous_1_(_env *LnsEnv) string {
-    return "commit: end"
-}
-func DBAccess_createTables___anonymous_0_(_env *LnsEnv, stmt string,msg string) {
+func DBAccess_DBAccess_createTables___anonymous_0_(_env *LnsEnv, stmt string,msg string) {
     if Lns_op_not(Lns_car(_env.GetVM().String_find(msg,"already exists", 1, true))){
         Lns_print([]LnsAny{msg})
     }
 }
 
+func DBAccess_DBAccess_begin___anonymous_0_(_env *LnsEnv) string {
+    return "start"
+}
+func DBAccess_DBAccess_begin___anonymous_1_(_env *LnsEnv) string {
+    return "db mode is read only"
+}
+func DBAccess_DBAccess_commit___anonymous_0_(_env *LnsEnv) string {
+    return "commit: start"
+}
+func DBAccess_DBAccess_commit___anonymous_1_(_env *LnsEnv) string {
+    return "commit: end"
+}
 // 23: decl @lns.@tags.@DBAccess.DBAccess.errorExit
 func (self *DBAccess_DBAccess) ErrorExit(_env *LnsEnv, mess string) {
     Lns_io_stderr.Write(_env, mess + "\n")
@@ -59,10 +59,10 @@ func (self *DBAccess_DBAccess) outputLog(_env *LnsEnv, message string) {
 // 51: decl @lns.@tags.@DBAccess.DBAccess.begin
 func (self *DBAccess_DBAccess) Begin(_env *LnsEnv) {
     __func__ := "@lns.@tags.@DBAccess.DBAccess.begin"
-    Log_log(_env, Log_Level__Log, __func__, 53, Log_CreateMessage(DBAccess_begin___anonymous_0_))
+    Log_log(_env, Log_Level__Log, __func__, 53, Log_CreateMessage(DBAccess_DBAccess_begin___anonymous_0_))
     
     if self.readonlyFlag{
-        Log_log(_env, Log_Level__Err, __func__, 56, Log_CreateMessage(DBAccess_begin___anonymous_1_))
+        Log_log(_env, Log_Level__Err, __func__, 56, Log_CreateMessage(DBAccess_DBAccess_begin___anonymous_1_))
         
         _env.GetVM().OS_exit(1)
     }
@@ -79,10 +79,10 @@ func (self *DBAccess_DBAccess) Commit(_env *LnsEnv) {
         return 
     }
     self.beginFlag = false
-    Log_log(_env, Log_Level__Log, __func__, 81, Log_CreateMessage(DBAccess_commit___anonymous_0_))
+    Log_log(_env, Log_Level__Log, __func__, 81, Log_CreateMessage(DBAccess_DBAccess_commit___anonymous_0_))
     
     self.db.Commit(_env)
-    Log_log(_env, Log_Level__Log, __func__, 85, Log_CreateMessage(DBAccess_commit___anonymous_1_))
+    Log_log(_env, Log_Level__Log, __func__, 85, Log_CreateMessage(DBAccess_DBAccess_commit___anonymous_1_))
     
 }
 // 88: decl @lns.@tags.@DBAccess.DBAccess.exec
@@ -160,7 +160,7 @@ func (self *DBAccess_DBAccess) MapRowList(_env *LnsEnv, tableName string,conditi
 }
 // 162: decl @lns.@tags.@DBAccess.DBAccess.createTables
 func (self *DBAccess_DBAccess) CreateTables(_env *LnsEnv, sqlTxt string) {
-    self.FP.Exec(_env, sqlTxt, base.Base_errHandleForm(DBAccess_createTables___anonymous_0_))
+    self.FP.Exec(_env, sqlTxt, base.Base_errHandleForm(DBAccess_DBAccess_createTables___anonymous_0_))
 }
 // 172: decl @lns.@tags.@DBAccess.DBAccess.insert
 func (self *DBAccess_DBAccess) Insert(_env *LnsEnv, tableName string,values string) {

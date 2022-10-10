@@ -87,7 +87,7 @@ func Option_Mode__from(_env *LnsEnv, arg1 string) LnsAny{
 func Option_Mode_getTxt(arg1 string) string {
     return Option_ModeMap_[arg1];
 }
-type analyzeArgs__getNextOpNonNilFunc_0_ func (_env *LnsEnv, arg1 string) string
+type Option_analyzeArgs__getNextOpNonNilFunc_0_ func (_env *LnsEnv, arg1 string) string
 // 60: decl @lns.@tags.@Option.printUsage
 func Option_printUsage_4_(_env *LnsEnv, messages LnsAny) {
     if messages != nil{
@@ -108,25 +108,25 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
     option = NewOption_Option(_env)
     var index LnsInt
     index = 1
-    var getNextOpNonNil analyzeArgs__getNextOpNonNilFunc_0_
-    getNextOpNonNil = analyzeArgs__getNextOpNonNilFunc_0_(analyzeArgs___anonymous_1_)
+    var getNextOpNonNil Option_analyzeArgs__getNextOpNonNilFunc_0_
+    getNextOpNonNil = Option_analyzeArgs__getNextOpNonNilFunc_0_(Option_analyzeArgs___anonymous_1_)
     var stdinFlag bool
     stdinFlag = false
-    var getNextOpRaw func(_env *LnsEnv) LnsAny
-    getNextOpRaw = func(_env *LnsEnv) LnsAny {
+    var Option_getNextOpRaw func(_env *LnsEnv) LnsAny
+    Option_getNextOpRaw = func(_env *LnsEnv) LnsAny {
         if argList.Len() <= index{
             return nil
         }
         index = index + 1
         return argList.GetAt(index).(string)
     }
-    var getNextOp func(_env *LnsEnv) LnsAny
-    getNextOp = func(_env *LnsEnv) LnsAny {
+    var Option_getNextOp func(_env *LnsEnv) LnsAny
+    Option_getNextOp = func(_env *LnsEnv) LnsAny {
         for  {
             var arg string
             
             {
-                _arg := getNextOpRaw(_env)
+                _arg := Option_getNextOpRaw(_env)
                 if _arg == nil{
                     return nil
                 } else {
@@ -150,9 +150,9 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
     // insert a dummy
         return nil
     }
-    getNextOpNonNil = analyzeArgs__getNextOpNonNilFunc_0_(func(_env *LnsEnv, mess string) string {
+    getNextOpNonNil = Option_analyzeArgs__getNextOpNonNilFunc_0_(func(_env *LnsEnv, mess string) string {
         {
-            _arg := getNextOp(_env)
+            _arg := Option_getNextOp(_env)
             if !Lns_IsNil( _arg ) {
                 arg := _arg.(string)
                 return arg
@@ -162,10 +162,10 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
     // insert a dummy
         return ""
     })
-    var getNextOpInt func(_env *LnsEnv, mess string) LnsInt
-    getNextOpInt = func(_env *LnsEnv, mess string) LnsInt {
+    var Option_getNextOpInt func(_env *LnsEnv, mess string) LnsInt
+    Option_getNextOpInt = func(_env *LnsEnv, mess string) LnsInt {
         {
-            _arg := getNextOp(_env)
+            _arg := Option_getNextOp(_env)
             if !Lns_IsNil( _arg ) {
                 arg := _arg.(string)
                 {
@@ -182,12 +182,12 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
     // insert a dummy
         return 0
     }
-    var getInqMode func(_env *LnsEnv) string
-    getInqMode = func(_env *LnsEnv) string {
+    var Option_getInqMode func(_env *LnsEnv) string
+    Option_getInqMode = func(_env *LnsEnv) string {
         var nextToken string
         
         {
-            _nextToken := getNextOp(_env)
+            _nextToken := Option_getNextOp(_env)
             if _nextToken == nil{
                 Option_printUsage_4_(_env, "illegal inqMod")
             } else {
@@ -212,7 +212,7 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
         var arg string
         
         {
-            _arg := getNextOp(_env)
+            _arg := Option_getNextOp(_env)
             if _arg == nil{
                 break
             } else {
@@ -226,17 +226,17 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
                     work := _work.(string)
                     mode = work
                     if _switch1 := mode; _switch1 == Option_Mode__Inq {
-                        option.inqMode = getInqMode(_env)
+                        option.inqMode = Option_getInqMode(_env)
                         if _switch0 := option.inqMode; _switch0 == Option_InqMode__AllMut || _switch0 == Option_InqMode__Async || _switch0 == Option_InqMode__Noasync || _switch0 == Option_InqMode__Luaval || _switch0 == Option_InqMode__AsyncLock {
                         } else {
                             option.pattern = getNextOpNonNil(_env, "none pattern")
                         }
                         Log_setLevel(_env, Log_Level__Warn)
                     } else if _switch1 == Option_Mode__InqAt {
-                        option.inqMode = getInqMode(_env)
+                        option.inqMode = Option_getInqMode(_env)
                         option.analyzeFileInfo.path = getNextOpNonNil(_env, "none path")
-                        option.analyzeFileInfo.lineNo = getNextOpInt(_env, "none lineno")
-                        option.analyzeFileInfo.column = getNextOpInt(_env, "none column")
+                        option.analyzeFileInfo.lineNo = Option_getNextOpInt(_env, "none lineno")
+                        option.analyzeFileInfo.column = Option_getNextOpInt(_env, "none column")
                     } else if _switch1 == Option_Mode__Suffix {
                         option.pattern = getNextOpNonNil(_env, "none pattern")
                     }
@@ -288,7 +288,7 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
     return nil
 }
 
-func analyzeArgs___anonymous_1_(_env *LnsEnv, mess string) string {
+func Option_analyzeArgs___anonymous_1_(_env *LnsEnv, mess string) string {
     Option_printUsage_4_(_env, "")
 // insert a dummy
     return ""

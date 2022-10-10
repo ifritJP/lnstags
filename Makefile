@@ -3,6 +3,8 @@ LNSC=lnsc
 SRCS=
 SRCS += $(shell find lns -iname '*.lns')
 
+.PHONY: lnstags
+
 
 help:
 	@echo make build [LNS_OPT=opt]

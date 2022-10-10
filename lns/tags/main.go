@@ -107,7 +107,7 @@ func Main___main(_env *LnsEnv, args *LnsList) LnsInt {
                 db = _db.(*DBCtrl_DBCtrl)
             }
         }
-        db.FP.MapNamespaceSuffix(_env, option.FP.Get_pattern(_env), DBCtrl_NameSpaceCallback(__main___anonymous_1_))
+        db.FP.MapNamespaceSuffix(_env, option.FP.Get_pattern(_env), DBCtrl_NameSpaceCallback(main___main___anonymous_1_))
         db.FP.Close(_env)
     } else if _switch0 == Option_Mode__Inq {
         main_inq_0_(_env, option.FP.Get_inqMode(_env), option.FP.Get_pattern(_env))
@@ -160,7 +160,7 @@ func Main___main(_env *LnsEnv, args *LnsList) LnsInt {
 }
 
 
-func __main___anonymous_1_(_env *LnsEnv, item *DBCtrl_ItemNamespace) bool {
+func main___main___anonymous_1_(_env *LnsEnv, item *DBCtrl_ItemNamespace) bool {
     Lns_print([]LnsAny{item.FP.Get_name(_env)})
     return true
 }
