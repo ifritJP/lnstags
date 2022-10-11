@@ -107,7 +107,7 @@ inq: build
 check: build
 	(cd test;../lnstags init)
 	(cd test;../lnstags build main.lns --log debug)
-	$(MAKE) inq 2>&1 | grep -v -e '^make\[' > work/output.new.txt 
+	$(MAKE) inq 2>&1 | grep -v -e '^make\[' -e ' -o lnstags' > work/output.new.txt 
 	diff test/output.txt work/output.new.txt
 
 
