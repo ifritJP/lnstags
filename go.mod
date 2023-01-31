@@ -1,10 +1,16 @@
 module github.com/ifritJP/lnstags
 
-go 1.16
+go 1.18
 
 require (
-	github.com/ifritJP/LuneScript/src v0.0.0-20230125120604-68adf239672a
+	github.com/ifritJP/LuneScript/src v0.0.0-20230130125024-c9f1b77ff224
 	github.com/ifritJP/lnssqlite3/src v0.0.0-20210523141024-7ad875760090
+)
+
+require (
+	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
+	github.com/mattn/go-sqlite3 v1.14.7 // indirect
+	github.com/yuin/gopher-lua v0.0.0-20220413183635-c841877397d8 // indirect
 )
 
 // replace github.com/ifritJP/LuneScript/src => ../LuneScript/src

@@ -144,19 +144,21 @@
     (setq select-func (cdr (assoc 'action lnstags-params )))
     (if (eq (length candidate-list) 1)
 	(funcall select-func (cdr (car candidate-list)))
-      (helm :sources lnstags-params
-	    :keymap lnstags-heml-map
-	    :preselect (plist-get item :latest)
-	    :buffer lnstags-helm-buffer-name))
+      (let ((helm-candidate-number-limit 9999))
+	(helm :sources lnstags-params
+	      :keymap lnstags-heml-map
+	      :preselect (plist-get item :latest)
+	      :buffer lnstags-helm-buffer-name)))
   ))
 (defun lnstags-helm-history-show ()
   (interactive)
-  (helm :sources `((name . "lnstags-history")
-		   (candidates . ,(reverse lnstags-helm-history))
-		   (action . lnstags-helm-history-select))
-	:buffer lnstags-helm-buffer-name
-	:preselect lnstags-helm-history-cur-time
-	)
+  (let ((helm-candidate-number-limit 9999))
+    (helm :sources `((name . "lnstags-history")
+		     (candidates . ,(reverse lnstags-helm-history))
+		     (action . lnstags-helm-history-select))
+	  :buffer lnstags-helm-buffer-name
+	  :preselect lnstags-helm-history-cur-time
+	  ))
   )
   
 

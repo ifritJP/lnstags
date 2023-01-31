@@ -3,6 +3,11 @@ LNSC=lnsc
 SRCS=
 SRCS += $(shell find lns -iname '*.lns')
 
+ifneq "$(wildcard Makefile.local)" ""
+include Makefile.local
+endif
+
+
 .PHONY: lnstags
 
 
