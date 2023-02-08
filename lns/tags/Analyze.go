@@ -218,8 +218,8 @@ func (self *Analyze_tagFilter) registDeclSym(_env *LnsEnv, symbolInfo *LuneAst.A
     var symNsId LnsInt
     symNsId = Analyze_convExp0_759(Lns_2DDD(self.FP.registerSymbol(_env, symbolInfo)))
     var pos Types.Types_Position
-    pos = Lns_unwrap( _env.NilAccFin(_env.NilAccPush(symbolInfo.FP.Get_pos(_env)) && 
-    Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(Types.Types_Position).Get_orgPos(_env)}))).(Types.Types_Position)
+    pos = Lns_unwrap( (_env.NilAccFin(_env.NilAccPush(symbolInfo.FP.Get_pos(_env)) && 
+    Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(Types.Types_Position).Get_orgPos(_env)})))).(Types.Types_Position)
     var fileId LnsInt
     fileId = self.FP.getFileId(_env, pos.StreamName)
     self.db.FP.AddSymbolDecl(_env, symNsId, fileId, pos.LineNo, pos.Column)
@@ -250,8 +250,8 @@ func (self *Analyze_tagFilter) registerDecl(_env *LnsEnv, nodeManager *Nodes.Nod
     }
     var Analyze_registerAutoMethod func(_env *LnsEnv, parentInfo *LuneAst.Ast_TypeInfo,pos Types.Types_Position)
     Analyze_registerAutoMethod = func(_env *LnsEnv, parentInfo *LuneAst.Ast_TypeInfo,pos Types.Types_Position) {
-        for _, _symbolInfo := range( Lns_unwrap( _env.NilAccFin(_env.NilAccPush(parentInfo.FP.Get_scope(_env)) && 
-        Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(*LuneAst.Ast_Scope).FP.Get_symbol2SymbolInfoMap(_env)}))).(*LnsMap).Items ) {
+        for _, _symbolInfo := range( Lns_unwrap( (_env.NilAccFin(_env.NilAccPush(parentInfo.FP.Get_scope(_env)) && 
+        Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(*LuneAst.Ast_Scope).FP.Get_symbol2SymbolInfoMap(_env)})))).(*LnsMap).Items ) {
             symbolInfo := _symbolInfo.(LuneAst.Ast_SymbolInfoDownCast).ToAst_SymbolInfo()
             var typeInfo *LuneAst.Ast_TypeInfo
             typeInfo = symbolInfo.FP.Get_typeInfo(_env)
@@ -392,8 +392,8 @@ func (self *Analyze_tagFilter) registerDecl(_env *LnsEnv, nodeManager *Nodes.Nod
             var name string
             name = _env.GetVM().String_format("get_%s", []LnsAny{workNode.FP.Get_name(_env).Txt})
             var pos Types.Types_Position
-            pos = Lns_unwrap( _env.NilAccFin(_env.NilAccPush(workNode.FP.Get_getterToken(_env)) && 
-            _env.NilAccPush(_env.NilAccPop().(*Types.Types_Token).Pos))).(Types.Types_Position)
+            pos = Lns_unwrap( (_env.NilAccFin(_env.NilAccPush(workNode.FP.Get_getterToken(_env)) && 
+            _env.NilAccPush(_env.NilAccPop().(*Types.Types_Token).Pos)))).(Types.Types_Position)
             Analyze_addMethod(_env, Lns_unwrap( _env.NilAccFin(_env.NilAccPush(workNode.FP.Get_classType(_env).FP.Get_scope(_env)) && 
             Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(*LuneAst.Ast_Scope).FP.GetTypeInfoChild(_env, name)})/* 244:20 */)).(*LuneAst.Ast_TypeInfo), pos)
             self.FP.addSymbolRef(_env, mbrNsId, pos, true)
@@ -402,8 +402,8 @@ func (self *Analyze_tagFilter) registerDecl(_env *LnsEnv, nodeManager *Nodes.Nod
             var name string
             name = _env.GetVM().String_format("set_%s", []LnsAny{workNode.FP.Get_name(_env).Txt})
             var pos Types.Types_Position
-            pos = Lns_unwrap( _env.NilAccFin(_env.NilAccPush(workNode.FP.Get_setterToken(_env)) && 
-            _env.NilAccPush(_env.NilAccPop().(*Types.Types_Token).Pos))).(Types.Types_Position)
+            pos = Lns_unwrap( (_env.NilAccFin(_env.NilAccPush(workNode.FP.Get_setterToken(_env)) && 
+            _env.NilAccPush(_env.NilAccPop().(*Types.Types_Token).Pos)))).(Types.Types_Position)
             Analyze_addMethod(_env, Lns_unwrap( _env.NilAccFin(_env.NilAccPush(workNode.FP.Get_classType(_env).FP.Get_scope(_env)) && 
             Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(*LuneAst.Ast_Scope).FP.GetTypeInfoChild(_env, name)})/* 252:20 */)).(*LuneAst.Ast_TypeInfo), pos)
             self.FP.addSymbolRef(_env, mbrNsId, pos, false)
@@ -707,7 +707,6 @@ type Analyze_tagFilterMtd interface {
     ProcessIf(_env *LnsEnv, arg1 *Nodes.Nodes_IfNode, arg2 LnsAny)
     ProcessIfUnwrap(_env *LnsEnv, arg1 *Nodes.Nodes_IfUnwrapNode, arg2 LnsAny)
     ProcessImport(_env *LnsEnv, arg1 *Nodes.Nodes_ImportNode, arg2 LnsAny)
-    ProcessLetExpandTuple(_env *LnsEnv, arg1 *Nodes.Nodes_LetExpandTupleNode, arg2 LnsAny)
     ProcessLiteralArray(_env *LnsEnv, arg1 *Nodes.Nodes_LiteralArrayNode, arg2 LnsAny)
     ProcessLiteralBool(_env *LnsEnv, arg1 *Nodes.Nodes_LiteralBoolNode, arg2 LnsAny)
     ProcessLiteralChar(_env *LnsEnv, arg1 *Nodes.Nodes_LiteralCharNode, arg2 LnsAny)

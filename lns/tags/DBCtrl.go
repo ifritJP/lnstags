@@ -731,8 +731,7 @@ func (self *DBCtrl_DBCtrl) AddSymbolDecl(_env *LnsEnv, nsId LnsInt,fileId LnsInt
     var parentId LnsAny
     
     {
-        _parentId := _env.NilAccFin( _env.NilAccPush(
-        self.FP.GetRow(_env, "namespace", _env.GetVM().String_format("id = %d", []LnsAny{nsId}), "parentId", nil)) && 
+        _parentId := _env.NilAccFin(_env.NilAccPush(self.FP.GetRow(_env, "namespace", _env.GetVM().String_format("id = %d", []LnsAny{nsId}), "parentId", nil)) && 
         _env.NilAccPush( _env.NilAccPop().(*LnsMap).Get("parentId")))
         if _parentId == nil{
             return 
