@@ -1,5 +1,7 @@
 // -*- coding: utf-8 -*-
 
+_lune_control default_strict_generics;
+
 import lns.tags.DBCtrl;
 import lns.tags.Analyze;
 import lns.tags.Option;
@@ -62,7 +64,7 @@ fn build( pathList:&List<str>, transCtrlInfo:&LuneTypes.TransCtrlInfo ) : int {
    return 0;
 }
 
-pub fn __main( args:&List<str> ) : int {
+pub fn __main( args:&_List<str> ) : int {
 
 
    let mut option = Option.analyzeArgs( args );

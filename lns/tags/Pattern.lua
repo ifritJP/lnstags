@@ -148,6 +148,8 @@ end
 if not _lune8 then
    _lune8 = _lune
 end
+
+
 local DBCtrl = _lune.loadModule( 'lns.tags.DBCtrl' )
 local Option = _lune.loadModule( 'lns.tags.Option' )
 local Log = _lune.loadModule( 'lns.tags.Log' )
@@ -194,7 +196,7 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
    
    
    
-   Log.log( Log.Level.Log, __func__, 20, function (  )
+   Log.log( Log.Level.Log, __func__, 22, function (  )
    
       return string.format( "%s %s:%4d:%3d -- %s", "nearestNode -- ", nearest:get_effectivePos().streamName, nearest:get_effectivePos().lineNo, nearest:get_effectivePos().column, Nodes.getNodeKindName( nearest:get_kind() ))
    end )
@@ -516,7 +518,7 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
    end
    
    
-   Log.log( Log.Level.Err, __func__, 193, function (  )
+   Log.log( Log.Level.Err, __func__, 195, function (  )
    
       return string.format( "unknown pattern -- %s", Nodes.getNodeKindName( nearest:get_kind() ))
    end )
@@ -605,7 +607,7 @@ function SyntaxFilter:getPattern( path, analyzeFileInfo, inqMod )
                
             end
             
-            Log.log( Log.Level.Trace, __func__, 20, function (  )
+            Log.log( Log.Level.Trace, __func__, 22, function (  )
             
                return string.format( "%s %s:%4d:%3d -- %s", "visit:", node:get_effectivePos().streamName, node:get_effectivePos().lineNo, node:get_effectivePos().column, Nodes.getNodeKindName( node:get_kind() ))
             end )
@@ -659,7 +661,7 @@ local function getPatterAt( db, analyzeFileInfo, inqMod, transCtrlInfo )
       if ast:get_streamName() == path then
          local filter = SyntaxFilter._new(ast)
          pattern = filter:getPattern( path, analyzeFileInfo, inqMod )
-         Log.log( Log.Level.Log, __func__, 298, function (  )
+         Log.log( Log.Level.Log, __func__, 300, function (  )
          
             return string.format( "pattern -- %s", pattern)
          end )

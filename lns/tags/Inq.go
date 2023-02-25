@@ -4,7 +4,7 @@ import . "github.com/ifritJP/LuneScript/src/lune/base/runtime_go"
 import LuneAst "github.com/ifritJP/LuneScript/src/lune/base"
 var init_Inq bool
 var Inq__mod__ string
-// 5: decl @lns.@tags.@Inq.InqDef
+// 7: decl @lns.@tags.@Inq.InqDef
 func Inq_InqDef(_env *LnsEnv, db *DBCtrl_DBCtrl,pattern string) {
     var factory *Util_SourceCodeLineAccessorFactory
     factory = NewUtil_SourceCodeLineAccessorFactory(_env)
@@ -14,7 +14,7 @@ func Inq_InqDef(_env *LnsEnv, db *DBCtrl_DBCtrl,pattern string) {
         {
             _path := db.FP.GetFilePath(_env, item.FP.Get_fileId(_env))
             if _path == nil{
-                panic(_env.GetVM().String_format("file id is illegal -- %d", []LnsAny{item.FP.Get_fileId(_env)}))
+                panic(_env.GetVM().String_format("file id is illegal -- %d", Lns_2DDD(item.FP.Get_fileId(_env))))
             } else {
                 path = _path.(string)
             }
@@ -25,7 +25,7 @@ func Inq_InqDef(_env *LnsEnv, db *DBCtrl_DBCtrl,pattern string) {
 }
 
 
-// 19: decl @lns.@tags.@Inq.InqRef
+// 21: decl @lns.@tags.@Inq.InqRef
 func Inq_InqRef(_env *LnsEnv, db *DBCtrl_DBCtrl,pattern string,onlySet bool) {
     var factory *Util_SourceCodeLineAccessorFactory
     factory = NewUtil_SourceCodeLineAccessorFactory(_env)
@@ -35,7 +35,7 @@ func Inq_InqRef(_env *LnsEnv, db *DBCtrl_DBCtrl,pattern string,onlySet bool) {
         {
             _path := db.FP.GetFilePath(_env, item.FP.Get_fileId(_env))
             if _path == nil{
-                panic(_env.GetVM().String_format("file id is illegal -- %d", []LnsAny{item.FP.Get_fileId(_env)}))
+                panic(_env.GetVM().String_format("file id is illegal -- %d", Lns_2DDD(item.FP.Get_fileId(_env))))
             } else {
                 path = _path.(string)
             }
@@ -46,7 +46,7 @@ func Inq_InqRef(_env *LnsEnv, db *DBCtrl_DBCtrl,pattern string,onlySet bool) {
 }
 
 
-// 33: decl @lns.@tags.@Inq.InqAllmut
+// 35: decl @lns.@tags.@Inq.InqAllmut
 func Inq_InqAllmut(_env *LnsEnv, db *DBCtrl_DBCtrl) {
     var factory *Util_SourceCodeLineAccessorFactory
     factory = NewUtil_SourceCodeLineAccessorFactory(_env)
@@ -56,7 +56,7 @@ func Inq_InqAllmut(_env *LnsEnv, db *DBCtrl_DBCtrl) {
         {
             _path := db.FP.GetFilePath(_env, item.FP.Get_fileId(_env))
             if _path == nil{
-                panic(_env.GetVM().String_format("file id is illegal -- %d", []LnsAny{item.FP.Get_fileId(_env)}))
+                panic(_env.GetVM().String_format("file id is illegal -- %d", Lns_2DDD(item.FP.Get_fileId(_env))))
             } else {
                 path = _path.(string)
             }
@@ -67,7 +67,7 @@ func Inq_InqAllmut(_env *LnsEnv, db *DBCtrl_DBCtrl) {
 }
 
 
-// 47: decl @lns.@tags.@Inq.InqAsync
+// 49: decl @lns.@tags.@Inq.InqAsync
 func Inq_InqAsync(_env *LnsEnv, db *DBCtrl_DBCtrl,asyncMode LnsInt) {
     var factory *Util_SourceCodeLineAccessorFactory
     factory = NewUtil_SourceCodeLineAccessorFactory(_env)
@@ -77,18 +77,18 @@ func Inq_InqAsync(_env *LnsEnv, db *DBCtrl_DBCtrl,asyncMode LnsInt) {
         {
             _path := db.FP.GetFilePath(_env, item.FP.Get_fileId(_env))
             if _path == nil{
-                panic(_env.GetVM().String_format("file id is illegal -- %d", []LnsAny{item.FP.Get_fileId(_env)}))
+                panic(_env.GetVM().String_format("file id is illegal -- %d", Lns_2DDD(item.FP.Get_fileId(_env))))
             } else {
                 path = _path.(string)
             }
         }
-        Util_outputLocate(_env, Lns_io_stdout, _env.GetVM().String_format("%d", []LnsAny{asyncMode}), path, factory.FP.Create(_env, path, nil), item.FP.Get_line(_env))
+        Util_outputLocate(_env, Lns_io_stdout, _env.GetVM().String_format("%d", Lns_2DDD(asyncMode)), path, factory.FP.Create(_env, path, nil), item.FP.Get_line(_env))
         return true
     }))
 }
 
 
-// 62: decl @lns.@tags.@Inq.InqLuaval
+// 64: decl @lns.@tags.@Inq.InqLuaval
 func Inq_InqLuaval(_env *LnsEnv, db *DBCtrl_DBCtrl) {
     var factory *Util_SourceCodeLineAccessorFactory
     factory = NewUtil_SourceCodeLineAccessorFactory(_env)
@@ -98,7 +98,7 @@ func Inq_InqLuaval(_env *LnsEnv, db *DBCtrl_DBCtrl) {
         {
             _path := db.FP.GetFilePath(_env, item.FP.Get_fileId(_env))
             if _path == nil{
-                panic(_env.GetVM().String_format("file id is illegal -- %d", []LnsAny{item.FP.Get_fileId(_env)}))
+                panic(_env.GetVM().String_format("file id is illegal -- %d", Lns_2DDD(item.FP.Get_fileId(_env))))
             } else {
                 path = _path.(string)
             }
@@ -109,7 +109,7 @@ func Inq_InqLuaval(_env *LnsEnv, db *DBCtrl_DBCtrl) {
 }
 
 
-// 75: decl @lns.@tags.@Inq.InqAsyncLock
+// 77: decl @lns.@tags.@Inq.InqAsyncLock
 func Inq_InqAsyncLock(_env *LnsEnv, db *DBCtrl_DBCtrl) {
     var factory *Util_SourceCodeLineAccessorFactory
     factory = NewUtil_SourceCodeLineAccessorFactory(_env)
@@ -119,7 +119,7 @@ func Inq_InqAsyncLock(_env *LnsEnv, db *DBCtrl_DBCtrl) {
         {
             _path := db.FP.GetFilePath(_env, item.FP.Get_fileId(_env))
             if _path == nil{
-                panic(_env.GetVM().String_format("file id is illegal -- %d", []LnsAny{item.FP.Get_fileId(_env)}))
+                panic(_env.GetVM().String_format("file id is illegal -- %d", Lns_2DDD(item.FP.Get_fileId(_env))))
             } else {
                 path = _path.(string)
             }

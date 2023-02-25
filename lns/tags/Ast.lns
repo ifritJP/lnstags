@@ -1,6 +1,7 @@
 // -*- coding: utf-8 -*-
 
 _lune_control default_async_all;
+_lune_control default_strict_generics;
 
 import go/github:com.ifritJP.LuneScript.src.lune.base.Option as LuneOpt;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Types;

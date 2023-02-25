@@ -192,6 +192,7 @@ if not _lune8 then
 end
 
 
+
 local DBCtrl = _lune.loadModule( 'lns.tags.DBCtrl' )
 local Option = _lune.loadModule( 'lns.tags.Option' )
 local Log = _lune.loadModule( 'lns.tags.Log' )
@@ -238,7 +239,7 @@ function tagFilter:addFileId( path, mod )
    end
    
    local fileId = self.db:addFile( path, mod )
-   Log.log( Log.Level.Debug, __func__, 39, function (  )
+   Log.log( Log.Level.Debug, __func__, 40, function (  )
    
       return string.format( "add file -- %d, %s", fileId, path)
    end )
@@ -302,7 +303,7 @@ function tagFilter:registerType( typeInfo )
    local parentNsId = self:registerType( typeInfo:get_parentInfo() )
    local name = self:getFull( typeInfo, false )
    local nsId, added = self.db:addNamespace( name, parentNsId )
-   Log.log( Log.Level.Debug, __func__, 82, function (  )
+   Log.log( Log.Level.Debug, __func__, 83, function (  )
    
       return string.format( "%s %s %d", name, added, nsId)
    end )
@@ -326,7 +327,7 @@ function tagFilter:registerSymbol( symbolInfo )
    local parentNsId = self:registerType( symbolInfo:get_namespaceTypeInfo() )
    local name = Ast.getFullNameSym( self, symbolInfo )
    local nsId, added = self.db:addNamespace( name, parentNsId )
-   Log.log( Log.Level.Debug, __func__, 96, function (  )
+   Log.log( Log.Level.Debug, __func__, 97, function (  )
    
       return string.format( "%s %s %d", name, added, nsId)
    end )
@@ -343,7 +344,7 @@ function tagFilter:registDeclSym( symbolInfo )
    local pos = _lune.unwrap( _lune.nilacc( symbolInfo:get_pos(), 'get_orgPos', 'callmtd' ))
    local fileId = self:getFileId( pos.streamName )
    self.db:addSymbolDecl( symNsId, fileId, pos.lineNo, pos.column )
-   Log.log( Log.Level.Debug, __func__, 106, function (  )
+   Log.log( Log.Level.Debug, __func__, 107, function (  )
    
       return symbolInfo:get_name()
    end )
@@ -671,7 +672,7 @@ function tagFilter:registerRefs( nodeManager )
             registerRefSym( _exp, workNode:get_pos(), false )
          else
             if not workNode:get_macroArgFlag() then
-               Log.log( Log.Level.Warn, __func__, 378, function (  )
+               Log.log( Log.Level.Warn, __func__, 379, function (  )
                
                   return string.format( "no symbolInfo -- %s, %s:%d:%d", workNode:get_field().txt, workNode:get_pos().streamName, workNode:get_pos().lineNo, workNode:get_pos().column)
                end )
@@ -766,7 +767,7 @@ end
 local function dumpRoot( rootNode, db, streamName, noDefNsIdList )
    local __func__ = '@lns.@tags.@Analyze.dumpRoot'
 
-   Log.log( Log.Level.Log, __func__, 448, function (  )
+   Log.log( Log.Level.Log, __func__, 449, function (  )
    
       return streamName
    end )
@@ -806,7 +807,7 @@ local function start( db, pathList, transCtrlInfo )
          return false
       end )
       if not find then
-         Log.log( Log.Level.Err, __func__, 482, function (  )
+         Log.log( Log.Level.Err, __func__, 483, function (  )
          
             return string.format( "no register the define for the sym -- %s", db:getName( nsId ))
          end )

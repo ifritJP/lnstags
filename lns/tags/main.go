@@ -6,14 +6,14 @@ import LuneAst "github.com/ifritJP/LuneScript/src/lune/base"
 var init_main bool
 var main__mod__ string
 var main_dbPath string
-// 16: decl @lns.@tags.@main.inq
+// 18: decl @lns.@tags.@main.inq
 func main_inq_0_(_env *LnsEnv, inqMode string,pattern string) LnsInt {
     var db *DBCtrl_DBCtrl
     
     {
         _db := DBCtrl_open(_env, main_dbPath, false)
         if _db == nil{
-            Lns_print([]LnsAny{"error"})
+            Lns_print(Lns_2DDD("error"))
             return -1
         } else {
             db = _db.(*DBCtrl_DBCtrl)
@@ -40,15 +40,15 @@ func main_inq_0_(_env *LnsEnv, inqMode string,pattern string) LnsInt {
     return 0
 }
 
-// 51: decl @lns.@tags.@main.build
-func main_build_1_(_env *LnsEnv, pathList *LnsList,transCtrlInfo *LuneTypes.Types_TransCtrlInfo) LnsInt {
+// 53: decl @lns.@tags.@main.build
+func main_build_1_(_env *LnsEnv, pathList *LnsList2_[string],transCtrlInfo *LuneTypes.Types_TransCtrlInfo) LnsInt {
     DBCtrl_initDB(_env, main_dbPath)
     var db *DBCtrl_DBCtrl
     
     {
         _db := DBCtrl_open(_env, main_dbPath, false)
         if _db == nil{
-            Lns_print([]LnsAny{"error"})
+            Lns_print(Lns_2DDD("error"))
             return 1
         } else {
             db = _db.(*DBCtrl_DBCtrl)
@@ -60,7 +60,7 @@ func main_build_1_(_env *LnsEnv, pathList *LnsList,transCtrlInfo *LuneTypes.Type
     return 0
 }
 
-// 65: decl @lns.@tags.@main.__main
+// 67: decl @lns.@tags.@main.__main
 func Main___main(_env *LnsEnv, args *LnsList) LnsInt {
     Lns_main_init( _env )
     var option *Option_Option
@@ -75,7 +75,7 @@ func Main___main(_env *LnsEnv, args *LnsList) LnsInt {
         {
             _db := DBCtrl_open(_env, main_dbPath, true)
             if _db == nil{
-                Lns_print([]LnsAny{"error"})
+                Lns_print(Lns_2DDD("error"))
                 return 1
             } else {
                 db = _db.(*DBCtrl_DBCtrl)
@@ -83,8 +83,8 @@ func Main___main(_env *LnsEnv, args *LnsList) LnsInt {
         }
         var projId LnsAny
         projId = db.FP.GetProjId(_env, "./")
-        var pathList *LnsList
-        pathList = NewLnsList([]LnsAny{})
+        var pathList *LnsList2_[string]
+        pathList = NewLnsList2_[string]([]string{})
         db.FP.MapFilePath(_env, DBCtrl_MapFileCallBack(func(_env *LnsEnv, item *DBCtrl_ItemFilePath) bool {
             if Lns_isCondTrue( _env.PopVal( _env.IncStack() ||
                 _env.SetStackVal( item.FP.Get_projId(_env) == projId) &&
@@ -101,7 +101,7 @@ func Main___main(_env *LnsEnv, args *LnsList) LnsInt {
         {
             _db := DBCtrl_open(_env, main_dbPath, true)
             if _db == nil{
-                Lns_print([]LnsAny{"error"})
+                Lns_print(Lns_2DDD("error"))
                 return 1
             } else {
                 db = _db.(*DBCtrl_DBCtrl)
@@ -119,7 +119,7 @@ func Main___main(_env *LnsEnv, args *LnsList) LnsInt {
         {
             _db := DBCtrl_open(_env, main_dbPath, true)
             if _db == nil{
-                Lns_print([]LnsAny{"error"})
+                Lns_print(Lns_2DDD("error"))
                 return 1
             } else {
                 db = _db.(*DBCtrl_DBCtrl)
@@ -131,7 +131,7 @@ func Main___main(_env *LnsEnv, args *LnsList) LnsInt {
             _pattern := Pattern_getPatterAt(_env, db, analyzeFileInfo, option.FP.Get_inqMode(_env), option.FP.Get_transCtrlInfo(_env))
             if _pattern == nil{
                 db.FP.Close(_env)
-                Lns_print([]LnsAny{_env.GetVM().String_format("illegal pos -- %s:%d:%d", []LnsAny{analyzeFileInfo.FP.Get_path(_env), analyzeFileInfo.FP.Get_lineNo(_env), analyzeFileInfo.FP.Get_column(_env)})})
+                Lns_print(Lns_2DDD(_env.GetVM().String_format("illegal pos -- %s:%d:%d", Lns_2DDD(analyzeFileInfo.FP.Get_path(_env), analyzeFileInfo.FP.Get_lineNo(_env), analyzeFileInfo.FP.Get_column(_env)))))
                 return 1
             } else {
                 pattern = _pattern.(string)
@@ -145,7 +145,7 @@ func Main___main(_env *LnsEnv, args *LnsList) LnsInt {
         {
             _db := DBCtrl_open(_env, main_dbPath, true)
             if _db == nil{
-                Lns_print([]LnsAny{"error"})
+                Lns_print(Lns_2DDD("error"))
                 return 1
             } else {
                 db = _db.(*DBCtrl_DBCtrl)
@@ -161,7 +161,7 @@ func Main___main(_env *LnsEnv, args *LnsList) LnsInt {
 
 
 func main___main___anonymous_1_(_env *LnsEnv, item *DBCtrl_ItemNamespace) bool {
-    Lns_print([]LnsAny{item.FP.Get_name(_env)})
+    Lns_print(Lns_2DDD(item.FP.Get_name(_env)))
     return true
 }
 func Lns_main_init(_env *LnsEnv) {

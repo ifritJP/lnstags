@@ -88,21 +88,22 @@ func Option_Mode_getTxt(arg1 string) string {
     return Option_ModeMap_[arg1];
 }
 type Option_analyzeArgs__getNextOpNonNilFunc_0_ func (_env *LnsEnv, arg1 string) string
-// 60: decl @lns.@tags.@Option.printUsage
+// 62: decl @lns.@tags.@Option.printUsage
 func Option_printUsage_4_(_env *LnsEnv, messages LnsAny) {
     if messages != nil{
         messages_72 := messages.(string)
-        Lns_io_stderr.Write(_env, _env.GetVM().String_format("%s\n", []LnsAny{messages_72}))
+        Lns_io_stderr.Write(_env, _env.GetVM().String_format("%s\n", Lns_2DDD(messages_72)))
     }
-    Lns_print([]LnsAny{"usage: lnstags init [option]"})
-    Lns_print([]LnsAny{"usage: lnstags build [option] filepath"})
-    Lns_print([]LnsAny{"usage: lnstags inq <def|ref|set|allmut> pattern"})
-    Lns_print([]LnsAny{"usage: lnstags inq-at <def|ref|set> filepath lineno column"})
-    Lns_print([]LnsAny{"usage: lnstags test [option]"})
+    Lns_print(Lns_2DDD("usage: lnstags init [option]"))
+    Lns_print(Lns_2DDD("usage: lnstags build [option] filepath"))
+    Lns_print(Lns_2DDD("usage: lnstags inq <def|ref|set|allmut> pattern"))
+    Lns_print(Lns_2DDD("usage: lnstags inq-at <def|ref|set> filepath lineno column"))
+    Lns_print(Lns_2DDD("usage: lnstags suffix pattern"))
+    Lns_print(Lns_2DDD("usage: lnstags test [option]"))
     _env.GetVM().OS_exit(1)
 }
 
-// 72: decl @lns.@tags.@Option.analyzeArgs
+// 75: decl @lns.@tags.@Option.analyzeArgs
 func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
     var option *Option_Option
     option = NewOption_Option(_env)
@@ -175,7 +176,7 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
                         return (LnsInt)(num)
                     }
                 }
-                Option_printUsage_4_(_env, _env.GetVM().String_format("illegal num -- %s", []LnsAny{arg}))
+                Option_printUsage_4_(_env, _env.GetVM().String_format("illegal num -- %s", Lns_2DDD(arg)))
             }
         }
         Option_printUsage_4_(_env, mess)
@@ -199,7 +200,7 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
         {
             _inqMode := Option_InqMode__from(_env, nextToken)
             if _inqMode == nil{
-                Option_printUsage_4_(_env, _env.GetVM().String_format("illegal inqMod -- %s", []LnsAny{nextToken}))
+                Option_printUsage_4_(_env, _env.GetVM().String_format("illegal inqMod -- %s", Lns_2DDD(nextToken)))
             } else {
                 inqMode = _inqMode.(string)
             }
@@ -241,7 +242,7 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
                         option.pattern = getNextOpNonNil(_env, "none pattern")
                     }
                 } else {
-                    Option_printUsage_4_(_env, _env.GetVM().String_format("illegal option -- %s", []LnsAny{arg}))
+                    Option_printUsage_4_(_env, _env.GetVM().String_format("illegal option -- %s", Lns_2DDD(arg)))
                 }
             }
         } else { 
@@ -318,6 +319,13 @@ func Option_AnalyzeFileInfo2Stem( obj LnsAny ) LnsAny {
     }
     return obj.(*Option_AnalyzeFileInfo).FP
 }
+func Option_AnalyzeFileInfo_toSlice(slice []LnsAny) []*Option_AnalyzeFileInfo {
+    ret := make([]*Option_AnalyzeFileInfo, len(slice))
+    for index, val := range slice {
+        ret[index] = val.(Option_AnalyzeFileInfoDownCast).ToOption_AnalyzeFileInfo()
+    }
+    return ret
+}
 type Option_AnalyzeFileInfoDownCast interface {
     ToOption_AnalyzeFileInfo() *Option_AnalyzeFileInfo
 }
@@ -342,7 +350,7 @@ func (self *Option_AnalyzeFileInfo) Get_path(_env *LnsEnv) string{ return self.p
 func (self *Option_AnalyzeFileInfo) Get_lineNo(_env *LnsEnv) LnsInt{ return self.lineNo }
 func (self *Option_AnalyzeFileInfo) Get_column(_env *LnsEnv) LnsInt{ return self.column }
 func (self *Option_AnalyzeFileInfo) Get_stdinFile(_env *LnsEnv) LnsAny{ return self.stdinFile }
-// 32: DeclConstr
+// 34: DeclConstr
 func (self *Option_AnalyzeFileInfo) InitOption_AnalyzeFileInfo(_env *LnsEnv) {
     self.path = ""
     self.lineNo = 0
@@ -357,12 +365,12 @@ type Option_OptionMtd interface {
     Get_inqMode(_env *LnsEnv) string
     Get_logLevel(_env *LnsEnv) LnsAny
     Get_mode(_env *LnsEnv) string
-    Get_pathList(_env *LnsEnv) *LnsList
+    Get_pathList(_env *LnsEnv) *LnsList2_[string]
     Get_pattern(_env *LnsEnv) string
     Get_transCtrlInfo(_env *LnsEnv) *LuneTypes.Types_TransCtrlInfo
 }
 type Option_Option struct {
-    pathList *LnsList
+    pathList *LnsList2_[string]
     mode string
     inqMode string
     pattern string
@@ -376,6 +384,13 @@ func Option_Option2Stem( obj LnsAny ) LnsAny {
         return nil
     }
     return obj.(*Option_Option).FP
+}
+func Option_Option_toSlice(slice []LnsAny) []*Option_Option {
+    ret := make([]*Option_Option, len(slice))
+    for index, val := range slice {
+        ret[index] = val.(Option_OptionDownCast).ToOption_Option()
+    }
+    return ret
 }
 type Option_OptionDownCast interface {
     ToOption_Option() *Option_Option
@@ -397,17 +412,17 @@ func NewOption_Option(_env *LnsEnv) *Option_Option {
     obj.InitOption_Option(_env)
     return obj
 }
-func (self *Option_Option) Get_pathList(_env *LnsEnv) *LnsList{ return self.pathList }
+func (self *Option_Option) Get_pathList(_env *LnsEnv) *LnsList2_[string]{ return self.pathList }
 func (self *Option_Option) Get_mode(_env *LnsEnv) string{ return self.mode }
 func (self *Option_Option) Get_inqMode(_env *LnsEnv) string{ return self.inqMode }
 func (self *Option_Option) Get_pattern(_env *LnsEnv) string{ return self.pattern }
 func (self *Option_Option) Get_analyzeFileInfo(_env *LnsEnv) *Option_AnalyzeFileInfo{ return self.analyzeFileInfo }
 func (self *Option_Option) Get_logLevel(_env *LnsEnv) LnsAny{ return self.logLevel }
 func (self *Option_Option) Get_transCtrlInfo(_env *LnsEnv) *LuneTypes.Types_TransCtrlInfo{ return self.transCtrlInfo }
-// 49: DeclConstr
+// 51: DeclConstr
 func (self *Option_Option) InitOption_Option(_env *LnsEnv) {
     self.logLevel = nil
-    self.pathList = NewLnsList([]LnsAny{})
+    self.pathList = NewLnsList2_[string]([]string{})
     self.mode = Option_Mode__Build
     self.inqMode = Option_InqMode__Def
     self.pattern = ""

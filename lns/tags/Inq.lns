@@ -1,3 +1,5 @@
+_lune_control default_strict_generics;
+
 import lns.tags.DBCtrl;
 import lns.tags.Util;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Ast as LuneAst;

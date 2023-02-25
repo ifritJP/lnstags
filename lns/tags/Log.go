@@ -41,26 +41,26 @@ func Log_Level__from(_env *LnsEnv, arg1 LnsInt) LnsAny{
 func Log_Level_getTxt(arg1 LnsInt) string {
     return Log_LevelMap_[arg1];
 }
-var Log_name2levelMap *LnsMap
+var Log_name2levelMap *LnsMap2_[string,LnsInt]
 var Log_outputLevel LnsInt
 var Log_detail bool
 type Log_CreateMessage func (_env *LnsEnv) string
-// 23: decl @lns.@tags.@Log.str2level
+// 24: decl @lns.@tags.@Log.str2level
 func Log_str2level(_env *LnsEnv, txt string) LnsAny {
     return Log_name2levelMap.Get(txt)
 }
 
-// 28: decl @lns.@tags.@Log.setLevel
+// 29: decl @lns.@tags.@Log.setLevel
 func Log_setLevel(_env *LnsEnv, level LnsInt) {
     Log_outputLevel = level
 }
 
-// 33: decl @lns.@tags.@Log.enableDetail
+// 34: decl @lns.@tags.@Log.enableDetail
 func Log_enableDetail(_env *LnsEnv, flag bool) {
     Log_detail = flag
 }
 
-// 41: decl @lns.@tags.@Log.log
+// 42: decl @lns.@tags.@Log.log
 func Log_log(_env *LnsEnv, level LnsInt,funcName string,lineNo LnsInt,callback Log_CreateMessage) {
     var logStream Lns_oStream
     logStream = Lns_io_stderr
@@ -68,9 +68,9 @@ func Log_log(_env *LnsEnv, level LnsInt,funcName string,lineNo LnsInt,callback L
         if Log_detail{
             var nowClock LnsReal
             nowClock = _env.GetVM().OS_clock()
-            logStream.Write(_env, _env.GetVM().String_format("%6d:%s:%s:%d:", []LnsAny{(LnsInt)((nowClock * LnsReal(1000))), Log_Level_getTxt( level), funcName, lineNo}))
+            logStream.Write(_env, _env.GetVM().String_format("%6d:%s:%s:%d:", Lns_2DDD((LnsInt)((nowClock * LnsReal(1000))), Log_Level_getTxt( level), funcName, lineNo)))
         } else { 
-            logStream.Write(_env, _env.GetVM().String_format("%s:%s:", []LnsAny{Log_Level_getTxt( level), funcName}))
+            logStream.Write(_env, _env.GetVM().String_format("%s:%s:", Lns_2DDD(Log_Level_getTxt( level), funcName)))
         }
         logStream.Write(_env, callback(_env))
         logStream.Write(_env, "\n")
@@ -82,7 +82,7 @@ func Lns_Log_init(_env *LnsEnv) {
     init_Log = true
     Log__mod__ = "@lns.@tags.@Log"
     Lns_InitMod()
-    Log_name2levelMap = NewLnsMap( map[LnsAny]LnsAny{"fatal":Log_Level__Fatal,"error":Log_Level__Err,"warn":Log_Level__Warn,"log":Log_Level__Log,"info":Log_Level__Info,"debug":Log_Level__Debug,"trace":Log_Level__Trace,})
+    Log_name2levelMap = NewLnsMap2_[string,LnsInt]( map[string]LnsInt{"fatal":Log_Level__Fatal,"error":Log_Level__Err,"warn":Log_Level__Warn,"log":Log_Level__Log,"info":Log_Level__Info,"debug":Log_Level__Debug,"trace":Log_Level__Trace,})
     Log_outputLevel = Log_Level__Warn
     Log_detail = true
 }

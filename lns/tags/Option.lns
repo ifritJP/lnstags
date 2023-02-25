@@ -1,3 +1,5 @@
+_lune_control default_strict_generics;
+
 import lns.tags.Log;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Types as LuneTypes;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Util as LuneUtil;
@@ -65,11 +67,12 @@ fn printUsage( messages:str! ) : __ {
    print( "usage: lnstags build [option] filepath" );
    print( "usage: lnstags inq <def|ref|set|allmut> pattern" );
    print( "usage: lnstags inq-at <def|ref|set> filepath lineno column" );
+   print( "usage: lnstags suffix pattern" );
    print( "usage: lnstags test [option]" );
    os.exit( 1 );
 }
 
-pub fn analyzeArgs( argList:&List<str> ) : &Option {
+pub fn analyzeArgs( argList:&_List<str> ) : &Option {
    let mut option = new Option();
 
    let mut index = 1;

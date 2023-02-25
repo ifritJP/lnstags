@@ -78,6 +78,8 @@ end
 if not _lune8 then
    _lune8 = _lune
 end
+
+
 local Log = _lune.loadModule( 'lns.tags.Log' )
 local LuneTypes = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Types' )
 local LuneUtil = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Util' )
@@ -262,6 +264,7 @@ local function printUsage( messages )
    print( "usage: lnstags build [option] filepath" )
    print( "usage: lnstags inq <def|ref|set|allmut> pattern" )
    print( "usage: lnstags inq-at <def|ref|set> filepath lineno column" )
+   print( "usage: lnstags suffix pattern" )
    print( "usage: lnstags test [option]" )
    os.exit( 1 )
 end

@@ -12,18 +12,18 @@ import LuneLog "github.com/ifritJP/LuneScript/src/lune/base"
 import LuneUtil "github.com/ifritJP/LuneScript/src/lune/base"
 var init_Ast bool
 var Ast__mod__ string
-// 15: decl @lns.@tags.@Ast.getFullNameSym
+// 16: decl @lns.@tags.@Ast.getFullNameSym
 func Ast_getFullNameSym(_env *LnsEnv, filter *Nodes.Nodes_Filter,symbolInfo *LuneAst.Ast_SymbolInfo) string {
     if symbolInfo.FP.Get_namespaceTypeInfo(_env) == LuneAst.Ast_headTypeInfo{
         return symbolInfo.FP.Get_name(_env)
     }
     var name string
-    name = _env.GetVM().String_format("%s.%s", []LnsAny{filter.FP.GetFull(_env, symbolInfo.FP.Get_namespaceTypeInfo(_env), false), symbolInfo.FP.Get_name(_env)})
+    name = _env.GetVM().String_format("%s.%s", Lns_2DDD(filter.FP.GetFull(_env, symbolInfo.FP.Get_namespaceTypeInfo(_env), false), symbolInfo.FP.Get_name(_env)))
     return name
 }
 
-// 24: decl @lns.@tags.@Ast.buildAst
-func Ast_buildAst(_env *LnsEnv, logLevel LnsInt,pathList *LnsList,projDir LnsAny,stdinFile LnsAny,forceAll bool,transCtrlInfo *Types.Types_TransCtrlInfo,astCallback front.Front_AstCallback) {
+// 25: decl @lns.@tags.@Ast.buildAst
+func Ast_buildAst(_env *LnsEnv, logLevel LnsInt,pathList *LnsList2_[string],projDir LnsAny,stdinFile LnsAny,forceAll bool,transCtrlInfo *Types.Types_TransCtrlInfo,astCallback front.Front_AstCallback) {
     if pathList.Len() == 0{
         return 
     }
@@ -37,7 +37,7 @@ func Ast_buildAst(_env *LnsEnv, logLevel LnsInt,pathList *LnsList,projDir LnsAny
     if forceAll{
         lnsOpt.TransCtrlInfo.UptodateMode = Types.Types_CheckingUptodateMode__ForceAll_Obj
     } else { 
-        lnsOpt.TransCtrlInfo.UptodateMode = &Types.Types_CheckingUptodateMode__Force1{LuneUtil.Util_scriptPath2Module(_env, pathList.GetAt(1).(string))}
+        lnsOpt.TransCtrlInfo.UptodateMode = &Types.Types_CheckingUptodateMode__Force1{LuneUtil.Util_scriptPath2Module(_env, pathList.GetAt(1))}
     }
     front.Front_build(_env, lnsOpt, astCallback)
 }

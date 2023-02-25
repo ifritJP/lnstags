@@ -3,36 +3,36 @@ package tags
 import . "github.com/ifritJP/LuneScript/src/lune/base/runtime_go"
 var init_Util bool
 var Util__mod__ string
-// for 33
-func Util_convExp0_183(arg1 []LnsAny) LnsAny {
+// for 35
+func Util_convExp0_181(arg1 []LnsAny) LnsAny {
     return Lns_getFromMulti( arg1, 0 )
 }
-// 49: decl @lns.@tags.@Util.outputLocate
+// 51: decl @lns.@tags.@Util.outputLocate
 func Util_outputLocate(_env *LnsEnv, stream Lns_oStream,symbol string,path string,lineAccessor LnsAny,lineNo LnsInt) {
     var line string
     
     {
         _line := _env.NilAccFin(_env.NilAccPush(lineAccessor) && 
-        Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(*Util_SourceCodeLineAccessor).FP.GetLine(_env, lineNo)})/* 53:16 */)
+        Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(*Util_SourceCodeLineAccessor).FP.GetLine(_env, lineNo)})/* 55:16 */)
         if _line == nil{
             line = ""
         } else {
             line = _line.(string)
         }
     }
-    stream.Write(_env, _env.GetVM().String_format("%-16s %4d %-16s %s\n", []LnsAny{symbol, lineNo, path, line}))
+    stream.Write(_env, _env.GetVM().String_format("%-16s %4d %-16s %s\n", Lns_2DDD(symbol, lineNo, path, line)))
 }
 
-// 5: decl @lns.@tags.@Util.SourceCodeLineAccessor.getLine
+// 7: decl @lns.@tags.@Util.SourceCodeLineAccessor.getLine
 func (self *Util_SourceCodeLineAccessor) GetLine(_env *LnsEnv, lineNo LnsInt) LnsAny {
     if _env.PopVal( _env.IncStack() ||
         _env.SetStackVal( lineNo < 0) ||
         _env.SetStackVal( self.lineList.Len() < lineNo) ).(bool){
         return nil
     }
-    return self.lineList.GetAt(lineNo).(string)
+    return self.lineList.GetAt(lineNo)
 }
-// 20: decl @lns.@tags.@Util.SourceCodeLineAccessorFactory.create
+// 22: decl @lns.@tags.@Util.SourceCodeLineAccessorFactory.create
 func (self *Util_SourceCodeLineAccessorFactory) Create(_env *LnsEnv, filePath string,fileContents LnsAny) LnsAny {
     {
         __exp := self.path2accessor.Get(filePath)
@@ -41,8 +41,8 @@ func (self *Util_SourceCodeLineAccessorFactory) Create(_env *LnsEnv, filePath st
             return _exp
         }
     }
-    var lineList *LnsList
-    lineList = NewLnsList([]LnsAny{})
+    var lineList *LnsList2_[string]
+    lineList = NewLnsList2_[string]([]string{})
     if fileContents != nil{
         fileContents_39 := fileContents.(string)
             {
@@ -59,7 +59,7 @@ func (self *Util_SourceCodeLineAccessorFactory) Create(_env *LnsEnv, filePath st
         var handle Lns_luaStream
         
         {
-            _handle := Util_convExp0_183(Lns_2DDD(Lns_io_open(filePath, "r")))
+            _handle := Util_convExp0_181(Lns_2DDD(Lns_io_open(filePath, "r")))
             if _handle == nil{
                 return nil
             } else {
@@ -92,7 +92,7 @@ type Util_SourceCodeLineAccessorMtd interface {
 }
 type Util_SourceCodeLineAccessor struct {
     path string
-    lineList *LnsList
+    lineList *LnsList2_[string]
     FP Util_SourceCodeLineAccessorMtd
 }
 func Util_SourceCodeLineAccessor2Stem( obj LnsAny ) LnsAny {
@@ -100,6 +100,13 @@ func Util_SourceCodeLineAccessor2Stem( obj LnsAny ) LnsAny {
         return nil
     }
     return obj.(*Util_SourceCodeLineAccessor).FP
+}
+func Util_SourceCodeLineAccessor_toSlice(slice []LnsAny) []*Util_SourceCodeLineAccessor {
+    ret := make([]*Util_SourceCodeLineAccessor, len(slice))
+    for index, val := range slice {
+        ret[index] = val.(Util_SourceCodeLineAccessorDownCast).ToUtil_SourceCodeLineAccessor()
+    }
+    return ret
 }
 type Util_SourceCodeLineAccessorDownCast interface {
     ToUtil_SourceCodeLineAccessor() *Util_SourceCodeLineAccessor
@@ -115,13 +122,13 @@ func Util_SourceCodeLineAccessorDownCastF( multi ...LnsAny ) LnsAny {
 func (obj *Util_SourceCodeLineAccessor) ToUtil_SourceCodeLineAccessor() *Util_SourceCodeLineAccessor {
     return obj
 }
-func NewUtil_SourceCodeLineAccessor(_env *LnsEnv, arg1 string, arg2 *LnsList) *Util_SourceCodeLineAccessor {
+func NewUtil_SourceCodeLineAccessor(_env *LnsEnv, arg1 string, arg2 *LnsList2_[string]) *Util_SourceCodeLineAccessor {
     obj := &Util_SourceCodeLineAccessor{}
     obj.FP = obj
     obj.InitUtil_SourceCodeLineAccessor(_env, arg1, arg2)
     return obj
 }
-func (self *Util_SourceCodeLineAccessor) InitUtil_SourceCodeLineAccessor(_env *LnsEnv, arg1 string, arg2 *LnsList) {
+func (self *Util_SourceCodeLineAccessor) InitUtil_SourceCodeLineAccessor(_env *LnsEnv, arg1 string, arg2 *LnsList2_[string]) {
     self.path = arg1
     self.lineList = arg2
 }
@@ -132,7 +139,7 @@ type Util_SourceCodeLineAccessorFactoryMtd interface {
     Create(_env *LnsEnv, arg1 string, arg2 LnsAny) LnsAny
 }
 type Util_SourceCodeLineAccessorFactory struct {
-    path2accessor *LnsMap
+    path2accessor *LnsMap2_[string,*Util_SourceCodeLineAccessor]
     FP Util_SourceCodeLineAccessorFactoryMtd
 }
 func Util_SourceCodeLineAccessorFactory2Stem( obj LnsAny ) LnsAny {
@@ -140,6 +147,13 @@ func Util_SourceCodeLineAccessorFactory2Stem( obj LnsAny ) LnsAny {
         return nil
     }
     return obj.(*Util_SourceCodeLineAccessorFactory).FP
+}
+func Util_SourceCodeLineAccessorFactory_toSlice(slice []LnsAny) []*Util_SourceCodeLineAccessorFactory {
+    ret := make([]*Util_SourceCodeLineAccessorFactory, len(slice))
+    for index, val := range slice {
+        ret[index] = val.(Util_SourceCodeLineAccessorFactoryDownCast).ToUtil_SourceCodeLineAccessorFactory()
+    }
+    return ret
 }
 type Util_SourceCodeLineAccessorFactoryDownCast interface {
     ToUtil_SourceCodeLineAccessorFactory() *Util_SourceCodeLineAccessorFactory
@@ -161,9 +175,9 @@ func NewUtil_SourceCodeLineAccessorFactory(_env *LnsEnv) *Util_SourceCodeLineAcc
     obj.InitUtil_SourceCodeLineAccessorFactory(_env)
     return obj
 }
-// 16: DeclConstr
+// 18: DeclConstr
 func (self *Util_SourceCodeLineAccessorFactory) InitUtil_SourceCodeLineAccessorFactory(_env *LnsEnv) {
-    self.path2accessor = NewLnsMap( map[LnsAny]LnsAny{})
+    self.path2accessor = NewLnsMap2_[string,*Util_SourceCodeLineAccessor]( map[string]*Util_SourceCodeLineAccessor{})
 }
 
 

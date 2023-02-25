@@ -80,6 +80,7 @@ if not _lune8 then
 end
 
 
+
 local base = _lune.loadModule( 'go/github:com.ifritJP.lnssqlite3.src.lns.sqlite3.base' )
 local Log = _lune.loadModule( 'lns.tags.Log' )
 
@@ -142,14 +143,14 @@ end
 function DBAccess:begin(  )
    local __func__ = '@lns.@tags.@DBAccess.DBAccess.begin'
 
-   Log.log( Log.Level.Log, __func__, 53, function (  )
+   Log.log( Log.Level.Log, __func__, 54, function (  )
    
       return "start"
    end )
    
    
    if self.readonlyFlag then
-      Log.log( Log.Level.Err, __func__, 56, function (  )
+      Log.log( Log.Level.Err, __func__, 57, function (  )
       
          return "db mode is read only"
       end )
@@ -177,7 +178,7 @@ function DBAccess:commit(  )
    
    self.beginFlag = false
    
-   Log.log( Log.Level.Log, __func__, 81, function (  )
+   Log.log( Log.Level.Log, __func__, 82, function (  )
    
       return "commit: start"
    end )
@@ -185,7 +186,7 @@ function DBAccess:commit(  )
    
    self.db:Commit(  )
    
-   Log.log( Log.Level.Log, __func__, 85, function (  )
+   Log.log( Log.Level.Log, __func__, 86, function (  )
    
       return "commit: end"
    end )

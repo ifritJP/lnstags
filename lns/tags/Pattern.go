@@ -14,14 +14,14 @@ import LuneLog "github.com/ifritJP/LuneScript/src/lune/base"
 import LuneUtil "github.com/ifritJP/LuneScript/src/lune/base"
 var init_Pattern bool
 var Pattern__mod__ string
-// for 288
-func Pattern_convExp0_1986(arg1 []LnsAny) string {
+// for 290
+func Pattern_convExp0_1987(arg1 []LnsAny) string {
     return Lns_getFromMulti( arg1, 0 ).(string)
 }
 
 
 
-// 272: decl @lns.@tags.@Pattern.getPatterAt
+// 274: decl @lns.@tags.@Pattern.getPatterAt
 func Pattern_getPatterAt(_env *LnsEnv, db *DBCtrl_DBCtrl,analyzeFileInfo *Option_AnalyzeFileInfo,inqMod string,transCtrlInfo *Types.Types_TransCtrlInfo) LnsAny {
     var fileId LnsInt
     fileId = db.FP.GetFileIdFromPath(_env, analyzeFileInfo.FP.Get_path(_env))
@@ -43,17 +43,17 @@ func Pattern_getPatterAt(_env *LnsEnv, db *DBCtrl_DBCtrl,analyzeFileInfo *Option
         _env.SetStackVal( Lns_car(_env.GetVM().String_find(path,"^%.%.", nil, nil))) ||
         _env.SetStackVal( Lns_car(_env.GetVM().String_find(path,"^/", nil, nil))) )){
         var dir string
-        dir = Pattern_convExp0_1986(Lns_2DDD(_env.GetVM().String_gsub(path,"/[^/]+$", "")))
+        dir = Pattern_convExp0_1987(Lns_2DDD(_env.GetVM().String_gsub(path,"/[^/]+$", "")))
         projDir = LuneUtil.Util_searchProjDir(_env, dir)
     }
-    Ast_buildAst(_env, LuneLog.Log_Level__Err, NewLnsList([]LnsAny{path}), projDir, analyzeFileInfo.FP.Get_stdinFile(_env), false, transCtrlInfo, front.Front_AstCallback(func(_env *LnsEnv, ast *AstInfo.AstInfo_ASTInfo) {
+    Ast_buildAst(_env, LuneLog.Log_Level__Err, NewLnsList2_[string](Lns_2DDDGen[string](path)), projDir, analyzeFileInfo.FP.Get_stdinFile(_env), false, transCtrlInfo, front.Front_AstCallback(func(_env *LnsEnv, ast *AstInfo.AstInfo_ASTInfo) {
         __func__ := "@lns.@tags.@Pattern.getPatterAt.<anonymous>"
         if ast.FP.Get_streamName(_env) == path{
             var filter *Pattern_SyntaxFilter
             filter = NewPattern_SyntaxFilter(_env, ast)
             pattern = filter.FP.GetPattern(_env, path, analyzeFileInfo, inqMod)
-            Log_log(_env, Log_Level__Log, __func__, 298, Log_CreateMessage(func(_env *LnsEnv) string {
-                return _env.GetVM().String_format("pattern -- %s", []LnsAny{pattern})
+            Log_log(_env, Log_Level__Log, __func__, 300, Log_CreateMessage(func(_env *LnsEnv) string {
+                return _env.GetVM().String_format("pattern -- %s", Lns_2DDD(pattern))
             }))
             
         }
@@ -66,7 +66,7 @@ func Pattern_getPatterAt(_env *LnsEnv, db *DBCtrl_DBCtrl,analyzeFileInfo *Option
 
 
 
-// 35: decl @lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode
+// 37: decl @lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode
 func (self *Pattern_SyntaxFilter) getPatternFromNode(_env *LnsEnv, analyzeFileInfo *Option_AnalyzeFileInfo,inqMod string,nearest *Nodes.Nodes_Node) LnsAny {
     __func__ := "@lns.@tags.@Pattern.SyntaxFilter.getPatternFromNode"
     var Pattern_isInner func(_env *LnsEnv, pos Types.Types_Position,name string) bool
@@ -79,8 +79,8 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(_env *LnsEnv, analyzeFileIn
         }
         return false
     }
-    Log_log(_env, Log_Level__Log, __func__, 20, Log_CreateMessage(func(_env *LnsEnv) string {
-        return _env.GetVM().String_format("%s %s:%4d:%3d -- %s", []LnsAny{"nearestNode -- ", nearest.FP.Get_effectivePos(_env).StreamName, nearest.FP.Get_effectivePos(_env).LineNo, nearest.FP.Get_effectivePos(_env).Column, Nodes.Nodes_getNodeKindName(_env, nearest.FP.Get_kind(_env))})
+    Log_log(_env, Log_Level__Log, __func__, 22, Log_CreateMessage(func(_env *LnsEnv) string {
+        return _env.GetVM().String_format("%s %s:%4d:%3d -- %s", Lns_2DDD("nearestNode -- ", nearest.FP.Get_effectivePos(_env).StreamName, nearest.FP.Get_effectivePos(_env).LineNo, nearest.FP.Get_effectivePos(_env).Column, Nodes.Nodes_getNodeKindName(_env, nearest.FP.Get_kind(_env))))
     }))
     
     
@@ -124,7 +124,7 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(_env *LnsEnv, analyzeFileIn
         if !Lns_IsNil( _workNode ) {
             workNode := _workNode.(*Nodes.Nodes_DeclVarNode)
             for _, _varSym := range( workNode.FP.Get_symbolInfoList(_env).Items ) {
-                varSym := _varSym.(LuneAst.Ast_SymbolInfoDownCast).ToAst_SymbolInfo()
+                varSym := _varSym
                 if Pattern_isInner(_env, Lns_unwrap( varSym.FP.Get_pos(_env)).(Types.Types_Position), varSym.FP.Get_name(_env)){
                     return Ast_getFullNameSym(_env, &self.Nodes_Filter, varSym)
                 }
@@ -185,7 +185,7 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(_env *LnsEnv, analyzeFileIn
                 return self.FP.GetFull(_env, workNode.FP.Get_expType(_env), false)
             }
             for _, _valInfo := range( workNode.FP.Get_enumType(_env).FP.Get_name2EnumValInfo(_env).Items ) {
-                valInfo := _valInfo.(LuneAst.Ast_EnumValInfoDownCast).ToAst_EnumValInfo()
+                valInfo := _valInfo
                 if Pattern_isInner(_env, Lns_unwrap( valInfo.FP.Get_symbolInfo(_env).FP.Get_pos(_env)).(Types.Types_Position), valInfo.FP.Get_symbolInfo(_env).FP.Get_name(_env)){
                     return Ast_getFullNameSym(_env, &self.Nodes_Filter, valInfo.FP.Get_symbolInfo(_env))
                 }
@@ -203,7 +203,7 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(_env *LnsEnv, analyzeFileIn
                 return self.FP.GetFull(_env, workNode.FP.Get_expType(_env), false)
             }
             for _, _valInfo := range( workNode.FP.Get_algeType(_env).FP.Get_valInfoMap(_env).Items ) {
-                valInfo := _valInfo.(LuneAst.Ast_AlgeValInfoDownCast).ToAst_AlgeValInfo()
+                valInfo := _valInfo
                 if Pattern_isInner(_env, Lns_unwrap( valInfo.FP.Get_symbolInfo(_env).FP.Get_pos(_env)).(Types.Types_Position), valInfo.FP.Get_symbolInfo(_env).FP.Get_name(_env)){
                     return Ast_getFullNameSym(_env, &self.Nodes_Filter, valInfo.FP.Get_symbolInfo(_env))
                 }
@@ -377,13 +377,13 @@ func (self *Pattern_SyntaxFilter) getPatternFromNode(_env *LnsEnv, analyzeFileIn
             
         }
     }
-    Log_log(_env, Log_Level__Err, __func__, 193, Log_CreateMessage(func(_env *LnsEnv) string {
-        return _env.GetVM().String_format("unknown pattern -- %s", []LnsAny{Nodes.Nodes_getNodeKindName(_env, nearest.FP.Get_kind(_env))})
+    Log_log(_env, Log_Level__Err, __func__, 195, Log_CreateMessage(func(_env *LnsEnv) string {
+        return _env.GetVM().String_format("unknown pattern -- %s", Lns_2DDD(Nodes.Nodes_getNodeKindName(_env, nearest.FP.Get_kind(_env))))
     }))
     
     return nil
 }
-// 197: decl @lns.@tags.@Pattern.SyntaxFilter.getPattern
+// 199: decl @lns.@tags.@Pattern.SyntaxFilter.getPattern
 func (self *Pattern_SyntaxFilter) GetPattern(_env *LnsEnv, path string,analyzeFileInfo *Option_AnalyzeFileInfo,inqMod string) LnsAny {
     var Pattern_isInner func(_env *LnsEnv, pos Types.Types_Position,name string) bool
     Pattern_isInner = func(_env *LnsEnv, pos Types.Types_Position,name string) bool {
@@ -463,15 +463,15 @@ func (self *Pattern_SyntaxFilter) GetPattern(_env *LnsEnv, path string,analyzeFi
                         }
                     }
                 }
-                Log_log(_env, Log_Level__Trace, __func__, 20, Log_CreateMessage(func(_env *LnsEnv) string {
-                    return _env.GetVM().String_format("%s %s:%4d:%3d -- %s", []LnsAny{"visit:", node.FP.Get_effectivePos(_env).StreamName, node.FP.Get_effectivePos(_env).LineNo, node.FP.Get_effectivePos(_env).Column, Nodes.Nodes_getNodeKindName(_env, node.FP.Get_kind(_env))})
+                Log_log(_env, Log_Level__Trace, __func__, 22, Log_CreateMessage(func(_env *LnsEnv) string {
+                    return _env.GetVM().String_format("%s %s:%4d:%3d -- %s", Lns_2DDD("visit:", node.FP.Get_effectivePos(_env).StreamName, node.FP.Get_effectivePos(_env).LineNo, node.FP.Get_effectivePos(_env).Column, Nodes.Nodes_getNodeKindName(_env, node.FP.Get_kind(_env))))
                 }))
                 
                 
                 return Nodes.Nodes_NodeVisitMode__Child
             }
             return Nodes.Nodes_NodeVisitMode__Next
-        }), 0, NewLnsSet([]LnsAny{}))
+        }), 0, NewLnsSet2_[*Nodes.Nodes_Node]([]*Nodes.Nodes_Node{}))
         {
             _nearest := nearestNode
             if !Lns_IsNil( _nearest ) {
@@ -599,6 +599,13 @@ func Pattern_SyntaxFilter2Stem( obj LnsAny ) LnsAny {
     }
     return obj.(*Pattern_SyntaxFilter).FP
 }
+func Pattern_SyntaxFilter_toSlice(slice []LnsAny) []*Pattern_SyntaxFilter {
+    ret := make([]*Pattern_SyntaxFilter, len(slice))
+    for index, val := range slice {
+        ret[index] = val.(Pattern_SyntaxFilterDownCast).ToPattern_SyntaxFilter()
+    }
+    return ret
+}
 type Pattern_SyntaxFilterDownCast interface {
     ToPattern_SyntaxFilter() *Pattern_SyntaxFilter
 }
@@ -620,7 +627,7 @@ func NewPattern_SyntaxFilter(_env *LnsEnv, arg1 *AstInfo.AstInfo_ASTInfo) *Patte
     obj.InitPattern_SyntaxFilter(_env, arg1)
     return obj
 }
-// 28: DeclConstr
+// 30: DeclConstr
 func (self *Pattern_SyntaxFilter) InitPattern_SyntaxFilter(_env *LnsEnv, ast *AstInfo.AstInfo_ASTInfo) {
     self.InitNodes_Filter(_env, true, ast.FP.Get_exportInfo(_env).FP.Get_moduleTypeInfo(_env), ast.FP.Get_exportInfo(_env).FP.Get_moduleTypeInfo(_env).FP.Get_scope(_env))
     self.ast = ast

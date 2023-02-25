@@ -1,4 +1,5 @@
 _lune_control default_async_all;
+_lune_control default_strict_generics;
 
 pub enum Level {
    Fatal,
