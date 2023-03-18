@@ -8,7 +8,6 @@ import lns.tags.Log;
 import lns.tags.Ast;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Option as LuneOpt;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Nodes;
-import go/github:com.ifritJP.LuneScript.src.lune.base.Parser;
 import go/github:com.ifritJP.LuneScript.src.lune.base.TransUnit;
 import go/github:com.ifritJP.LuneScript.src.lune.base.front;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Types;

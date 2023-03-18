@@ -156,7 +156,6 @@ local Log = _lune.loadModule( 'lns.tags.Log' )
 local Ast = _lune.loadModule( 'lns.tags.Ast' )
 local LuneOpt = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Option' )
 local Nodes = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Nodes' )
-local Parser = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Parser' )
 local TransUnit = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.TransUnit' )
 local front = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.front' )
 local Types = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Types' )
@@ -196,7 +195,7 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
    
    
    
-   Log.log( Log.Level.Log, __func__, 22, function (  )
+   Log.log( Log.Level.Log, __func__, 21, function (  )
    
       return string.format( "%s %s:%4d:%3d -- %s", "nearestNode -- ", nearest:get_effectivePos().streamName, nearest:get_effectivePos().lineNo, nearest:get_effectivePos().column, Nodes.getNodeKindName( nearest:get_kind() ))
    end )
@@ -518,7 +517,7 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
    end
    
    
-   Log.log( Log.Level.Err, __func__, 195, function (  )
+   Log.log( Log.Level.Err, __func__, 194, function (  )
    
       return string.format( "unknown pattern -- %s", Nodes.getNodeKindName( nearest:get_kind() ))
    end )
@@ -607,7 +606,7 @@ function SyntaxFilter:getPattern( path, analyzeFileInfo, inqMod )
                
             end
             
-            Log.log( Log.Level.Trace, __func__, 22, function (  )
+            Log.log( Log.Level.Trace, __func__, 21, function (  )
             
                return string.format( "%s %s:%4d:%3d -- %s", "visit:", node:get_effectivePos().streamName, node:get_effectivePos().lineNo, node:get_effectivePos().column, Nodes.getNodeKindName( node:get_kind() ))
             end )
@@ -661,7 +660,7 @@ local function getPatterAt( db, analyzeFileInfo, inqMod, transCtrlInfo )
       if ast:get_streamName() == path then
          local filter = SyntaxFilter._new(ast)
          pattern = filter:getPattern( path, analyzeFileInfo, inqMod )
-         Log.log( Log.Level.Log, __func__, 300, function (  )
+         Log.log( Log.Level.Log, __func__, 299, function (  )
          
             return string.format( "pattern -- %s", pattern)
          end )

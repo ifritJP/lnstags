@@ -3,7 +3,6 @@ package tags
 import . "github.com/ifritJP/LuneScript/src/lune/base/runtime_go"
 import LuneOpt "github.com/ifritJP/LuneScript/src/lune/base"
 import Types "github.com/ifritJP/LuneScript/src/lune/base"
-import Parser "github.com/ifritJP/LuneScript/src/lune/base"
 import front "github.com/ifritJP/LuneScript/src/lune/base"
 import Nodes "github.com/ifritJP/LuneScript/src/lune/base"
 import LuneAst "github.com/ifritJP/LuneScript/src/lune/base"
@@ -12,7 +11,7 @@ import LuneLog "github.com/ifritJP/LuneScript/src/lune/base"
 import LuneUtil "github.com/ifritJP/LuneScript/src/lune/base"
 var init_Ast bool
 var Ast__mod__ string
-// 16: decl @lns.@tags.@Ast.getFullNameSym
+// 15: decl @lns.@tags.@Ast.getFullNameSym
 func Ast_getFullNameSym(_env *LnsEnv, filter *Nodes.Nodes_Filter,symbolInfo *LuneAst.Ast_SymbolInfo) string {
     if symbolInfo.FP.Get_namespaceTypeInfo(_env) == LuneAst.Ast_headTypeInfo{
         return symbolInfo.FP.Get_name(_env)
@@ -22,7 +21,7 @@ func Ast_getFullNameSym(_env *LnsEnv, filter *Nodes.Nodes_Filter,symbolInfo *Lun
     return name
 }
 
-// 25: decl @lns.@tags.@Ast.buildAst
+// 24: decl @lns.@tags.@Ast.buildAst
 func Ast_buildAst(_env *LnsEnv, logLevel LnsInt,pathList *LnsList2_[string],projDir LnsAny,stdinFile LnsAny,forceAll bool,transCtrlInfo *Types.Types_TransCtrlInfo,astCallback front.Front_AstCallback) {
     if pathList.Len() == 0{
         return 
@@ -49,7 +48,6 @@ func Lns_Ast_init(_env *LnsEnv) {
     Lns_InitMod()
     LuneOpt.Lns_Option_init(_env)
     Types.Lns_Types_init(_env)
-    Parser.Lns_Parser_init(_env)
     front.Lns_front_init(_env)
     Nodes.Lns_Nodes_init(_env)
     LuneAst.Lns_Ast_init(_env)

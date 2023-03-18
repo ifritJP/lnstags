@@ -28,7 +28,7 @@ endif
 	go build -tags gopherlua -o lnstags
 
 update_lns:
-	go get github.com/ifritJP/LuneScript/src@latest
+	go get -u github.com/ifritJP/LuneScript/src@latest
 
 
 buildDB: build

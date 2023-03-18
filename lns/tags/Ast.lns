@@ -5,7 +5,6 @@ _lune_control default_strict_generics;
 
 import go/github:com.ifritJP.LuneScript.src.lune.base.Option as LuneOpt;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Types;
-import go/github:com.ifritJP.LuneScript.src.lune.base.Parser;
 import go/github:com.ifritJP.LuneScript.src.lune.base.front;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Nodes;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Ast as LuneAst;
