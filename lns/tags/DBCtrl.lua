@@ -1340,7 +1340,6 @@ function DBCtrl:mapNamespaceSuffix( suffix, callback )
    end )
 end
 
-
 function DBCtrl:addNamespace( fullName, parentId )
 
    local id = nil

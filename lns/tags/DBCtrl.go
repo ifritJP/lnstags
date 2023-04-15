@@ -94,7 +94,7 @@ func DBCtrl_convExp4_753(arg1 []LnsAny) LnsAny {
     return Lns_getFromMulti( arg1, 0 )
 }
 // for 890
-func DBCtrl_convExp0_1556(arg1 []LnsAny) LnsInt {
+func DBCtrl_convExp0_1555(arg1 []LnsAny) LnsInt {
     return Lns_getFromMulti( arg1, 0 ).(LnsInt)
 }
 // for 204
@@ -110,11 +110,11 @@ func DBCtrl_convExp2_336(arg1 []LnsAny) LnsInt {
     return Lns_getFromMulti( arg1, 0 ).(LnsInt)
 }
 // for 896
-func DBCtrl_convExp0_1586(arg1 []LnsAny) LnsInt {
+func DBCtrl_convExp0_1585(arg1 []LnsAny) LnsInt {
     return Lns_getFromMulti( arg1, 0 ).(LnsInt)
 }
 // for 908
-func DBCtrl_convExp0_1671(arg1 []LnsAny) (LnsInt, bool) {
+func DBCtrl_convExp0_1670(arg1 []LnsAny) (LnsInt, bool) {
     return Lns_getFromMulti( arg1, 0 ).(LnsInt), Lns_getFromMulti( arg1, 1 ).(bool)
 }
 func DBCtrl_open___anonymous_0_(_env *LnsEnv) string {
@@ -316,7 +316,7 @@ func DBCtrl_test(_env *LnsEnv) bool {
     fileId = DBCtrl_rootNsId
     for _, _path := range( NewLnsList2_[string](Lns_2DDDGen[string]("aa.lns", "bb.lns", "cc.lns")).Items ) {
         path := _path
-        fileId = DBCtrl_convExp0_1556(Lns_2DDD(db.FP.AddFile(_env, path, Lns_car(_env.GetVM().String_gsub(path,"%.lns", "")).(string))))
+        fileId = DBCtrl_convExp0_1555(Lns_2DDD(db.FP.AddFile(_env, path, Lns_car(_env.GetVM().String_gsub(path,"%.lns", "")).(string))))
     }
     var parentId LnsInt
     parentId = DBCtrl_rootNsId
@@ -324,7 +324,7 @@ func DBCtrl_test(_env *LnsEnv) bool {
         index := _index + 1
         name := _name
         var newid LnsInt
-        newid = DBCtrl_convExp0_1586(Lns_2DDD(db.FP.AddNamespace(_env, name, parentId)))
+        newid = DBCtrl_convExp0_1585(Lns_2DDD(db.FP.AddNamespace(_env, name, parentId)))
         db.FP.AddSymbolDecl(_env, newid, fileId, 100 + index, index * 10)
         db.FP.AddSymbolRef(_env, newid, fileId, 200 + index, index * 20, true)
         db.FP.AddSymbolSet(_env, newid, fileId, 300 + index, index * 30)
