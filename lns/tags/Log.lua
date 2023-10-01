@@ -108,25 +108,31 @@ Level.__allList[7] = Level.Trace
 
 local name2levelMap = {["fatal"] = Level.Fatal, ["error"] = Level.Err, ["warn"] = Level.Warn, ["log"] = Level.Log, ["info"] = Level.Info, ["debug"] = Level.Debug, ["trace"] = Level.Trace}
 
+
 local function str2level( txt )
 
    return name2levelMap[txt]
 end
 _moduleObj.str2level = str2level
 
+
 local outputLevel = Level.Warn
+
 local function setLevel( level )
 
    outputLevel = level
 end
 _moduleObj.setLevel = setLevel
 
+
 local detail = true
+
 local function enableDetail( flag )
 
    detail = flag
 end
 _moduleObj.enableDetail = enableDetail
+
 
 
 
@@ -143,13 +149,12 @@ local function log( level, funcName, lineNo, callback )
          logStream:write( string.format( "%s:%s:", Level:_getTxt( level)
          , funcName) )
       end
-      
       logStream:write( callback(  ) )
       logStream:write( "\n" )
    end
-   
 end
 _moduleObj.log = log
+
 
 
 

@@ -68,8 +68,11 @@ end
 
 
 local DBCtrl = _lune.loadModule( 'lns.tags.DBCtrl' )
+
 local Util = _lune.loadModule( 'lns.tags.Util' )
+
 local LuneAst = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Ast' )
+
 
 local function InqDef( db, pattern )
 
@@ -85,9 +88,11 @@ local function InqDef( db, pattern )
       
       Util.outputLocate( io.stdout, pattern, path, factory:create( path ), item:get_line() )
       return true
-   end )
+   end
+    )
 end
 _moduleObj.InqDef = InqDef
+
 
 local function InqRef( db, pattern, onlySet )
 
@@ -103,9 +108,11 @@ local function InqRef( db, pattern, onlySet )
       
       Util.outputLocate( io.stdout, pattern, path, factory:create( path ), item:get_line() )
       return true
-   end )
+   end
+    )
 end
 _moduleObj.InqRef = InqRef
+
 
 local function InqAllmut( db )
 
@@ -121,9 +128,11 @@ local function InqAllmut( db )
       
       Util.outputLocate( io.stdout, "allmut", path, factory:create( path ), item:get_line() )
       return true
-   end )
+   end
+    )
 end
 _moduleObj.InqAllmut = InqAllmut
+
 
 local function InqAsync( db, asyncMode )
 
@@ -139,9 +148,11 @@ local function InqAsync( db, asyncMode )
       
       Util.outputLocate( io.stdout, string.format( "%d", asyncMode), path, factory:create( path ), item:get_line() )
       return true
-   end )
+   end
+    )
 end
 _moduleObj.InqAsync = InqAsync
+
 
 local function InqLuaval( db )
 
@@ -157,9 +168,11 @@ local function InqLuaval( db )
       
       Util.outputLocate( io.stdout, "luaval", path, factory:create( path ), item:get_line() )
       return true
-   end )
+   end
+    )
 end
 _moduleObj.InqLuaval = InqLuaval
+
 
 local function InqAsyncLock( db )
 
@@ -175,8 +188,10 @@ local function InqAsyncLock( db )
       
       Util.outputLocate( io.stdout, "luaval", path, factory:create( path ), item:get_line() )
       return true
-   end )
+   end
+    )
 end
 _moduleObj.InqAsyncLock = InqAsyncLock
+
 
 return _moduleObj

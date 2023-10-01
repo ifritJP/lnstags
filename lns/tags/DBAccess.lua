@@ -82,7 +82,9 @@ end
 
 
 local base = _lune.loadModule( 'go/github:com.ifritJP.lnssqlite3.src.lns.sqlite3.base' )
+
 local Log = _lune.loadModule( 'lns.tags.Log' )
+
 
 local DBAccess = {}
 _moduleObj.DBAccess = DBAccess
@@ -129,6 +131,7 @@ local function open( path, readonly )
 end
 _moduleObj.open = open
 
+
 function DBAccess:close(  )
 
    self.db:Close(  )
@@ -146,21 +149,21 @@ function DBAccess:begin(  )
    Log.log( Log.Level.Log, __func__, 54, function (  )
    
       return "start"
-   end )
+   end
+    )
    
    
    if self.readonlyFlag then
       Log.log( Log.Level.Err, __func__, 57, function (  )
       
          return "db mode is read only"
-      end )
+      end
+       )
+      
       
       os.exit( 1 )
    end
-   
-   
    self.beginFlag = true
-   
    self.db:Begin(  )
 end
 
@@ -171,25 +174,24 @@ function DBAccess:commit(  )
    if self.readonlyFlag then
       return 
    end
-   
    if not self.beginFlag then
       return 
    end
-   
    self.beginFlag = false
-   
    Log.log( Log.Level.Log, __func__, 82, function (  )
    
       return "commit: start"
-   end )
+   end
+    )
    
    
    self.db:Commit(  )
-   
    Log.log( Log.Level.Log, __func__, 86, function (  )
    
       return "commit: end"
-   end )
+   end
+    )
+   
    
 end
 
@@ -206,11 +208,9 @@ function DBAccess:mapJoin( tableName, otherTable, on, condition, limit, attrib, 
    if condition ~= nil then
       query = string.format( "%s WHERE %s", query, condition)
    end
-   
    if limit ~= nil then
       query = string.format( "%s LIMIT %d", query, limit)
    end
-   
    return self.db:MapQueryAsMap( query, func, errHandle )
 end
 
@@ -221,11 +221,9 @@ function DBAccess:mapJoin2( tableName, otherTable, on, otherTable2, on2, conditi
    if condition ~= nil then
       query = string.format( "%s WHERE %s", query, condition)
    end
-   
    if limit ~= nil then
       query = string.format( "%s LIMIT %d", query, limit)
    end
-   
    return self.db:MapQueryAsMap( query, func, errHandle )
 end
 
@@ -236,11 +234,9 @@ function DBAccess:mapJoin3( tableName, otherTable, on, otherTable2, on2, otherTa
    if condition ~= nil then
       query = string.format( "%s WHERE %s", query, condition)
    end
-   
    if limit ~= nil then
       query = string.format( "%s LIMIT %d", query, limit)
    end
-   
    return self.db:MapQueryAsMap( query, func, errHandle )
 end
 
@@ -255,15 +251,12 @@ function DBAccess:mapRowList( tableName, condition, limit, attrib, order, func, 
    else
       query = string.format( "SELECT %s FROM %s", ATTRIB, tableName)
    end
-   
    if order ~= nil then
       query = string.format( "%s ORDER BY %s", query, order)
    end
-   
    if limit ~= nil then
       query = string.format( "%s LIMIT %d", query, limit)
    end
-   
    return self.db:MapQueryAsMap( query, func, errHandle )
 end
 
@@ -275,8 +268,8 @@ function DBAccess:createTables( sqlTxt )
       if not msg:find( "already exists", 1, true ) then
          print( msg )
       end
-      
-   end )
+   end
+    )
 end
 
 
@@ -287,8 +280,8 @@ function DBAccess:insert( tableName, values )
       if not message:find( "UNIQUE constraint failed", 1, true ) and not message:find( " not unique", 1, true ) then
          self:errorExit( string.format( "%s\n%s", message, stmt) )
       end
-      
-   end )
+   end
+    )
 end
 
 
@@ -298,7 +291,6 @@ function DBAccess:update( tableName, set, condition )
    if condition then
       sql = string.format( "%s WHERE %s", sql, condition )
    end
-   
    self:exec( sql )
 end
 

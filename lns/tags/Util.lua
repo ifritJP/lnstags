@@ -109,7 +109,6 @@ function SourceCodeLineAccessor:getLine( lineNo )
    if lineNo < 0 or #self.lineList < lineNo then
       return nil
    end
-   
    return self.lineList[lineNo]
 end
 function SourceCodeLineAccessor._setmeta( obj )
@@ -152,16 +151,13 @@ function SourceCodeLineAccessorFactory:create( filePath, fileContents )
          return _exp
       end
    end
-   
    local lineList = {}
    if fileContents ~= nil then
       do
          for line in string.gmatch( fileContents, "[^\n]*\n" ) do
             table.insert( lineList, string.sub( line, 1, #line - 1 ) )
          end
-         
       end
-      
    else
       local handle = io.open( filePath, "r" )
       if  nil == handle then
@@ -180,9 +176,7 @@ function SourceCodeLineAccessorFactory:create( filePath, fileContents )
          
          table.insert( lineList, text )
       end
-      
    end
-   
    local accessor = SourceCodeLineAccessor._new(filePath, lineList)
    self.path2accessor[filePath] = accessor
    return accessor
@@ -204,5 +198,6 @@ local function outputLocate( stream, symbol, path, lineAccessor, lineNo )
    stream:write( string.format( "%-16s %4d %-16s %s\n", symbol, lineNo, path, line) )
 end
 _moduleObj.outputLocate = outputLocate
+
 
 return _moduleObj

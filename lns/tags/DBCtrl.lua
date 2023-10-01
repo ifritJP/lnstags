@@ -193,17 +193,26 @@ end
 
 
 local base = _lune.loadModule( 'go/github:com.ifritJP.lnssqlite3.src.lns.sqlite3.base' )
+
 local LuneAst = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Ast' )
+
 local DBAccess = _lune.loadModule( 'lns.tags.DBAccess' )
+
 local Log = _lune.loadModule( 'lns.tags.Log' )
+
 local Depend = _lune.loadModule( 'lns.tags.Depend' )
+
 
 local rootNsId = 1
 _moduleObj.rootNsId = rootNsId
 
+
 local userNsId = 2
+
 local systemFileId = 1
+
 local DB_VERSION = 10.0
+
 
 local IdMgr = {}
 function IdMgr._new( idNum )
@@ -235,13 +244,14 @@ function DBCtrl.getMaxId( access, tableName, defId )
    
       id = items['id']
       return false
-   end, function ( stmt, msg )
+   end
+   , function ( stmt, msg )
    
-   end )
+   end
+    )
    if id ~= nil then
       return math.floor(id)
    end
-   
    return defId
 end
 function DBCtrl._new( access, readonly )
@@ -253,7 +263,6 @@ end
 function DBCtrl:__init(access, readonly) 
    self.access = access
    self.projDir = Depend.getCurDir(  )
-   
    self.idMgrNamespace = IdMgr._new(DBCtrl.getMaxId( access, "namespace", userNsId ))
    self.idMgrSimpleName = IdMgr._new(DBCtrl.getMaxId( access, "simpleName", userNsId ))
    self.idMgrFilePath = IdMgr._new(DBCtrl.getMaxId( access, "filePath", userNsId ))
@@ -285,7 +294,6 @@ function DBCtrl:update( tableName, set, condition )
    if condition then
       sql = string.format( "%s WHERE %s", sql, condition )
    end
-   
    self:exec( sql )
 end
 function DBCtrl:mapRowList( tableName, condition, limit, attrib, func, errHandle )
@@ -303,7 +311,8 @@ function DBCtrl:getRowList( tableName, condition, limit, attrib, errHandle )
    
       table.insert( rows, items )
       return true
-   end, errHandle )
+   end
+   , errHandle )
    return rows
 end
 function DBCtrl:mapJoin( tableName, otherTable, on, condition, limit, attrib, func, errHandle )
@@ -316,8 +325,6 @@ function DBCtrl:getRow( tableName, condition, attrib, errHandle )
    if #row == 0 then
       return nil
    end
-   
-   
    return row[1]
 end
 function DBCtrl:getEtc( key )
@@ -331,10 +338,8 @@ function DBCtrl:getEtc( key )
                return val
             end
          end
-         
       end
    end
-   
    return nil
 end
 function DBCtrl:setEtc( key, val )
@@ -347,14 +352,12 @@ function DBCtrl:setEtc( key, val )
     
       self:update( "etc", valTxt, keyTxt )
    end
-   
 end
 function DBCtrl:equalsEtc( key, val )
 
    if self:getEtc( key ) == val then
       return true
    end
-   
    return false
 end
 function DBCtrl:isKilling(  )
@@ -362,7 +365,6 @@ function DBCtrl:isKilling(  )
    if self:equalsEtc( "killFlag", "1" ) then
       return true
    end
-   
    return false
 end
 function DBCtrl._setmeta( obj )
@@ -429,7 +431,9 @@ local function open( path, readonly )
    Log.log( Log.Level.Log, __func__, 191, function (  )
    
       return "open"
-   end )
+   end
+    )
+   
    
    local db = DBAccess.open( path, readonly )
    if  nil == db then
@@ -438,16 +442,11 @@ local function open( path, readonly )
       return nil
    end
    
-   
    db:exec( "PRAGMA case_sensitive_like=ON;", nil )
-   
    local dbCtrl = DBCtrl._new(db, readonly)
-   
    if not readonly then
       dbCtrl:begin(  )
    end
-   
-   
    local item = ETC._fromStem( dbCtrl:getRow( "etc", "keyName = 'version'" ) )
    if  nil == item then
       local _item = item
@@ -455,7 +454,9 @@ local function open( path, readonly )
       Log.log( Log.Level.Err, __func__, 205, function (  )
       
          return "unknown version"
-      end )
+      end
+       )
+      
       
       db:close(  )
       return nil
@@ -465,21 +466,20 @@ local function open( path, readonly )
       Log.log( Log.Level.Err, __func__, 210, function (  )
       
          return string.format( "not support version. -- %s", item:get_val())
-      end )
+      end
+       )
+      
       
       db:close(  )
       return nil
    end
-   
-   
    if dbCtrl:isKilling(  ) then
       error( "db is killed now" )
    end
-   
-   
    return dbCtrl
 end
 _moduleObj.open = open
+
 
 function DBCtrl:creataTables(  )
 
@@ -1116,9 +1116,9 @@ function DBCtrl:getProjId( path )
             projId = projInfo:get_id()
          end
       end
-      
       return false
-   end )
+   end
+    )
    return projId
 end
 
@@ -1130,10 +1130,8 @@ function DBCtrl:addProj( path )
          return projId, false
       end
    end
-   
    local id = self.idMgrProjInfo:getIdNext(  )
    self:insert( "projInfo", string.format( "%d,'%s'", id, path) )
-   
    return id, true
 end
 
@@ -1145,19 +1143,19 @@ local function getProjDir( path, mod )
    if #mod ~= 0 and #projDir == 0 then
       projDir = "./"
    end
-   
    return projDir
 end
 _moduleObj.getProjDir = getProjDir
+
 
 local function normalizePath( path )
 
    return (path:gsub( "^%./", "" ) )
 end
+
 function DBCtrl:addFile( path, mod )
 
    path = normalizePath( path )
-   
    local fileId = nil
    self:mapRowList( "filePath", string.format( "path = '%s'", path), 1, nil, function ( items )
    
@@ -1167,17 +1165,14 @@ function DBCtrl:addFile( path, mod )
             fileId = filePath:get_id()
          end
       end
-      
       return false
-   end )
+   end
+    )
    if fileId ~= nil then
       return fileId, false
    end
-   
-   
    local projDir = getProjDir( path, mod )
    local projId = self:addProj( projDir )
-   
    local id = self.idMgrFilePath:getIdNext(  )
    self:insert( "filePath", string.format( "%d,'%s','%s', %d", id, path, mod:gsub( "@", "" ), projId) )
    return id, true
@@ -1196,12 +1191,11 @@ function DBCtrl:mapFilePath( callback )
             if not callback( filePath ) then
                return false
             end
-            
          end
       end
-      
       return true
-   end )
+   end
+    )
 end
 
 
@@ -1218,17 +1212,18 @@ function DBCtrl:getFileIdFromPath( path )
             fileId = filePath:get_id()
          end
       end
-      
       return false
-   end )
+   end
+    )
    if fileId ~= nil then
       return fileId
    end
-   
    Log.log( Log.Level.Err, __func__, 452, function (  )
    
       return string.format( "not found file -- %s", path)
-   end )
+   end
+    )
+   
    
    return _moduleObj.rootNsId
 end
@@ -1245,9 +1240,9 @@ function DBCtrl:getFilePath( fileId )
             path = obj:get_path()
          end
       end
-      
       return false
-   end )
+   end
+    )
    return path
 end
 
@@ -1269,10 +1264,8 @@ function DBCtrl:getMainFilePath( subId )
                return self:getFilePath( math.floor(mainId) )
             end
          end
-         
       end
    end
-   
    return nil
 end
 
@@ -1288,9 +1281,9 @@ function DBCtrl:getName( nsId )
             name = obj:get_name()
          end
       end
-      
       return false
-   end )
+   end
+    )
    return name
 end
 
@@ -1306,9 +1299,9 @@ function DBCtrl:getNsId( name )
             nsId = obj:get_id()
          end
       end
-      
       return false
-   end )
+   end
+    )
    return nsId
 end
 
@@ -1324,9 +1317,9 @@ function DBCtrl:mapNamespaceSuffix( suffix, callback )
             return callback( item )
          end
       end
-      
       return true
-   end )
+   end
+    )
    self:mapRowList( "namespace", string.format( "name = '%s'", suffix), nil, nil, function ( items )
    
       do
@@ -1335,9 +1328,9 @@ function DBCtrl:mapNamespaceSuffix( suffix, callback )
             return callback( item )
          end
       end
-      
       return true
-   end )
+   end
+    )
 end
 
 function DBCtrl:addNamespace( fullName, parentId )
@@ -1351,17 +1344,15 @@ function DBCtrl:addNamespace( fullName, parentId )
             id = obj:get_id()
          end
       end
-      
       return false
-   end )
+   end
+    )
    if id ~= nil then
       return id, false
    end
-   
    local snid = _moduleObj.rootNsId
    local newId = self.idMgrNamespace:getIdNext(  )
    self:insert( "namespace", string.format( "%d, %d, %d, '', '%s', '', 1", newId, snid, parentId, fullName) )
-   
    return newId, true
 end
 
@@ -1389,9 +1380,9 @@ function DBCtrl:mapAsyncMode( asyncMode, callback )
             return callback( item )
          end
       end
-      
       return true
-   end )
+   end
+    )
 end
 
 
@@ -1412,9 +1403,9 @@ function DBCtrl:mapAllmutDecl( callback )
             return callback( item )
          end
       end
-      
       return true
-   end )
+   end
+    )
 end
 
 
@@ -1422,14 +1413,12 @@ function DBCtrl:addSymbolDecl( nsId, fileId, lineNo, column )
 
    local kind = 0
    local snid = _moduleObj.rootNsId
-   
    local parentId = _lune.nilacc( self:getRow( "namespace", string.format( "id = %d", nsId), "parentId" ), nil, 'item', "parentId")
    if  nil == parentId then
       local _parentId = parentId
    
       return 
    end
-   
    
    self:insert( "symbolDecl", string.format( "%d, %d, %d, %d, %d, %d, %d, %d, %d, 0, '', 0", nsId, snid, math.floor(parentId), kind, fileId, lineNo, column, lineNo, column) )
 end
@@ -1457,7 +1446,9 @@ local function create( dbPath )
    Log.log( Log.Level.Log, __func__, 649, function (  )
    
       return "create"
-   end )
+   end
+    )
+   
    
    local db = DBAccess.open( dbPath, false )
    if  nil == db then
@@ -1466,15 +1457,12 @@ local function create( dbPath )
       return nil
    end
    
-   
    local dbCtrl = DBCtrl._new(db, false)
-   
    dbCtrl:creataTables(  )
-   
    dbCtrl:begin(  )
-   
    return dbCtrl
 end
+
 
 local function initDB( dbPath )
 
@@ -1493,6 +1481,7 @@ end
 _moduleObj.initDB = initDB
 
 
+
 function DBCtrl:mapLuavalRef( callback )
 
    self:mapRowListSort( "luavalRef", nil, nil, nil, "fileId, line", function ( items )
@@ -1503,9 +1492,9 @@ function DBCtrl:mapLuavalRef( callback )
             return callback( item )
          end
       end
-      
       return false
-   end )
+   end
+    )
 end
 
 
@@ -1526,9 +1515,9 @@ function DBCtrl:mapAsyncLock( callback )
             return callback( item )
          end
       end
-      
       return false
-   end )
+   end
+    )
 end
 
 
@@ -1549,7 +1538,6 @@ function DBCtrl:mapSymbolDecl( name, callback )
       return 
    end
    
-   
    local overrideStr = string.format( "%d", nsId)
    self:mapRowList( "override", string.format( "superNsId = %d", nsId), nil, nil, function ( items )
    
@@ -1559,10 +1547,9 @@ function DBCtrl:mapSymbolDecl( name, callback )
             overrideStr = string.format( "%s, %d", overrideStr, item:get_nsId())
          end
       end
-      
       return true
-   end )
-   
+   end
+    )
    self:mapRowListSort( "symbolDecl", string.format( "nsId IN (%s)", overrideStr), nil, nil, "fileId, line", function ( items )
    
       do
@@ -1571,9 +1558,9 @@ function DBCtrl:mapSymbolDecl( name, callback )
             return callback( item )
          end
       end
-      
       return true
-   end )
+   end
+    )
 end
 
 
@@ -1587,9 +1574,9 @@ function DBCtrl:mapSymbolDeclForNsId( nsId, callback )
             return callback( item )
          end
       end
-      
       return true
-   end )
+   end
+    )
 end
 
 
@@ -1604,7 +1591,6 @@ function DBCtrl:mapSymbolRef( name, onlySet, callback )
       return 
    end
    
-   
    local overrideStr = string.format( "%d", nsId)
    self:mapRowList( "override", string.format( "nsId = %d", nsId), nil, nil, function ( items )
    
@@ -1614,15 +1600,13 @@ function DBCtrl:mapSymbolRef( name, onlySet, callback )
             overrideStr = string.format( "%s, %d", overrideStr, item:get_superNsId())
          end
       end
-      
       return true
-   end )
-   
+   end
+    )
    local cond = string.format( "nsId IN (%s)", overrideStr)
    if onlySet then
       cond = string.format( "(%s) AND setOp = 1", cond)
    end
-   
    self:mapRowListSort( "symbolRef", cond, nil, nil, "fileId, line", function ( items )
    
       do
@@ -1631,9 +1615,9 @@ function DBCtrl:mapSymbolRef( name, onlySet, callback )
             return callback( item )
          end
       end
-      
       return true
-   end )
+   end
+    )
 end
 
 
@@ -1644,74 +1628,75 @@ function DBCtrl:dumpFile(  )
    
       print( items['id'], items['dir'] )
       return true
-   end )
-   
+   end
+    )
    print( "filePath" )
    self:mapRowList( "filePath", nil, nil, nil, function ( items )
    
       print( items['id'], items['projId'], items['path'], items['mod'] )
       return true
-   end )
-   
+   end
+    )
    print( "subfile" )
    self:mapRowList( "subfile", nil, nil, nil, function ( items )
    
       print( items['mainId'], items['subId'] )
       return true
-   end )
+   end
+    )
 end
 
 
 function DBCtrl:dumpAsync(  )
 
    print( "async" )
-   
    self:mapRowList( "asyncMode", nil, nil, nil, function ( items )
    
       print( items['nsId'], items['mode'] )
       return true
-   end )
+   end
+    )
 end
 
 
 function DBCtrl:dumpAll(  )
 
    self:dumpFile(  )
-   
    print( "namespace" )
    self:mapRowList( "namespace", nil, nil, nil, function ( items )
    
       print( items['id'], items['name'] )
       return true
-   end )
-   
+   end
+    )
    print( "override" )
    self:mapRowList( "override", nil, nil, nil, function ( items )
    
       print( items['nsId'], items['superNsId'] )
       return true
-   end )
-   
+   end
+    )
    print( "symbolDecl" )
    self:mapRowList( "symbolDecl", nil, nil, nil, function ( items )
    
       print( items['nsId'], items['fileId'], items['line'], items['column'] )
       return true
-   end )
-   
+   end
+    )
    print( "symbolRef" )
    self:mapRowList( "symbolRef", nil, nil, nil, function ( items )
    
       print( items['nsId'], items['fileId'], items['line'], items['column'] )
       return true
-   end )
-   
+   end
+    )
    print( "symbolSet" )
    self:mapRowList( "symbolSet", nil, nil, nil, function ( items )
    
       print( items['nsId'], items['fileId'], items['line'], items['column'] )
       return true
-   end )
+   end
+    )
 end
 
 
@@ -1721,8 +1706,6 @@ local function test(  )
    do
       initDB( dbPath )
    end
-   
-   
    local db = open( dbPath, false )
    if  nil == db then
       local _db = db
@@ -1731,37 +1714,28 @@ local function test(  )
       return false
    end
    
-   
    local fileId = _moduleObj.rootNsId
    for __index, path in pairs( {"aa.lns", "bb.lns", "cc.lns"} ) do
       fileId = db:addFile( path, (path:gsub( "%.lns", "" ) ) )
    end
-   
-   
    local parentId = _moduleObj.rootNsId
    for index, name in pairs( {"@hoge", "@hoge.@foo", "@hoge.@foo.bar"} ) do
       local newid = db:addNamespace( name, parentId )
       db:addSymbolDecl( newid, fileId, 100 + index, index * 10 )
       db:addSymbolRef( newid, fileId, 200 + index, index * 20, true )
       db:addSymbolSet( newid, fileId, 300 + index, index * 30 )
-      
       parentId = newid
    end
-   
-   
    do
       local _
       local _1, added = db:addNamespace( "@hoge", _moduleObj.rootNsId )
       print( "added", added )
    end
-   
-   
    db:commit(  )
-   
    db:dumpAll(  )
-   
    return true
 end
 _moduleObj.test = test
+
 
 return _moduleObj

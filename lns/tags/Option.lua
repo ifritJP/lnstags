@@ -81,8 +81,11 @@ end
 
 
 local Log = _lune.loadModule( 'lns.tags.Log' )
+
 local LuneTypes = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Types' )
+
 local LuneUtil = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Util' )
+
 
 local InqMode = {}
 _moduleObj.InqMode = InqMode
@@ -259,7 +262,6 @@ local function printUsage( messages )
    if messages ~= nil then
       io.stderr:write( string.format( "%s\n", messages) )
    end
-   
    print( "usage: lnstags init [option]" )
    print( "usage: lnstags build [option] filepath" )
    print( "usage: lnstags inq <def|ref|set|allmut> pattern" )
@@ -269,12 +271,11 @@ local function printUsage( messages )
    os.exit( 1 )
 end
 
+
 local function analyzeArgs( argList )
 
    local option = Option._new()
-   
    local index = 1
-   
    local getNextOpNonNil
    
    getNextOpNonNil = function ( mess )
@@ -283,13 +284,11 @@ local function analyzeArgs( argList )
    end
    
    local stdinFlag = false
-   
    local function getNextOpRaw(  )
    
       if #argList <= index then
          return nil
       end
-      
       index = index + 1
       return argList[index]
    end
@@ -304,7 +303,6 @@ local function analyzeArgs( argList )
          end
          
          if arg:find( "^-" ) then
-            
             do
                local _switchExp = arg
                if _switchExp == "-i" then
@@ -317,16 +315,12 @@ local function analyzeArgs( argList )
                   option.transCtrlInfo.legacyMutableControl = true
                end
             end
-            
          else
           
             return arg
          end
-         
       end
-      
    end
-   
    getNextOpNonNil = function ( mess )
    
       do
@@ -335,9 +329,9 @@ local function analyzeArgs( argList )
             return arg
          end
       end
-      
       printUsage( mess )
    end
+   
    local function getNextOpInt( mess )
    
       do
@@ -349,14 +343,11 @@ local function analyzeArgs( argList )
                   return math.floor(num)
                end
             end
-            
             printUsage( string.format( "illegal num -- %s", arg) )
          end
       end
-      
       printUsage( mess )
    end
-   
    local function getInqMode(  )
    
       local nextToken = getNextOp(  )
@@ -375,9 +366,7 @@ local function analyzeArgs( argList )
       
       return inqMode
    end
-   
    local mode = nil
-   
    while true do
       local arg = getNextOp(  )
       if  nil == arg then
@@ -385,7 +374,6 @@ local function analyzeArgs( argList )
       
          break
       end
-      
       
       if not mode then
          do
@@ -404,7 +392,6 @@ local function analyzeArgs( argList )
                               option.pattern = getNextOpNonNil( "none pattern" )
                         end
                      end
-                     
                      Log.setLevel( Log.Level.Warn )
                   elseif _switchExp == Mode.InqAt then
                      option.inqMode = getInqMode(  )
@@ -415,12 +402,10 @@ local function analyzeArgs( argList )
                      option.pattern = getNextOpNonNil( "none pattern" )
                   end
                end
-               
             else
                printUsage( string.format( "illegal option -- %s", arg) )
             end
          end
-         
       else
        
          do
@@ -438,43 +423,31 @@ local function analyzeArgs( argList )
                      if #line > 0 then
                         table.insert( option.pathList, line )
                      end
-                     
                   end
-                  
                else
                 
                   table.insert( option.pathList, arg )
                end
-               
             end
          end
-         
       end
-      
    end
-   
    do
       local logLevel = option.logLevel
       if logLevel ~= nil then
          Log.setLevel( logLevel )
       end
    end
-   
-   
    if stdinFlag then
       option.analyzeFileInfo.stdinFile = LuneTypes.StdinFile._new(LuneUtil.scriptPath2Module( option.analyzeFileInfo:get_path() ), _lune.unwrap( io.stdin:read( "*a" )))
    end
-   
-   
    if mode ~= nil then
       option.mode = mode
-      
       return option
    end
-   
-   
    printUsage( "none mode" )
 end
 _moduleObj.analyzeArgs = analyzeArgs
+
 
 return _moduleObj

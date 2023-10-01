@@ -27,11 +27,10 @@ local function getCurDir(  )
             path = "./"
          end
       end
-      
    end
-   
    return path
 end
 _moduleObj.getCurDir = getCurDir
+
 
 return _moduleObj

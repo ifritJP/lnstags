@@ -56,51 +56,53 @@ end
 
 
 local LuneOpt = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Option' )
+
 local Types = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Types' )
+
 local front = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.front' )
+
 local Nodes = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Nodes' )
+
 local LuneAst = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Ast' )
+
 local LuaVer = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.LuaVer' )
+
 local LuneLog = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Log' )
+
 local LuneUtil = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Util' )
+
 
 local function getFullNameSym( filter, symbolInfo )
 
    if symbolInfo:get_namespaceTypeInfo() == LuneAst.headTypeInfo then
       return symbolInfo:get_name()
    end
-   
    local name = string.format( "%s.%s", filter:getFull( symbolInfo:get_namespaceTypeInfo(), false ), symbolInfo:get_name())
    return name
 end
 _moduleObj.getFullNameSym = getFullNameSym
+
 
 local function buildAst( logLevel, pathList, projDir, stdinFile, forceAll, transCtrlInfo, astCallback )
 
    if #pathList == 0 then
       return 
    end
-   
-   
    LuneLog.setLevel( logLevel )
    LuneUtil.setDebugFlag( false )
-   
    local lnsOpt = LuneOpt.createDefaultOption( pathList, projDir )
    lnsOpt:set_stdinFile( stdinFile )
-   
    lnsOpt.targetLuaVer = LuaVer.ver53
    lnsOpt.transCtrlInfo.legacyMutableControl = transCtrlInfo.legacyMutableControl
-   
    if forceAll then
       lnsOpt.transCtrlInfo.uptodateMode = _lune.newAlge( Types.CheckingUptodateMode.ForceAll)
    else
     
       lnsOpt.transCtrlInfo.uptodateMode = _lune.newAlge( Types.CheckingUptodateMode.Force1, {LuneUtil.scriptPath2Module( pathList[1] )})
    end
-   
-   
    front.build( lnsOpt, astCallback )
 end
 _moduleObj.buildAst = buildAst
+
 
 return _moduleObj

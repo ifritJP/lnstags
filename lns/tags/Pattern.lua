@@ -151,19 +151,33 @@ end
 
 
 local DBCtrl = _lune.loadModule( 'lns.tags.DBCtrl' )
+
 local Option = _lune.loadModule( 'lns.tags.Option' )
+
 local Log = _lune.loadModule( 'lns.tags.Log' )
+
 local Ast = _lune.loadModule( 'lns.tags.Ast' )
+
 local LuneOpt = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Option' )
+
 local Nodes = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Nodes' )
+
 local TransUnit = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.TransUnit' )
+
 local front = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.front' )
+
 local Types = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Types' )
+
 local LuneAst = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Ast' )
+
 local AstInfo = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.AstInfo' )
+
 local LuaVer = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.LuaVer' )
+
 local LuneLog = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Log' )
+
 local LuneUtil = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Util' )
+
 
 
 
@@ -177,7 +191,6 @@ function SyntaxFilter._new( ast )
 end
 function SyntaxFilter:__init(ast) 
    Nodes.Filter.__init( self,true, ast:get_exportInfo():get_moduleTypeInfo(), ast:get_exportInfo():get_moduleTypeInfo():get_scope())
-   
    self.ast = ast
 end
 function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
@@ -188,17 +201,14 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
       if pos.lineNo == analyzeFileInfo:get_lineNo() and pos.column <= analyzeFileInfo:get_column() and pos.column + #name >= analyzeFileInfo:get_column() then
          return true
       end
-      
       return false
    end
-   
-   
-   
-   
    Log.log( Log.Level.Log, __func__, 21, function (  )
    
       return string.format( "%s %s:%4d:%3d -- %s", "nearestNode -- ", nearest:get_effectivePos().streamName, nearest:get_effectivePos().lineNo, nearest:get_effectivePos().column, Nodes.getNodeKindName( nearest:get_kind() ))
-   end )
+   end
+    )
+   
    
    
    
@@ -214,18 +224,15 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
             elseif _switchExp == Option.InqMode.Set or _switchExp == Option.InqMode.AllMut or _switchExp == Option.InqMode.Async or _switchExp == Option.InqMode.Noasync or _switchExp == Option.InqMode.Luaval or _switchExp == Option.InqMode.AsyncLock then
             end
          end
-         
          return nil
       end
    end
-   
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.ExpRefNode )
       if workNode ~= nil then
          return Ast.getFullNameSym( self, workNode:get_symbolInfo() )
       end
    end
-   
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.RefFieldNode )
       if workNode ~= nil then
@@ -236,12 +243,9 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
                   return Ast.getFullNameSym( self, symbolInfo )
                end
             end
-            
          end
-         
       end
    end
-   
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.DeclVarNode )
       if workNode ~= nil then
@@ -252,40 +256,32 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
             
             
          end
-         
       end
    end
-   
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.ExpOmitEnumNode )
       if workNode ~= nil then
          if isInner( workNode:get_effectivePos(), workNode:get_valInfo():get_name() ) then
             return Ast.getFullNameSym( self, workNode:get_valInfo():get_symbolInfo() )
          end
-         
       end
    end
-   
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.NewAlgeValNode )
       if workNode ~= nil then
          if isInner( workNode:get_effectivePos(), workNode:get_valInfo():get_name() ) then
             return Ast.getFullNameSym( self, workNode:get_valInfo():get_symbolInfo() )
          end
-         
       end
    end
-   
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.ExpMacroExpNode )
       if workNode ~= nil then
          if isInner( workNode:get_effectivePos(), workNode:get_expType():get_rawTxt() ) then
             return self:getFull( workNode:get_macroType(), false )
          end
-         
       end
    end
-   
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.DeclFuncNode )
       if workNode ~= nil then
@@ -295,14 +291,12 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
                if isInner( name.pos, name.txt ) then
                   return self:getFull( workNode:get_expType(), false )
                end
-               
             end
          end
          
          
       end
    end
-   
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.DeclEnumNode )
       if workNode ~= nil then
@@ -310,7 +304,6 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
          if isInner( name.pos, name.txt ) then
             return self:getFull( workNode:get_expType(), false )
          end
-         
          for __index, valInfo in pairs( workNode:get_enumType():get_name2EnumValInfo() ) do
             if isInner( _lune.unwrap( valInfo:get_symbolInfo():get_pos()), valInfo:get_symbolInfo():get_name() ) then
                return Ast.getFullNameSym( self, valInfo:get_symbolInfo() )
@@ -318,10 +311,8 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
             
             
          end
-         
       end
    end
-   
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.DeclAlgeNode )
       if workNode ~= nil then
@@ -329,7 +320,6 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
          if isInner( name.pos, name.txt ) then
             return self:getFull( workNode:get_expType(), false )
          end
-         
          for __index, valInfo in pairs( workNode:get_algeType():get_valInfoMap() ) do
             if isInner( _lune.unwrap( valInfo:get_symbolInfo():get_pos()), valInfo:get_symbolInfo():get_name() ) then
                return Ast.getFullNameSym( self, valInfo:get_symbolInfo() )
@@ -337,20 +327,16 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
             
             
          end
-         
       end
    end
-   
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.DeclClassNode )
       if workNode ~= nil then
          if isInner( workNode:get_name().pos, workNode:get_name().txt ) then
             return self:getFull( workNode:get_expType(), false )
          end
-         
       end
    end
-   
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.DeclMethodNode )
       if workNode ~= nil then
@@ -360,14 +346,12 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
                if isInner( name.pos, name.txt ) then
                   return self:getFull( workNode:get_expType(), false )
                end
-               
             end
          end
          
          
       end
    end
-   
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.ProtoClassNode )
       if workNode ~= nil then
@@ -375,10 +359,8 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
          if isInner( name.pos, name.txt ) then
             return self:getFull( workNode:get_expType(), false )
          end
-         
       end
    end
-   
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.DeclMemberNode )
       if workNode ~= nil then
@@ -393,23 +375,18 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
                if isInner( token.pos, token.txt ) then
                   return Ast.getFullNameSym( self, symbol )
                end
-               
             end
          end
-         
          do
             local token, symbol = workNode:get_setterToken(), workNode:getSetterSym(  )
             if token ~= nil and  symbol ~= nil then
                if isInner( token.pos, token.txt ) then
                   return Ast.getFullNameSym( self, symbol )
                end
-               
             end
          end
-         
       end
    end
-   
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.DeclConstrNode )
       if workNode ~= nil then
@@ -419,38 +396,32 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
                if isInner( name.pos, name.txt ) then
                   return self:getFull( workNode:get_expType(), false )
                end
-               
             end
          end
          
          
       end
    end
-   
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.ExpCallSuperCtorNode )
       if workNode ~= nil then
          return self:getFull( workNode:get_methodType(), false )
       end
    end
-   
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.ExpCallSuperNode )
       if workNode ~= nil then
          return self:getFull( workNode:get_methodType(), false )
       end
    end
-   
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.ExpNewNode )
       if workNode ~= nil then
          if isInner( workNode:get_pos(), "new" ) then
             return self:getFull( workNode:get_ctorTypeInfo(), false )
          end
-         
       end
    end
-   
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.DeclMacroNode )
       if workNode ~= nil then
@@ -458,20 +429,16 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
          if isInner( name.pos, name.txt ) then
             return self:getFull( workNode:get_expType(), false )
          end
-         
       end
    end
-   
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.ExpMacroExpNode )
       if workNode ~= nil then
          if isInner( workNode:get_pos(), workNode:get_macroType():get_rawTxt() ) then
             return self:getFull( workNode:get_macroType(), false )
          end
-         
       end
    end
-   
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.GetFieldNode )
       if workNode ~= nil then
@@ -481,13 +448,10 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
                if isInner( workNode:get_field().pos, workNode:get_field().txt ) then
                   return Ast.getFullNameSym( self, symbolInfo )
                end
-               
             end
          end
-         
       end
    end
-   
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.AliasNode )
       if workNode ~= nil then
@@ -498,7 +462,6 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
          
       end
    end
-   
    do
       local workNode = _lune.__Cast( nearest, 3, Nodes.DeclFormNode )
       if workNode ~= nil then
@@ -508,19 +471,18 @@ function SyntaxFilter:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
                if isInner( name.pos, name.txt ) then
                   return self:getFull( workNode:get_expType(), false )
                end
-               
             end
          end
          
          
       end
    end
-   
-   
    Log.log( Log.Level.Err, __func__, 194, function (  )
    
       return string.format( "unknown pattern -- %s", Nodes.getNodeKindName( nearest:get_kind() ))
-   end )
+   end
+    )
+   
    
    return nil
 end
@@ -531,10 +493,8 @@ function SyntaxFilter:getPattern( path, analyzeFileInfo, inqMod )
       if pos.lineNo == analyzeFileInfo:get_lineNo() and pos.column <= analyzeFileInfo:get_column() and pos.column + #name >= analyzeFileInfo:get_column() then
          return true
       end
-      
       return false
    end
-   
    local pattern = nil
    if self.ast:get_streamName() == path then
       local nearestNode = nil
@@ -553,10 +513,8 @@ function SyntaxFilter:getPattern( path, analyzeFileInfo, inqMod )
                               nearestNode = node
                               return Nodes.NodeVisitMode.End
                            end
-                           
                         end
                      end
-                     
                      do
                         local token = declMemberNode:get_setterToken()
                         if token ~= nil then
@@ -564,32 +522,25 @@ function SyntaxFilter:getPattern( path, analyzeFileInfo, inqMod )
                               nearestNode = node
                               return Nodes.NodeVisitMode.End
                            end
-                           
                         end
                      end
-                     
                   end
                end
-               
-               
                do
                   local nearest = nearestNode
                   if nearest ~= nil then
                      if nearest:get_effectivePos().lineNo ~= analyzeFileInfo:get_lineNo() then
                         nearestNode = node
                      end
-                     
                      if nearest:get_effectivePos().column < node:get_effectivePos().column then
                         nearestNode = node
                      elseif nearest:get_effectivePos().column == node:get_effectivePos().column then
                         nearestNode = node
                      end
-                     
                   else
                      nearestNode = node
                   end
                end
-               
             else
              
                do
@@ -598,34 +549,32 @@ function SyntaxFilter:getPattern( path, analyzeFileInfo, inqMod )
                      if nearest:get_effectivePos().lineNo < node:get_effectivePos().lineNo and node:get_effectivePos().lineNo < analyzeFileInfo:get_lineNo() then
                         nearestNode = node
                      end
-                     
                   else
                      nearestNode = node
                   end
                end
-               
             end
-            
             Log.log( Log.Level.Trace, __func__, 21, function (  )
             
                return string.format( "%s %s:%4d:%3d -- %s", "visit:", node:get_effectivePos().streamName, node:get_effectivePos().lineNo, node:get_effectivePos().column, Nodes.getNodeKindName( node:get_kind() ))
-            end )
+            end
+             )
+            
+            
             
             
             return Nodes.NodeVisitMode.Child
          end
-         
          return Nodes.NodeVisitMode.Next
-      end, 0, {} )
+      end
+      , 0, {} )
       do
          local nearest = nearestNode
          if nearest ~= nil then
             pattern = self:getPatternFromNode( analyzeFileInfo, inqMod, nearest )
          end
       end
-      
    end
-   
    return pattern
 end
 function SyntaxFilter._setmeta( obj )
@@ -635,7 +584,6 @@ end
 
 local function getPatterAt( db, analyzeFileInfo, inqMod, transCtrlInfo )
 
-   
    local fileId = db:getFileIdFromPath( analyzeFileInfo:get_path() )
    local path = db:getMainFilePath( fileId )
    if  nil == path then
@@ -644,16 +592,12 @@ local function getPatterAt( db, analyzeFileInfo, inqMod, transCtrlInfo )
       path = analyzeFileInfo:get_path()
    end
    
-   
    local pattern = nil
-   
    local projDir = nil
    if path:find( "^%.%." ) or path:find( "^/" ) then
       local dir = path:gsub( "/[^/]+$", "" )
       projDir = LuneUtil.searchProjDir( dir )
    end
-   
-   
    Ast.buildAst( LuneLog.Level.Err, {path}, projDir, analyzeFileInfo:get_stdinFile(), false, transCtrlInfo, function ( ast )
       local __func__ = '@lns.@tags.@Pattern.getPatterAt.<anonymous>'
    
@@ -663,14 +607,16 @@ local function getPatterAt( db, analyzeFileInfo, inqMod, transCtrlInfo )
          Log.log( Log.Level.Log, __func__, 299, function (  )
          
             return string.format( "pattern -- %s", pattern)
-         end )
+         end
+          )
+         
          
       end
-      
-   end )
-   
+   end
+    )
    return pattern
 end
 _moduleObj.getPatterAt = getPatterAt
+
 
 return _moduleObj
