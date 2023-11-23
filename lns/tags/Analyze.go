@@ -552,7 +552,7 @@ func (self *Analyze_tagFilter) registerRefs(_env *LnsEnv, nodeManager *Nodes.Nod
             var valInfo *LuneAst.Ast_AlgeValInfo
             valInfo = matchCase.FP.Get_valInfo(_env)
             {
-                __exp := _env.NilAccFin(_env.NilAccPush(valInfo.FP.Get_algeTpye(_env).FP.Get_scope(_env)) && 
+                __exp := _env.NilAccFin(_env.NilAccPush(valInfo.FP.Get_algeType(_env).FP.Get_scope(_env)) && 
                 Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(*LuneAst.Ast_Scope).FP.GetSymbolInfoChild(_env, valInfo.FP.Get_name(_env))})/* 406:14 */)
                 if !Lns_IsNil( __exp ) {
                     _exp := __exp.(*LuneAst.Ast_SymbolInfo)
@@ -566,7 +566,7 @@ func (self *Analyze_tagFilter) registerRefs(_env *LnsEnv, nodeManager *Nodes.Nod
         var valInfo *LuneAst.Ast_AlgeValInfo
         valInfo = workNode.FP.Get_valInfo(_env)
         {
-            __exp := _env.NilAccFin(_env.NilAccPush(valInfo.FP.Get_algeTpye(_env).FP.Get_scope(_env)) && 
+            __exp := _env.NilAccFin(_env.NilAccPush(valInfo.FP.Get_algeType(_env).FP.Get_scope(_env)) && 
             Lns_NilAccCall1( _env, func () LnsAny { return _env.NilAccPop().(*LuneAst.Ast_Scope).FP.GetSymbolInfoChild(_env, valInfo.FP.Get_name(_env))})/* 413:11 */)
             if !Lns_IsNil( __exp ) {
                 _exp := __exp.(*LuneAst.Ast_SymbolInfo)

@@ -650,7 +650,7 @@ function tagFilter:registerRefs( nodeManager )
       for __index, matchCase in pairs( workNode:get_caseList() ) do
          local valInfo = matchCase:get_valInfo()
          do
-            local _exp = _lune.nilacc( valInfo:get_algeTpye():get_scope(), 'getSymbolInfoChild', 'callmtd' , valInfo:get_name() )
+            local _exp = _lune.nilacc( valInfo:get_algeType():get_scope(), 'getSymbolInfoChild', 'callmtd' , valInfo:get_name() )
             if _exp ~= nil then
                registerRefSym( _exp, matchCase:get_block():get_pos(), false )
             end
@@ -660,7 +660,7 @@ function tagFilter:registerRefs( nodeManager )
    for __index, workNode in pairs( nodeManager:getNewAlgeValNodeList(  ) ) do
       local valInfo = workNode:get_valInfo()
       do
-         local _exp = _lune.nilacc( valInfo:get_algeTpye():get_scope(), 'getSymbolInfoChild', 'callmtd' , valInfo:get_name() )
+         local _exp = _lune.nilacc( valInfo:get_algeType():get_scope(), 'getSymbolInfoChild', 'callmtd' , valInfo:get_name() )
          if _exp ~= nil then
             registerRefSym( _exp, workNode:get_pos(), false )
          end

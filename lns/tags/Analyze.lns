@@ -403,14 +403,14 @@ fn tagFilter.registerRefs( nodeManager:&Nodes.NodeManager ) mut {
    foreach workNode in nodeManager.getMatchNodeList() {
       foreach matchCase in workNode.$caseList {
          let valInfo = matchCase.$valInfo;
-         if! valInfo.$algeTpye.$scope$.getSymbolInfoChild$( valInfo.$name ) {
+         if! valInfo.$algeType.$scope$.getSymbolInfoChild$( valInfo.$name ) {
             registerRefSym( _exp, matchCase.$block.$pos, false );
          }
       }
    }
    foreach workNode in nodeManager.getNewAlgeValNodeList() {
       let valInfo = workNode.$valInfo;
-      if! valInfo.$algeTpye.$scope$.getSymbolInfoChild$( valInfo.$name ) {
+      if! valInfo.$algeType.$scope$.getSymbolInfoChild$( valInfo.$name ) {
          registerRefSym( _exp, workNode.$pos, false );
       }
    }

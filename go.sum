@@ -4,8 +4,8 @@ github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1/go.mod h1:Q3SI9o4m/ZMn
 github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da h1:oI5xCqsCo564l8iNU+DwB5epxmsaqB+rhGL0m5jtYqE=
 github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da/go.mod h1:cIg4eruTrX1D+g88fzRXU5OdNfaM+9IcxsU14FzY7Hc=
 github.com/ifritJP/LuneScript/src v0.0.0-20230225113348-72886d7e513d/go.mod h1:DswlbmisPZvOh5fa36m1AZznVOjoSyggshgZY6Kz2T8=
-github.com/ifritJP/LuneScript/src v0.0.0-20231001072752-24d150e8347a h1:VyLqXjArom1OGAGF3SF0ijAlGkwRJidJl116dNIWQsM=
-github.com/ifritJP/LuneScript/src v0.0.0-20231001072752-24d150e8347a/go.mod h1:DswlbmisPZvOh5fa36m1AZznVOjoSyggshgZY6Kz2T8=
+github.com/ifritJP/LuneScript/src v0.0.0-20231123023427-0862b471f684 h1:q4w5BuL3AtQBoLPhs5KCbEisuVF0mQibTkzOolK7bq8=
+github.com/ifritJP/LuneScript/src v0.0.0-20231123023427-0862b471f684/go.mod h1:DswlbmisPZvOh5fa36m1AZznVOjoSyggshgZY6Kz2T8=
 github.com/ifritJP/lnssqlite3/src v0.0.0-20230225123857-cfb8496afd8c h1:FyqS3f+7Oqwoi3p20sVAj2L3xla2TPGt/2BiF8tJGos=
 github.com/ifritJP/lnssqlite3/src v0.0.0-20230225123857-cfb8496afd8c/go.mod h1:76T/vFju+8a2fwrTxSsqnUQvIE17ZEcWT344K/VTIMo=
 github.com/mattn/go-sqlite3 v1.14.7 h1:fxWBnXkxfM6sRiuH3bqJ4CfzZojMOLVc0UTsTglEghA=
