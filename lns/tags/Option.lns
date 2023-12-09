@@ -16,6 +16,7 @@ pub enum InqMode {
 }
 
 pub enum Mode {
+   Version = "version",
    Init = "init",
    Build = "build",
    Update = "update",
@@ -69,6 +70,7 @@ fn printUsage( messages:str! ) : __ {
    print( "usage: lnstags inq-at <def|ref|set> filepath lineno column" );
    print( "usage: lnstags suffix pattern" );
    print( "usage: lnstags test [option]" );
+   print( "usage: lnstags version" );
    os.exit( 1 );
 }
 

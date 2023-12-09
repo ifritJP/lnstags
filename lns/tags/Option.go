@@ -56,7 +56,9 @@ const Option_Mode__InqAt = "inq-at"
 const Option_Mode__Suffix = "suffix"
 const Option_Mode__Test = "test"
 const Option_Mode__Update = "update"
+const Option_Mode__Version = "version"
 var Option_ModeList_ = NewLnsList( []LnsAny {
+  Option_Mode__Version,
   Option_Mode__Init,
   Option_Mode__Build,
   Option_Mode__Update,
@@ -78,6 +80,7 @@ var Option_ModeMap_ = map[string]string {
   Option_Mode__Suffix: "Mode.Suffix",
   Option_Mode__Test: "Mode.Test",
   Option_Mode__Update: "Mode.Update",
+  Option_Mode__Version: "Mode.Version",
 }
 func Option_Mode__from(_env *LnsEnv, arg1 string) LnsAny{
     if _, ok := Option_ModeMap_[arg1]; ok { return arg1 }
@@ -88,11 +91,11 @@ func Option_Mode_getTxt(arg1 string) string {
     return Option_ModeMap_[arg1];
 }
 type Option_analyzeArgs__getNextOpNonNilFunc_0_ func (_env *LnsEnv, arg1 string) string
-// 62: decl @lns.@tags.@Option.printUsage
+// 63: decl @lns.@tags.@Option.printUsage
 func Option_printUsage_4_(_env *LnsEnv, messages LnsAny) {
     if messages != nil{
-        messages_72 := messages.(string)
-        Lns_io_stderr.Write(_env, _env.GetVM().String_format("%s\n", Lns_2DDD(messages_72)))
+        messages_73 := messages.(string)
+        Lns_io_stderr.Write(_env, _env.GetVM().String_format("%s\n", Lns_2DDD(messages_73)))
     }
     Lns_print(Lns_2DDD("usage: lnstags init [option]"))
     Lns_print(Lns_2DDD("usage: lnstags build [option] filepath"))
@@ -100,10 +103,11 @@ func Option_printUsage_4_(_env *LnsEnv, messages LnsAny) {
     Lns_print(Lns_2DDD("usage: lnstags inq-at <def|ref|set> filepath lineno column"))
     Lns_print(Lns_2DDD("usage: lnstags suffix pattern"))
     Lns_print(Lns_2DDD("usage: lnstags test [option]"))
+    Lns_print(Lns_2DDD("usage: lnstags version"))
     _env.GetVM().OS_exit(1)
 }
 
-// 75: decl @lns.@tags.@Option.analyzeArgs
+// 77: decl @lns.@tags.@Option.analyzeArgs
 func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
     var option *Option_Option
     option = NewOption_Option(_env)
@@ -280,8 +284,8 @@ func Option_analyzeArgs(_env *LnsEnv, argList *LnsList) *Option_Option {
         option.analyzeFileInfo.stdinFile = LuneTypes.NewTypes_StdinFile(_env, LuneUtil.Util_scriptPath2Module(_env, option.analyzeFileInfo.FP.Get_path(_env)), Lns_unwrap( Lns_io_stdin.Read(_env, "*a")).(string))
     }
     if mode != nil{
-        mode_149 := mode.(string)
-        option.mode = mode_149
+        mode_150 := mode.(string)
+        option.mode = mode_150
         return option
     }
     Option_printUsage_4_(_env, "none mode")
@@ -350,7 +354,7 @@ func (self *Option_AnalyzeFileInfo) Get_path(_env *LnsEnv) string{ return self.p
 func (self *Option_AnalyzeFileInfo) Get_lineNo(_env *LnsEnv) LnsInt{ return self.lineNo }
 func (self *Option_AnalyzeFileInfo) Get_column(_env *LnsEnv) LnsInt{ return self.column }
 func (self *Option_AnalyzeFileInfo) Get_stdinFile(_env *LnsEnv) LnsAny{ return self.stdinFile }
-// 34: DeclConstr
+// 35: DeclConstr
 func (self *Option_AnalyzeFileInfo) InitOption_AnalyzeFileInfo(_env *LnsEnv) {
     self.path = ""
     self.lineNo = 0
@@ -419,7 +423,7 @@ func (self *Option_Option) Get_pattern(_env *LnsEnv) string{ return self.pattern
 func (self *Option_Option) Get_analyzeFileInfo(_env *LnsEnv) *Option_AnalyzeFileInfo{ return self.analyzeFileInfo }
 func (self *Option_Option) Get_logLevel(_env *LnsEnv) LnsAny{ return self.logLevel }
 func (self *Option_Option) Get_transCtrlInfo(_env *LnsEnv) *LuneTypes.Types_TransCtrlInfo{ return self.transCtrlInfo }
-// 51: DeclConstr
+// 52: DeclConstr
 func (self *Option_Option) InitOption_Option(_env *LnsEnv) {
     self.logLevel = nil
     self.pathList = NewLnsList2_[string]([]string{})

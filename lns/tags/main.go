@@ -3,10 +3,11 @@ package tags
 import . "github.com/ifritJP/LuneScript/src/lune/base/runtime_go"
 import LuneTypes "github.com/ifritJP/LuneScript/src/lune/base"
 import LuneAst "github.com/ifritJP/LuneScript/src/lune/base"
+import LuneVer "github.com/ifritJP/LuneScript/src/lune/base"
 var init_main bool
 var main__mod__ string
 var main_dbPath string
-// 18: decl @lns.@tags.@main.inq
+// 19: decl @lns.@tags.@main.inq
 func main_inq_0_(_env *LnsEnv, inqMode string,pattern string) LnsInt {
     var db *DBCtrl_DBCtrl
     
@@ -40,7 +41,7 @@ func main_inq_0_(_env *LnsEnv, inqMode string,pattern string) LnsInt {
     return 0
 }
 
-// 53: decl @lns.@tags.@main.build
+// 54: decl @lns.@tags.@main.build
 func main_build_1_(_env *LnsEnv, pathList *LnsList2_[string],transCtrlInfo *LuneTypes.Types_TransCtrlInfo) LnsInt {
     DBCtrl_initDB(_env, main_dbPath)
     var db *DBCtrl_DBCtrl
@@ -60,12 +61,14 @@ func main_build_1_(_env *LnsEnv, pathList *LnsList2_[string],transCtrlInfo *Lune
     return 0
 }
 
-// 67: decl @lns.@tags.@main.__main
+// 68: decl @lns.@tags.@main.__main
 func Main___main(_env *LnsEnv, args *LnsList) LnsInt {
     Lns_main_init( _env )
     var option *Option_Option
     option = Option_analyzeArgs(_env, args)
-    if _switch0 := option.FP.Get_mode(_env); _switch0 == Option_Mode__Init {
+    if _switch0 := option.FP.Get_mode(_env); _switch0 == Option_Mode__Version {
+        Lns_print(Lns_2DDD(_env.GetVM().String_format("lnsc-runtime:%s", Lns_2DDD(LuneVer.Ver_version))))
+    } else if _switch0 == Option_Mode__Init {
         DBCtrl_initDB(_env, main_dbPath)
     } else if _switch0 == Option_Mode__Build {
         return main_build_1_(_env, option.FP.Get_pathList(_env), option.FP.Get_transCtrlInfo(_env))
@@ -178,6 +181,7 @@ func Lns_main_init(_env *LnsEnv) {
     Lns_Pattern_init(_env)
     LuneTypes.Lns_Types_init(_env)
     LuneAst.Lns_Ast_init(_env)
+    LuneVer.Lns_Ver_init(_env)
     main_dbPath = "lnstags.sqlite3"
 }
 func init() {

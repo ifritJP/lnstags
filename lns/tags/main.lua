@@ -92,6 +92,8 @@ local LuneTypes = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.b
 
 local LuneAst = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Ast' )
 
+local LuneVer = _lune.loadModule( 'go/github:com.ifritJP.LuneScript.src.lune.base.Ver' )
+
 
 local dbPath = "lnstags.sqlite3"
 
@@ -154,7 +156,9 @@ local function __main( args )
    local option = Option.analyzeArgs( args )
    do
       local _switchExp = option:get_mode()
-      if _switchExp == Option.Mode.Init then
+      if _switchExp == Option.Mode.Version then
+         print( string.format( "lnsc-runtime:%s", LuneVer.version) )
+      elseif _switchExp == Option.Mode.Init then
          DBCtrl.initDB( dbPath )
       elseif _switchExp == Option.Mode.Build then
          return build( option:get_pathList(), option:get_transCtrlInfo() )

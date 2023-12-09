@@ -157,30 +157,33 @@ function Mode.get__allList()
    return Mode.__allList
 end
 
+Mode.Version = 'version'
+Mode._val2NameMap['version'] = 'Version'
+Mode.__allList[1] = Mode.Version
 Mode.Init = 'init'
 Mode._val2NameMap['init'] = 'Init'
-Mode.__allList[1] = Mode.Init
+Mode.__allList[2] = Mode.Init
 Mode.Build = 'build'
 Mode._val2NameMap['build'] = 'Build'
-Mode.__allList[2] = Mode.Build
+Mode.__allList[3] = Mode.Build
 Mode.Update = 'update'
 Mode._val2NameMap['update'] = 'Update'
-Mode.__allList[3] = Mode.Update
+Mode.__allList[4] = Mode.Update
 Mode.Inq = 'inq'
 Mode._val2NameMap['inq'] = 'Inq'
-Mode.__allList[4] = Mode.Inq
+Mode.__allList[5] = Mode.Inq
 Mode.InqAt = 'inq-at'
 Mode._val2NameMap['inq-at'] = 'InqAt'
-Mode.__allList[5] = Mode.InqAt
+Mode.__allList[6] = Mode.InqAt
 Mode.Suffix = 'suffix'
 Mode._val2NameMap['suffix'] = 'Suffix'
-Mode.__allList[6] = Mode.Suffix
+Mode.__allList[7] = Mode.Suffix
 Mode.Dump = 'dump'
 Mode._val2NameMap['dump'] = 'Dump'
-Mode.__allList[7] = Mode.Dump
+Mode.__allList[8] = Mode.Dump
 Mode.Test = 'test'
 Mode._val2NameMap['test'] = 'Test'
-Mode.__allList[8] = Mode.Test
+Mode.__allList[9] = Mode.Test
 
 
 local AnalyzeFileInfo = {}
@@ -268,6 +271,7 @@ local function printUsage( messages )
    print( "usage: lnstags inq-at <def|ref|set> filepath lineno column" )
    print( "usage: lnstags suffix pattern" )
    print( "usage: lnstags test [option]" )
+   print( "usage: lnstags version" )
    os.exit( 1 )
 end
 

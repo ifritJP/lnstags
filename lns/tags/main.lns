@@ -11,6 +11,7 @@ import lns.tags.Log;
 import lns.tags.Pattern;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Types as LuneTypes;
 import go/github:com.ifritJP.LuneScript.src.lune.base.Ast as LuneAst;
+import go/github:com.ifritJP.LuneScript.src.lune.base.Ver as LuneVer;
 
 
 let dbPath = "lnstags.sqlite3";
@@ -70,6 +71,9 @@ pub fn __main( args:&_List<str> ) : int {
    let mut option = Option.analyzeArgs( args );
 
    _switch option.$mode {
+      case .Version {
+         print( "lnsc-runtime:%s" (LuneVer.version) );
+      }
       case .Init {
          DBCtrl.initDB( dbPath );
       }
